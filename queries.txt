@@ -1,0 +1,28 @@
+**Don't forget to locally host files**
+python -m SimpleHTTPServer
+
+**Solution from the internet**
+You first create or match the :A node, then create or match the :B node, then create or match the relationship. The WITH clauses collect the results at each point in the sequence to use in the next.
+
+***IMPORT PRESIDENTS***
+USING PERIODIC COMMIT
+LOAD CSV WITH HEADERS FROM "http://localhost:8000/presidents.csv" AS csvLine FIELDTERMINATOR '|'
+MERGE (n:Page {id: csvLine.source})
+WITH csvLine, n
+MERGE (m:Page {id: csvLine.target})
+WITH m, n
+CREATE (n)-[:LINKS_TO]->(m)
+
+**SHORTEST UNDIRECTED PATH**
+MATCH (m:Page { node:"44808" }),(n:Page { node:"1087" }),
+  p = shortestPath((m)-[*]-(n))
+RETURN p
+
+**ALL SHORTEST UNDIRECTED PATHS**
+MATCH (m:Page { node:"44808" }),(n:Page { node:"1087" }),
+  p = allShortestPaths((m)-[*]-(n))
+RETURN p
+
+
+TO DO
+[ ] figure out a way to handle unicode in the cleaning script
