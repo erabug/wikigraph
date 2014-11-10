@@ -14,15 +14,17 @@ WITH m, n
 CREATE (n)-[:LINKS_TO]->(m)
 
 **SHORTEST UNDIRECTED PATH**
-MATCH (m:Page { node:"44808" }),(n:Page { node:"1087" }),
-  p = shortestPath((m)-[*]-(n))
-RETURN p
+MATCH (m {node:"1"}), (n {node:"200"}), p = shortestPath((m)-[*]-(n)) RETURN p
 
 **ALL SHORTEST UNDIRECTED PATHS**
-MATCH (m:Page { node:"44808" }),(n:Page { node:"1087" }),
-  p = allShortestPaths((m)-[*]-(n))
-RETURN p
+MATCH (m {node:"1"}), (n {node:"200"}), p = allShortestPaths((m)-[*]-(n)) RETURN p
 
+**How to calculate centrality**
+As your graph is mainly static you can also run a simple cypher script to store the degree centrality on each node.
 
-TO DO
-[ ] figure out a way to handle unicode in the cleaning script
+start n=node(*)
+match n--()
+with n,count(*) as centrality
+set n.centrality = centrality
+
+Then you can use that property, you can also use the first 3 lines of the snippet in your actual query for the nodes you're looking at.

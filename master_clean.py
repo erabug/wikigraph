@@ -1,21 +1,3 @@
-# PRESIDENTS = set([
-# 				'George_Washington', 'John_Adams', 'Thomas_Jefferson',
-# 				'James_Madison', 'James_Monroe','John_Quincy_Adams',
-# 				'Andrew_Jackson','Martin_Van_Buren', 'William_Henry_Harrison',
-# 				'John_Tyler', 'James_K._Polk', 'Zachary_Taylor',
-# 				'Millard_Fillmore', 'Franklin_Pierce', 'James_Buchanan',
-# 				'Abraham_Lincoln', 'Andrew_Johnson', 'Ulysses_S._Grant',
-# 				'Rutherford_B._Hayes', 'James_A._Garfield', 'Chester_A._Arthur',
-# 				'Grover_Cleveland', 'Benjamin_Harrison', 'William_McKinley',
-# 				'Theodore_Roosevelt', 'William_Howard_Taft', 'Woodrow_Wilson', 
-# 				'Warren_G._Harding', 'Calvin_Coolidge', 'Herbert_Hoover', 
-# 				'Franklin_D._Roosevelt', 'Harry_S._Truman',
-# 				'Dwight_D._Eisenhower', 'John_F._Kennedy', 'Lyndon_B._Johnson',
-# 				'Richard_Nixon', 'Gerald_Ford', 'Jimmy_Carter', 'Ronald_Reagan',
-# 				'George_H._W._Bush', 'Bill_Clinton', 'George_W._Bush',
-# 				'Barack_Obama'
-# ])
-
 def redirects_set():
 
 	print "Creating set of redirect pages..."
@@ -74,7 +56,7 @@ def parse_links():
 	topics = {}
 	data = {}
 	
-	counter = 50000000
+	# counter = 50000000
 	id_counter = 0
 
 	print "Writing 'rels.csv'..."
@@ -84,10 +66,10 @@ def parse_links():
 		f.next()
 
 		for line in f:
-			if counter > 0:
+			# if counter > 0:
 
-				if counter % 100000 == 0:
-					print "counter:", counter
+				# if counter % 100000 == 0:
+				# 	print "counter:", counter
 
 				l = line.split()
 				start = l[0][29:-1]
@@ -124,10 +106,10 @@ def parse_links():
 
 					c.write(start_id + '\t' + end_id + '\tLINKS_TO\n')
 
-				counter -= 1
+			# 	counter -= 1
 
-			else:
-				break
+			# else:
+			# 	break
 
 	write_nodes(sorted(data.values(), key=lambda k: k['id']))
 
