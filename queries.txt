@@ -6,7 +6,7 @@ You first create or match the :A node, then create or match the :B node, then cr
 
 ***IMPORT PRESIDENTS***
 USING PERIODIC COMMIT
-LOAD CSV WITH HEADERS FROM "http://localhost:8000/presidents.csv" AS csvLine FIELDTERMINATOR '|'
+LOAD CSV WITH HEADERS FROM "http://localhost:8000/presidents.csv" AS csvLine FIELDTERMINATOR '\t'
 MERGE (n:Page {id: csvLine.source})
 WITH csvLine, n
 MERGE (m:Page {id: csvLine.target})

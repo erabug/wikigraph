@@ -47,72 +47,6 @@ def types_dict():
 
 	return types # as a dict
 
-def parse_links():
-
-	redirects = redirects_set() # create set of redirects
-	names = names_dict()
-	types = types_dict()
-
-	topics = {}
-	data = {}
-	
-	# counter = 50000000
-	id_counter = 0
-
-	print "Writing 'rels.csv'..."
-
-	with open('page_links_en.ttl', 'r') as f, open('rels.csv', 'wb+') as c:
-		c.write('start\tend\ttype\n') # write headers
-		f.next()
-
-		for line in f:
-			# if counter > 0:
-
-				# if counter % 100000 == 0:
-				# 	print "counter:", counter
-
-				l = line.split()
-				start = l[0][29:-1]
-				end = l[2][29:-1]
-
-				if start in topics: # are you currently in a topic?
-					if end in topics[start]: # are you a repeat link?
-						continue
-					else:
-						topics[start].append(end) # add yourself to topics
-				else:
-					topics = { start: [end] } # overwrite topics dict with new topic
-
-				if start not in redirects and end[:5] != "File:":
-
-					if start not in data: # are you a new node?
-						
-						data[start] = { 'id':   id_counter, 
-										'name': names.get(start, start) }
-						if types.get(start, 0) != 0: # only add type if it is known
-							data[start].update({'type': types[start]})
-						id_counter += 1
-
-					if end not in data: # are you a new node?
-
-						data[end] = { 'id':   id_counter, 
-									  'name': names.get(end, end) }
-						if types.get(end, 0) != 0:
-							data[end].update({'type': types[end]})
-						id_counter += 1
-
-					start_id = str(data[start]['id'])
-					end_id = str(data[end]['id'])
-
-					c.write(start_id + '\t' + end_id + '\tLINKS_TO\n')
-
-			# 	counter -= 1
-
-			# else:
-			# 	break
-
-	write_nodes(sorted(data.values(), key=lambda k: k['id']))
-
 def write_nodes(data):
 
 	print "Writing 'nodes.csv'..."
@@ -129,6 +63,86 @@ def write_nodes(data):
 				label = label + ',' + value['type']
 
 			d. write(node + '\t' + name + '\t' + label + '\n')
+			# d.write(node, '\t' + name + '\t' + label + '\n')
+
+def parse_links():
+
+	redirects = redirects_set() # create set of redirects
+	names = names_dict()
+	types = types_dict()
+
+	topics = {}
+	data = {}
+	
+	counter = 5000
+	id_counter = 0
+
+	print "Writing 'rels.csv'..."
+
+	with open('page_links_en.ttl', 'r') as f, open('rels.csv', 'wb+') as c:
+		c.write('start\tend\ttype\n') # write headers
+		f.next()
+
+		for line in f:
+			if counter > 0:
+
+				l = line.split()
+				start = l[0][29:-1]
+				end = l[2][29:-1]
+
+				if start in topics: # are you currently in a topic?
+					if end in topics[start]: # are you a repeat link?
+						continue
+					else:
+						topics[start].append(end) # add yourself to topics
+				else:
+					topics = { start: [end] } # overwrite topics dict with new topic
+
+				if start not in redirects and end[:5] != "File:":
+
+					links = (start, end)
+
+					for link in links:
+
+						if link not in data: # are you a new link?
+
+							data[link] = { 'id':   id_counter, 
+										   'name': names.get(link, link) }
+
+							if types.get(link, 0) != 0: # only add type if it is known
+								data[link].update({'type': types[link]})
+
+							id_counter += 1
+
+					# if start not in data: # are you a new node?
+						
+					# 	data[start] = { 'id':   id_counter, 
+					# 					'name': names.get(start, start) }
+					# 	if types.get(start, 0) != 0: # only add type if it is known
+					# 		data[start].update({'type': types[start]})
+					# 	id_counter += 1
+
+					# if end not in data: # are you a new node?
+
+					# 	data[end] = { 'id':   id_counter, 
+					# 				  'name': names.get(end, end) }
+					# 	if types.get(end, 0) != 0:
+					# 		data[end].update({'type': types[end]})
+					# 	id_counter += 1
+
+					start_id = str(data[start]['id'])
+					end_id = str(data[end]['id'])
+
+					c.write(start_id + '\t' + end_id + '\tLINKS_TO\n')
+
+				counter -= 1
+
+			else:
+				break
+
+	data_tup = sorted(data.values(), key=lambda k: k['id']) # sorted list of tuples
+	write_nodes(data_tup)
 
 if __name__ == "__main__":
 	parse_links()
+
