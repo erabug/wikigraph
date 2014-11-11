@@ -12,8 +12,7 @@ def find_shortest_path(node1, node2):
 		)
 
 	path = query.execute_one()
-	print "\nShortest Path:"
-	print path
+	print "\nShortest Path:", path, '\n'
 
 	return path
 
@@ -63,26 +62,23 @@ def create_lists(path):
 	codes = {}
 	id_counter = 0
 
-	for node in nodes_list:
+	for node in nodes_list: # create a dict to translate id codes
 		node_id = node['id']
 		if node_id not in codes:
 			codes[node_id] = id_counter
 			id_counter += 1
 		node['id'] = codes[node_id]
 
-	for rel in rels_list:
+	for rel in rels_list: # look up the source and target in codes
 		rel['source'] = codes[rel['source']]
 		rel['target'] = codes[rel['target']]
 
-
-
-
-	print "\nnodes list:", nodes_list
-	print "\nrels list:", rels_list, '\n'
-	print '{ "directed": true, "nodes":', json.dumps(nodes_list) + ', "links":', json.dumps(rels_list)+', "multigraph": false }'
+	response = '{ "directed": true, "nodes":' + json.dumps(nodes_list) + ', "links":' + json.dumps(rels_list) + ', "multigraph": false }'
 	
+	with open('wikigraph.json', 'wb') as w:
+		w.write(response)
 
 if __name__ == "__main__":
-	path = find_shortest_path('98', '2800')
+	path = find_shortest_path('66700', '2080')
 	create_lists(path)
 
