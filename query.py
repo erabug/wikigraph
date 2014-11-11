@@ -1,11 +1,16 @@
 from py2neo import neo4j
 import json
 import sys
+import time
 
 def find_shortest_path(node1, node2):
+	"""Connect to graph database, send query to graph database. Return shortest
+	path between two nodes.
+	Format: (67149)-[:"LINKS_TO"]->(421)"""
 
 	graph_db = neo4j.GraphDatabaseService()
 
+	t0 = time.time()
 	query = neo4j.CypherQuery(
 		graph_db, 
 		"""MATCH (m {node:'%s'}), (n {node:'%s'}), 
@@ -13,11 +18,17 @@ def find_shortest_path(node1, node2):
 		)
 
 	path = query.execute_one()
-	print "\nShortest Path:", path, '\n'
+	t1 = time.time()
+
+	print "Shortest Path:", path
+	print "Time elapsed: %.2f seconds." % (t1 - t0)
 
 	return path
 
 def create_rels_list(path):
+	"""Given the returned path, create a dict for each relationship, return list 
+	of dicts. 
+	Format: [{'source': 42, 'target': 552}]"""
 
 	rels_list = []
 
@@ -29,6 +40,9 @@ def create_rels_list(path):
 	return rels_list
 
 def create_nodes_list(path):
+	"""Given the returned path, create a dict for each node, return list 
+	of dicts. 'Type' is included when available. 
+	Format: [{'node': 42, 'name': 'Douglas Adams'}]"""
 
 	nodes_list = []
 
