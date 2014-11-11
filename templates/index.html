@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+
+    <meta charset="utf-8">
+    <link href='http://fonts.googleapis.com/css?family=Signika' rel='stylesheet' type='text/css'>
+    <link href="../static/index.css" rel="stylesheet" type="text/css">
+
+  </head>
+
+<body>
+  <header>
+    <h1>wikiGraph</h1>
+    <!-- <h4>explore Wikipedia from a graph perspective</h4> -->
+  
+  <div class="query-form">
+    <form>
+      How does 
+      <input type="text" id="start-node" placeholder="Choose a start page">
+      connect to <input type="text" id="end-node" placeholder="Choose an end page">
+      ?<button type="query" id="submit-query">Go</button>
+    </form>
+  </div>
+  </header>
+
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+
+<script src="../static/graph.js"></script>
+<script src="../static/index.js"></script>
+
+</body>
+</html>

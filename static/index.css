@@ -1,8 +1,7 @@
 body {
-  background-color: #333;
-  color: #fff;
+  background-color: #ffffff; /*formerly #333*/
+  color: #333;
   font-weight: 100;
-  /*font-size: 40;*/
   margin: 0;
   font-family: sans-serif;
 }
@@ -21,19 +20,17 @@ marker#arrow {
   fill: #666;
 }
 
-.node text {
-  fill: black;
-}
-
 header {
   text-align: center;
+
 }
 
 h1 {
   font-family: "Signika", sans-serif;
   margin: 0;
   padding: 20px;
-  background-color: #666;
+  color: #fff;
+  background-color: #333; /*formerly #666 */
 }
 
 h4 {
@@ -41,15 +38,14 @@ h4 {
 }
 
 input { 
-  border-radius: 10px;  
-  border: solid 1px white;
-  /*width: 250px; */
-  /*font-size: 18px;*/
-  padding-left: 8px; /* indent the text box */
+  border: none;
+  border-bottom:solid 1px #c0c0c0; 
+  text-indent: 8px;
   margin-left: 10px;
 } 
 
 .query-form {
+  margin: 50px;
   text-align: center;
 }
 
@@ -57,7 +53,7 @@ button {
   background-color: #666; /* medium grey */
   color: white;
   border-radius: 10px;
-  border: solid 1px white;
+  border: solid 1px #666;
   /*font-size: 18px;*/
   margin-left: 10px;
   position: relative;
@@ -65,6 +61,6 @@ button {
 
 button:hover {
   cursor: pointer;
-  background-color: #cc0;  /* yellow */
-  color: black;
+  background-color: #999;
+  /*color: black;*/
 }

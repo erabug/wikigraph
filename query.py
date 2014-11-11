@@ -4,9 +4,9 @@ import sys
 import time
 
 def find_shortest_path(node1, node2):
-	"""Connect to graph database, send query to graph database. Return shortest
-	path between two nodes.
-	Format: (67149)-[:"LINKS_TO"]->(421)"""
+	"""Connect to graph database, then create and send query to graph database. 
+	Returns the shortest	path between two nodes.
+	Format: (67149)-[:'LINKS_TO']->(421)"""
 
 	graph_db = neo4j.GraphDatabaseService()
 
@@ -26,8 +26,8 @@ def find_shortest_path(node1, node2):
 	return path
 
 def create_rels_list(path):
-	"""Given the returned path, create a dict for each relationship, return list 
-	of dicts. 
+	"""Given the returned path, create a dict for each relationship. Returns 
+	list of dicts. 
 	Format: [{'source': 42, 'target': 552}]"""
 
 	rels_list = []
@@ -35,13 +35,13 @@ def create_rels_list(path):
 	for rel in path.relationships:
 		start_node = rel.start_node.get_properties()['node']
 		end_node = rel.end_node.get_properties()['node']
-		rels_list.append({"source": int(start_node), "target": int(end_node)})
+		rels_list.append({'source': int(start_node), 'target': int(end_node)})
 
 	return rels_list
 
 def create_nodes_list(path):
-	"""Given the returned path, create a dict for each node, return list 
-	of dicts. 'Type' is included when available. 
+	"""Given the returned path, create a dict for each node. Returns list of 
+	dicts. 'Type' is included when available.
 	Format: [{'node': 42, 'name': 'Douglas Adams'}]"""
 
 	nodes_list = []
@@ -52,7 +52,7 @@ def create_nodes_list(path):
 		name = name.replace('_', ' ')
 		node = int(node)
 
-		d = {"id": node, "name": name}
+		d = {'id': node, 'name': name}
 
 		labels = a_node.get_labels()
 		label = labels - set(['Page']) # does it have a label other than Page?
@@ -69,10 +69,12 @@ def create_nodes_list(path):
 
 	return nodes_list
 
-def create_lists(path):
-	"""Assemble list of nodes and relationships from the path, then process
-	to recode their IDs. Write output to a JSON file."""
+def create_lists(node1, node2):
+	"""Request the shortest path between two nodes from the database. Assemble 
+	list of nodes and relationships from the path, then process	to recode their 
+	IDs. Write output to a JSON file."""
 
+	path = find_shortest_path(str(node1), str(node2))
 	rels_list = create_rels_list(path)
 	nodes_list = create_nodes_list(path)
 
@@ -92,11 +94,12 @@ def create_lists(path):
 
 	response = '{ "directed": true, "nodes":' + json.dumps(nodes_list) + ', "links":' + json.dumps(rels_list) + ', "multigraph": false }'
 	
-	with open('response.json', 'wb') as w:
+	with open('static/response.json', 'wb') as w:
 		w.write(response)
 
-if __name__ == "__main__":
+	return response
+
+if __name__ == '__main__':
 	f, node1, node2 = sys.argv
-	path = find_shortest_path(str(node1), str(node2))
-	create_lists(path)
+	create_lists(node1, node2)
 
