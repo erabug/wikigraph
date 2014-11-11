@@ -1,0 +1,28 @@
+body {
+  background-color: #333;
+  color: #ffffff!important;
+  font-family: "Signika", sans-serif;
+}
+
+.link {
+  stroke: #666;
+  stroke-width: 2px;
+}
+
+.node {
+  font: 10px;
+  color: #ffffff!important;
+}
+
+circle {
+    stroke: #fff;
+    stroke-width: 2px;
+}
+
+marker#arrow {
+    fill: #666;
+}
+
+h1 {
+  text-align: center;
+}
