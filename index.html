@@ -10,11 +10,21 @@
   </head>
 
 <body>
-
-  <h1>wikiGraph</h1>
+  <header>
+    <h1>wikiGraph</h1>
+    <h4>explore Wikipedia from the graph perspective</h4>
+  </header>
+  <div class="query-form">
+    <form>
+      <input type="text" id="start-node" placeholder="Choose a start page">
+      <input type="text" id="end-node" placeholder="Choose an end page">
+      <button type="query" id="submit-query">Go</button>
+    </form>
+  </div>
 
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script src="static/index.js"></script>
+<script src="static/graph.js"></script>
 
 </body>
 </html>

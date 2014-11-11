@@ -20,7 +20,7 @@ PRESIDENTS = set([
 
 one_hops = set()
 
-with open('page_links_en.ttl', 'r') as f, open('pres_links.ttl', 'wb+') as p:
+with open('data/page_links_en.ttl', 'r') as f, open('data/pres_links.ttl', 'wb+') as p:
 	for line in f:
 		l = line.split()
 		start = l[0][29:-1]

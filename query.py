@@ -1,5 +1,6 @@
 from py2neo import neo4j
 import json
+import sys
 
 def find_shortest_path(node1, node2):
 
@@ -55,6 +56,8 @@ def create_nodes_list(path):
 	return nodes_list
 
 def create_lists(path):
+	"""Assemble list of nodes and relationships from the path, then process
+	to recode their IDs. Write output to a JSON file."""
 
 	rels_list = create_rels_list(path)
 	nodes_list = create_nodes_list(path)
@@ -75,10 +78,11 @@ def create_lists(path):
 
 	response = '{ "directed": true, "nodes":' + json.dumps(nodes_list) + ', "links":' + json.dumps(rels_list) + ', "multigraph": false }'
 	
-	with open('wikigraph.json', 'wb') as w:
+	with open('response.json', 'wb') as w:
 		w.write(response)
 
 if __name__ == "__main__":
-	path = find_shortest_path('66700', '2080')
+	f, node1, node2 = sys.argv
+	path = find_shortest_path(str(node1), str(node2))
 	create_lists(path)
 

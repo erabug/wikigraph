@@ -3,7 +3,7 @@ def redirects_set():
 	print "Creating set of redirect pages..."
 	redirects = set()
 
-	with open('redirects_en.ttl', 'r') as r:
+	with open('data/redirects_en.ttl', 'r') as r:
 		for line in r:
 			l = line.split()
 			start = l[0][29:-1]
@@ -16,7 +16,7 @@ def names_dict():
 	print "Creating dictionary of names..."
 	names = {}
 
-	with open('labels_en.ttl', 'r') as r:
+	with open('data/labels_en.ttl', 'r') as r:
 		for line in r:
 			l = line.partition('<http://www.w3.org/2000/01/rdf-schema#label>')
 			name_link = l[0][29:-2]
@@ -30,7 +30,7 @@ def types_dict():
 	print "Creating dictionary of types..."
 	types = {}
 
-	with open('instance_types_en.ttl', 'r') as r:
+	with open('data/instance_types_en.ttl', 'r') as r:
 		for line in r:
 			l = line.split()
 			if l[2][:29] == '<http://dbpedia.org/ontology/': # only if the type is dbpedia's
@@ -79,7 +79,7 @@ def parse_links():
 
 	print "Writing 'rels.csv'..."
 
-	with open('page_links_en.ttl', 'r') as f, open('rels.csv', 'wb+') as c:
+	with open('data/page_links_en.ttl', 'r') as f, open('rels.csv', 'wb+') as c:
 		c.write('start\tend\ttype\n') # write headers
 		f.next()
 
