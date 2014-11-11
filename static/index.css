@@ -1,9 +1,11 @@
-body {
-  background-color: #ffffff; /*formerly #333*/
-  color: #333;
-  font-weight: 100;
-  margin: 0;
-  font-family: sans-serif;
+/*GRAPH STUFF*/
+.graph-result {
+  text-align: center;
+}
+
+svg {
+  display: block;
+  margin: 0 auto;
 }
 
 .link {
@@ -20,41 +22,69 @@ marker#arrow {
   fill: #666;
 }
 
-header {
-  text-align: center;
+/*HTML STUFF*/
+:focus {
+  outline:none; 
+  border-bottom: solid 2px #999;
+} /*changes chrome's focus action*/
 
-}
-
-h1 {
-  font-family: "Signika", sans-serif;
-  margin: 0;
-  padding: 20px;
-  color: #fff;
-  background-color: #333; /*formerly #666 */
-}
-
-h4 {
+body {
+  background-color: #ffffff; /*formerly #333*/
+  color: #333;
   font-weight: 100;
+  margin: 0;
+  font-family: sans-serif;
+}
+
+.logo-container {
+  text-align: center;
+  background-color: #333; /*formerly #666 */
+  padding: 25px;
+}
+
+img {
+  position: relative;
+  top: 10px;
+  left: -10px;
+}
+
+.logo-text {
+  font-family: "Signika", sans-serif;
+  text-align: left;
+  display: inline-block;
+}
+
+.title {
+  color: #fff;
+  font-size: 32px;
+}
+
+.blurb {
+  color: #fff;
+  font-size: 15px;
+  font-style: italic;
 }
 
 input { 
   border: none;
-  border-bottom:solid 1px #c0c0c0; 
-  text-indent: 8px;
+  border-bottom:solid 1px #999; 
+  text-indent: 4px;
   margin-left: 10px;
+  font-size: 14px;
 } 
 
 .query-form {
-  margin: 50px;
+  margin: 30px;
   text-align: center;
+  font-size: 20px;
 }
 
 button {
-  background-color: #666; /* medium grey */
+  background-color: #666;
   color: white;
   border-radius: 10px;
   border: solid 1px #666;
-  /*font-size: 18px;*/
+  font-size: 16px;
   margin-left: 10px;
   position: relative;
 }
@@ -62,5 +92,5 @@ button {
 button:hover {
   cursor: pointer;
   background-color: #999;
-  /*color: black;*/
+  border: solid 1px #999;
 }

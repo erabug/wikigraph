@@ -10,19 +10,26 @@
   </head>
 
 <body>
-  <header>
-    <h1>wikiGraph</h1>
-    <!-- <h4>explore Wikipedia from a graph perspective</h4> -->
-  
+
+  <div class="logo-container">
+    <img src="../static/logo.png" width="80px">
+    <div class="logo-text">
+      <div class="title">wikiGraph</div>
+      <div class="blurb">wikipedia from a graph perspective</div>
+    </div>
+  </div>
+
   <div class="query-form">
     <form>
-      How does 
-      <input type="text" id="start-node" placeholder="Choose a start page">
-      connect to <input type="text" id="end-node" placeholder="Choose an end page">
+      How does<input type="text" id="start-node" placeholder="Choose a start page"> 
+      connect to<input type="text" id="end-node" placeholder="Choose an end page">
       ?<button type="query" id="submit-query">Go</button>
     </form>
   </div>
-  </header>
+  
+
+  <div class="graph-result">
+  </div>
 
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>

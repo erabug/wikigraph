@@ -2,9 +2,9 @@ function drawGraph(json) {
   var width = 800,
       height = 400;
 
-  var color = d3.scale.category20();
+  var color = d3.scale.category10();
 
-  var svg = d3.select("body").append("svg")
+  var svg = d3.select(".graph-result").append("svg")
       .attr("width", width)
       .attr("height", height);
 
