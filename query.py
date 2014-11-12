@@ -74,7 +74,9 @@ def find_primary_rels(node_list):
 
 	for node in node_list:
 
-		for rel in node.match(limit=2):
+		for rel in node.match_incoming(limit=2):
+			rels.append(rel)
+		for rel in node.match_outgoing(limit=2):
 			rels.append(rel)
 
 	rel_dict_list = parse_rel_objs(rels)
