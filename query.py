@@ -56,6 +56,18 @@ def parse_rel(rel, in_path):
 
 	return rel_dict
 
+def parse_node_objs(node_objs_list, in_path=False):
+	"""Takes a list of node objects. Returns dict of node dicts."""
+
+	nodes = {}
+
+	for node in node_objs_list:
+		node_dict = parse_node(node, in_path=in_path)
+		if node_dict['id'] not in nodes:
+			nodes[node_dict['id']] = node_dict
+
+	return nodes
+
 def parse_rel_objs(rel_objs_list, in_path=False):
 	"""Takes a list of relationship objects. Returns list of rel dicts."""
 
@@ -67,17 +79,6 @@ def parse_rel_objs(rel_objs_list, in_path=False):
 		rel_dict_list.append(rel_dict)
 
 	return rel_dict_list
-
-def parse_node_objs(node_objs_list, in_path=False):
-	"""Takes a list of node objects. Returns list of node dicts."""
-
-	node_dict_list = []
-
-	for node in node_objs_list:
-		node_dict = parse_node(node, in_path=in_path)
-		node_dict_list.append(node_dict)
-
-	return node_dict_list
 
 def find_secondary_rels_and_nodes(node_objs_list):
 	"""Takes a list of node objects. Returns list of rel dicts."""
@@ -100,6 +101,19 @@ def find_secondary_rels_and_nodes(node_objs_list):
 
 	return rel_dict_list, node_dict_list
 
+def merge_node_dicts(path_nodes, non_path_nodes):
+	"""Takes and merges the two dictionaries of node dicts. Returns list of 
+	deduped node dicts."""
+
+	d = dict(non_path_nodes.items() + path_nodes.items())
+
+	node_dict_list = []
+
+	for node_dict in d.values():
+		node_dict_list.append(node_dict)
+
+	return node_dict_list
+
 def parse_nods_and_rels(path):
 	"""Takes a path object. Returns two lists, one for rel dicts and one for 
 	node dicts."""
@@ -108,61 +122,23 @@ def parse_nods_and_rels(path):
 	path_rels = parse_rel_objs(rel_objs_list=path.relationships, in_path=True)
 	# print "path_rels:", path_rels
 
+	# parse nodes, create list of unique nodes
+	path_nodes = parse_node_objs(node_objs_list=path.nodes, in_path=True)
+	# print "path_nodes:", path_nodes
+
 	# rel dict list for secondary rels
 	non_path_rels, non_path_nodes = find_secondary_rels_and_nodes(node_objs_list=path.nodes)
-	# print "non_path_rels", non_path_rels
-	# print "non_path_nodes", non_path_nodes
+	print "\nnon_path_rels", non_path_rels
+	print "\nnon_path_nodes", non_path_nodes
 
 	# combine the two lists
 	rels_list = path_rels + non_path_rels
-	print "rels_list:", rels_list
+	# print "rels_list:", rels_list
 
-	# parse nodes, create list of unique nodes
-	path_nodes = parse_node_objs(node_objs_list=path.nodes)
-	# print "path_nodes:", path_nodes
-
-	nodes_list = path_nodes + non_path_nodes
-	print "nodes_list:", nodes_list
+	nodes_list = merge_node_dicts(path_nodes, non_path_nodes)
+	# print "nodes_list:", nodes_list
 
 	return rels_list, nodes_list
-		
-# def create_rels_list(path):
-# 	"""Given the returned path, create a dict for each relationship. Returns 
-# 	list of dicts. 
-# 	Format: [{'source': 42, 'target': 552}]"""
-
-# 	rels_list = []
-
-# 	for rel in path.relationships:
-# 		start_node = rel.start_node.get_properties()['node']
-# 		end_node = rel.end_node.get_properties()['node']
-# 		rels_list.append({'source': int(start_node), 'target': int(end_node), 'value': 1})
-
-# 	return rels_list
-
-# def create_nodes_list(path):
-# 	"""Given the returned path, create a dict for each node. Returns list of 
-# 	dicts. 'Type' is included when available.
-# 	Format: [{'node': 42, 'name': 'Douglas Adams', 'group': 'path'}]"""
-
-# 	nodes_list = []
-
-# 	for a_node in path.nodes:
-
-# 		node, name = a_node.get_properties().values()
-# 		name = name.replace('_', ' ')
-# 		node = int(node)
-
-# 		d = {'id': node, 'name': name, 'group': 'path'}
-
-# 		labels = a_node.get_labels()
-# 		label = labels - set(['Page']) # does it have a label other than Page?
-# 		if label:
-# 			d['type'] = list(label)[0]
-
-# 		nodes_list.append(d)
-
-# 	return nodes_list
 
 def create_lists(node1, node2):
 	"""Request the shortest path between two nodes from the database. Assemble 
@@ -170,8 +146,6 @@ def create_lists(node1, node2):
 	IDs. Write output to a JSON file."""
 
 	path = find_shortest_path(str(node1), str(node2))
-	# rels_list = create_rels_list(path)
-	# nodes_list = create_nodes_list(path)
 	rels_list, nodes_list = parse_nods_and_rels(path)
 
 	codes = {}
@@ -184,7 +158,7 @@ def create_lists(node1, node2):
 			id_counter += 1
 		node['id'] = codes[node_id]
 
-	print "codes:", codes
+	# print "codes:", codes
 
 	for rel in rels_list: # look up the source and target in codes
 		rel['source'] = codes[rel['source']]
