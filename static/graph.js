@@ -1,5 +1,5 @@
 function drawGraph(json) {
-  var width = 800,
+  var width = 1000,
       height = 400;
 
   var color = d3.scale.category10();
