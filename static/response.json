@@ -1,1 +1,0 @@
-{ "directed": true, "nodes":[{"id": 0, "name": "President of the United States"}, {"type": "OfficeHolder", "id": 1, "name": "John Tyler"}, {"id": 2, "name": "Secession in the United States"}], "links":[{"source": 0, "target": 1}, {"source": 1, "target": 2}], "multigraph": false }
