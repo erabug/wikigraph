@@ -81,20 +81,23 @@ def parse_rel_objs(rel_objs_list, in_path=False):
 	return rel_dict_list
 
 def find_secondary_rels_and_nodes(node_objs_list):
-	"""Takes a list of node objects. Returns list of rel dicts."""
+	"""Takes a list of node objects. Returns list of rel dicts and list of
+	node dicts."""
 
 	rels = []
 	nodes = []
+	print "node object list:", node_objs_list
 
 	for node in node_objs_list:
 
-		for rel in node.match_incoming(limit=1):
+		for rel in node.match_incoming(limit=10):
 			rels.append(rel)
 			nodes.append(rel.start_node)
 
-		for rel in node.match_outgoing(limit=1):
+
+		for rel in node.match_outgoing(limit=10):
 			rels.append(rel)
-			nodes.append(rel.end_node)			
+			nodes.append(rel.end_node)
 
 	rel_dict_list = parse_rel_objs(rels)
 	node_dict_list = parse_node_objs(nodes)
@@ -103,7 +106,7 @@ def find_secondary_rels_and_nodes(node_objs_list):
 
 def merge_node_dicts(path_nodes, non_path_nodes):
 	"""Takes and merges the two dictionaries of node dicts. Returns list of 
-	deduped node dicts."""
+	node dicts."""
 
 	d = dict(non_path_nodes.items() + path_nodes.items())
 
@@ -120,23 +123,23 @@ def parse_nods_and_rels(path):
 
 	# rel dict list for main path
 	path_rels = parse_rel_objs(rel_objs_list=path.relationships, in_path=True)
-	# print "path_rels:", path_rels
+	print "\npath_rels:", path_rels
 
 	# parse nodes, create list of unique nodes
 	path_nodes = parse_node_objs(node_objs_list=path.nodes, in_path=True)
-	# print "path_nodes:", path_nodes
+	# print "\npath_nodes:", path_nodes
 
 	# rel dict list for secondary rels
 	non_path_rels, non_path_nodes = find_secondary_rels_and_nodes(node_objs_list=path.nodes)
 	print "\nnon_path_rels", non_path_rels
-	print "\nnon_path_nodes", non_path_nodes
+	# print "\nnon_path_nodes", non_path_nodes
 
 	# combine the two lists
 	rels_list = path_rels + non_path_rels
 	# print "rels_list:", rels_list
 
 	nodes_list = merge_node_dicts(path_nodes, non_path_nodes)
-	# print "nodes_list:", nodes_list
+	print "\nnodes_list:", nodes_list
 
 	return rels_list, nodes_list
 

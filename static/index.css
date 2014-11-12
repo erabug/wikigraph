@@ -10,11 +10,11 @@ svg {
 
 .link {
   stroke: #666;
-  stroke-width: 2px;
+  stroke-width: 1px;
 }
 
 circle {
-  stroke: #fff;
+  /*stroke: #fff;*/
   stroke-width: 2px;
 }
 
@@ -38,11 +38,40 @@ body {
 
 .logo-container {
   text-align: center;
-  background-color: #333; /*formerly #666 */
-  padding: 25px;
+  height: 100px;
+  /*background-color: #333;*/
 }
 
-img {
+.logo {
+  background: url('../static/logo-background1.png');
+  height: 100px;
+}
+
+.transparent {
+  position: absolute;
+  width: 100%;
+  top: 0;
+  height: 100px;
+  background-color: #333;
+  /*opacity: 0.3;*/
+}
+
+.title {
+  font-family: "Signika", sans-serif;
+  color: #fff;
+  font-size: 48px;
+  font-weight: 600;
+  opacity: 1;
+  position: relative;
+  top: 20px;
+/*  text-shadow:
+    -2px -2px 0 #333,
+    2px -2px 0 #333,
+    -2px 2px 0 #333,
+    2px 2px 0 #333; */
+}
+
+/*img {
   position: relative;
   top: 10px;
   left: -10px;
@@ -63,7 +92,7 @@ img {
   color: #fff;
   font-size: 15px;
   font-style: italic;
-}
+}*/
 
 input { 
   border: none;

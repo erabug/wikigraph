@@ -1,6 +1,6 @@
 function drawGraph(json) {
   var width = 1000,
-      height = 400;
+      height = 600;
 
   var color = d3.scale.category10();
 
@@ -10,8 +10,8 @@ function drawGraph(json) {
 
   var force = d3.layout.force()
       .gravity(0.07) //originally 0.05
-      .distance(200) //originally 100 and -100
-      .charge(-200)
+      .distance(90) //originally 100 and -100
+      .charge(-100)
       .size([width, height]);
 
   // d3.json('response.json', function(error, json) {
@@ -25,18 +25,27 @@ function drawGraph(json) {
       .enter().append("svg:marker")
         .attr("id", String)
         .attr("viewBox", "0 -5 10 10")
-        .attr("refX", 24)
+        .attr("refX", 22)
         // .attr("refY", 0)
         .attr("markerWidth", 6)
         .attr("markerHeight", 6)
         .attr("orient", "auto")
         .append("svg:path")
-        .attr("d", "M0,-5L10,0L0,5Z");
+        .attr("d", "M0,-4L10,0L0,4Z");
 
     var link = svg.selectAll(".link")
         .data(json.links)
       .enter().append("line")
         .attr("class", "link")
+        .style("stroke", function(d) {
+          if (d.value == 1) { return "#333"; }
+          // return d.value;
+        })
+        // .style("stroke-width", function(d) {
+        //   if (d.value == 1) {
+        //     return "2";
+        //   } else { return 1; }
+        // })
         .attr("marker-end", "url(#arrow)");
 
     var node = svg.selectAll(".node")
@@ -46,21 +55,32 @@ function drawGraph(json) {
         .call(force.drag);
 
     node.append("circle")
-        .attr("r", 16)
+        // .attr("r", 8)
+        .attr("r", function(d) {
+          if (d.group == "path") {
+            return 10;
+          } else { return 8; }
+        })
+        .style("stroke", function(d) {
+          if (d.group == "path") {
+            return "#333";
+          } else { return "#fff"; }
+        })
+        // .style("opacity", 0.8)
         .style("fill", function(d) { return color(d.type); });
         // .attr("x", -8)
         // .attr("y", -8)
         // .attr("width", 16)
         // .attr("height", 16);
 
-    node.append("text")
-        .attr("dx", 23)
-        .attr("dy", ".35em")
-        // .style("fill", "white")
-        .text(function(d) { return d.name; });
+    // node.append("text")
+    //     .attr("dx", 23)
+    //     .attr("dy", ".35em")
+    //     // .style("fill", "white")
+    //     .text(function(d) { return d.name; });
 
     node.append("title")
-        .text(function(d) { return d.type; });
+        .text(function(d) { return d.name + " (" + d.id + "), " + d.type; });
 
     force.on("tick", function() {
       link.attr("x1", function(d) { return d.source.x; })
