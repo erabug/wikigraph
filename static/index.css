@@ -1,8 +1,4 @@
-/*GRAPH STUFF*/
-.graph-result {
-  text-align: center;
-}
-
+/******GRAPH STUFF******/
 svg {
   display: block;
   margin: 0 auto;
@@ -10,7 +6,6 @@ svg {
 
 .link {
   stroke: #666;
-  stroke-width: 1px;
 }
 
 circle {
@@ -22,105 +17,63 @@ marker#arrow {
   fill: #666;
 }
 
-/*HTML STUFF*/
+/******HTML STUFF******/
 :focus {
   outline:none; 
   border-bottom: solid 2px #999;
 } /*changes chrome's focus action*/
 
 body {
-  background-color: #ffffff; /*formerly #333*/
+  background-color: #fff;
   color: #333;
-  font-weight: 100;
   margin: 0;
   font-family: sans-serif;
+  font-weight: 100;
+  text-align: center;
 }
 
-.logo-container {
-  text-align: center;
-  height: 100px;
-  /*background-color: #333;*/
+.logo {
+  width: 100%;
 }
 
 .border {
   background: url('../static/logo-background.png');
   height: 20px;
-  width: 100%;
 }
 
-.transparent {
-  position: relative;
-  width: 100%;
-  top: 0;
-  height: 70px;
+.background {
   background-color: #333;
-  /*opacity: 0.3;*/
 }
 
 .title {
   font-family: "Signika", sans-serif;
   color: #fff;
   font-size: 40px;
-  font-weight: 600;
-  opacity: 1;
-  position: relative;
-  top: -60px;
-/*  text-shadow:
-    -2px -2px 0 #333,
-    2px -2px 0 #333,
-    -2px 2px 0 #333,
-    2px 2px 0 #333; */
 }
 
-/*img {
-  position: relative;
-  top: 10px;
-  left: -10px;
+.query-form {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 18px;
 }
-
-.logo-text {
-  font-family: "Signika", sans-serif;
-  text-align: left;
-  display: inline-block;
-}
-
-.title {
-  color: #fff;
-  font-size: 32px;
-}
-
-.blurb {
-  color: #fff;
-  font-size: 15px;
-  font-style: italic;
-}*/
 
 input { 
   border: none;
-  border-bottom:solid 1px #999; 
-  text-indent: 4px;
+  border-bottom: solid 1px #999; 
   margin-left: 10px;
   font-size: 14px;
 } 
 
-.query-form {
-  margin: 30px;
-  text-align: center;
-  font-size: 20px;
-}
-
-button {
-  background-color: #666;
-  color: white;
+.button {
+  color: #fff;
+  background-color: #999;
+  border: solid 1px #999;
   border-radius: 10px;
-  border: solid 1px #666;
-  font-size: 16px;
-  margin-left: 10px;
   position: relative;
 }
 
-button:hover {
+.button:hover {
   cursor: pointer;
-  background-color: #999;
-  border: solid 1px #999;
+  background-color: #666;
+  border: solid 1px #666;
 }

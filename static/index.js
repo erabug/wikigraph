@@ -1,6 +1,6 @@
 var response;
 
-$('button#submit-query').click(function(e) {
+$('input#submit-query').click(function(e) {
 	e.preventDefault();
 
 	var start = $('input#start-node');
@@ -13,12 +13,11 @@ $('button#submit-query').click(function(e) {
 	end.val('');
 	$('svg').remove();
 
-	console.log(node1, node2);
-
 	$.get(
 		"/query",
 		{'node1': node1, 'node2': node2},
 		function(data) {
+			console.log("successful query!");
 			response = JSON.parse(data);
 			drawGraph(response);
 		});

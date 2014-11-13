@@ -177,7 +177,9 @@ def create_lists(node1, node2):
 		rel['source'] = codes[rel['source']]
 		rel['target'] = codes[rel['target']]
 
-	response = '{ "directed": true, "nodes":' + json.dumps(nodes_list) + ', "links":' + json.dumps(rels_list) + ', "multigraph": false }'
+	response = """{ "directed": true, "nodes":%s, "links":%s, 
+	"multigraph": false }""" % (json.dumps(nodes_list), json.dumps(rels_list))
+
 	# print "response", response
 	# with open('static/response.json', 'wb') as w:
 	# 	w.write(response)

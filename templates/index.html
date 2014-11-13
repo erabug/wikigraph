@@ -2,38 +2,33 @@
 <html>
 
   <head>
-
     <meta charset="utf-8">
     <link href='http://fonts.googleapis.com/css?family=Signika' rel='stylesheet' type='text/css'>
     <link href="../static/index.css" rel="stylesheet" type="text/css">
-
   </head>
 
 <body>
 
-  <div class="logo-container">
-    <div class="border"></div>
-    <div class="transparent"></div>
+  <div class="border logo"></div>
+  <div class="background logo">
     <div class="title">wikiGraph</div>
   </div>
-
+    
   <div class="query-form">
     <form>
       How does<input type="text" id="start-node" placeholder="Choose a start page"> 
       connect to<input type="text" id="end-node" placeholder="Choose an end page">
-      <button type="query" id="submit-query">?</button>
+      <input type="button" class="button" id="submit-query" value="?">
     </form>
   </div>
   
+  <div class="graph-result"></div>
 
-  <div class="graph-result">
-  </div>
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+  <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
 
-<script src="http://d3js.org/d3.v3.min.js"></script>
-<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
-
-<script src="../static/graph.js"></script>
-<script src="../static/index.js"></script>
+  <script src="../static/graph.js"></script>
+  <script src="../static/index.js"></script>
 
 </body>
 </html>
