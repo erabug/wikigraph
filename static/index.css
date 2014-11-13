@@ -42,16 +42,17 @@ body {
   /*background-color: #333;*/
 }
 
-.logo {
-  background: url('../static/logo-background1.png');
-  height: 100px;
+.border {
+  background: url('../static/logo-background.png');
+  height: 20px;
+  width: 100%;
 }
 
 .transparent {
-  position: absolute;
+  position: relative;
   width: 100%;
   top: 0;
-  height: 100px;
+  height: 70px;
   background-color: #333;
   /*opacity: 0.3;*/
 }
@@ -59,11 +60,11 @@ body {
 .title {
   font-family: "Signika", sans-serif;
   color: #fff;
-  font-size: 48px;
+  font-size: 40px;
   font-weight: 600;
   opacity: 1;
   position: relative;
-  top: 20px;
+  top: -60px;
 /*  text-shadow:
     -2px -2px 0 #333,
     2px -2px 0 #333,
