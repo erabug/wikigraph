@@ -25,7 +25,7 @@ function drawGraph(json) {
       .enter().append("svg:marker")
         .attr("id", String)
         .attr("viewBox", "0 -5 10 10")
-        .attr("refX", 22)
+        .attr("refX", 23)
         // .attr("refY", 0)
         .attr("markerWidth", 6)
         .attr("markerHeight", 6)
@@ -61,17 +61,18 @@ function drawGraph(json) {
             return 10;
           } else { return 8; }
         })
-        .style("stroke", function(d) {
+        // .style("stroke", function(d) {
+        //   if (d.group == "path") {
+        //     return "#333";
+        //   } else { return "#fff"; }
+        // })
+        // .style("opacity", 0.8)
+        .style("fill", function(d) {
           if (d.group == "path") {
             return "#333";
-          } else { return "#fff"; }
-        })
-        // .style("opacity", 0.8)
-        .style("fill", function(d) { return color(d.type); });
-        // .attr("x", -8)
-        // .attr("y", -8)
-        // .attr("width", 16)
-        // .attr("height", 16);
+          } else { return color(d.type); }
+        });
+        // .style("fill", function(d) { return color(d.type); });
 
     // node.append("text")
     //     .attr("dx", 23)

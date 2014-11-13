@@ -14,7 +14,7 @@ svg {
 }
 
 circle {
-  /*stroke: #fff;*/
+  stroke: #fff;
   stroke-width: 2px;
 }
 

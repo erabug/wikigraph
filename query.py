@@ -72,6 +72,17 @@ def parse_rel_objs(rel_objs_list, in_path=False):
 	"""Takes a list of relationship objects. Returns list of rel dicts."""
 
 	rel_dict_list = []
+	# rels = {}
+
+	# for rel in rel_objs_list:
+	# 	rel_dict = parse_rel(rel=rel, in_path=in_path)
+	# 	print rel_dict
+	# 	if rel_dict['source'] not in rels:
+	# 		rels[rel_dict['source']] = rel_dict
+
+	# print rels
+	# return rels
+
 
 	for rel in rel_objs_list:
 
@@ -86,16 +97,15 @@ def find_secondary_rels_and_nodes(node_objs_list):
 
 	rels = []
 	nodes = []
-	print "node object list:", node_objs_list
 
 	for node in node_objs_list:
 
-		for rel in node.match_incoming(limit=10):
+		for rel in node.match_incoming(limit=5):
 			rels.append(rel)
 			nodes.append(rel.start_node)
 
 
-		for rel in node.match_outgoing(limit=10):
+		for rel in node.match_outgoing(limit=5):
 			rels.append(rel)
 			nodes.append(rel.end_node)
 
@@ -123,7 +133,7 @@ def parse_nods_and_rels(path):
 
 	# rel dict list for main path
 	path_rels = parse_rel_objs(rel_objs_list=path.relationships, in_path=True)
-	print "\npath_rels:", path_rels
+	# print "\npath_rels:", path_rels
 
 	# parse nodes, create list of unique nodes
 	path_nodes = parse_node_objs(node_objs_list=path.nodes, in_path=True)
@@ -131,7 +141,7 @@ def parse_nods_and_rels(path):
 
 	# rel dict list for secondary rels
 	non_path_rels, non_path_nodes = find_secondary_rels_and_nodes(node_objs_list=path.nodes)
-	print "\nnon_path_rels", non_path_rels
+	# print "\nnon_path_rels", non_path_rels
 	# print "\nnon_path_nodes", non_path_nodes
 
 	# combine the two lists
@@ -139,7 +149,7 @@ def parse_nods_and_rels(path):
 	# print "rels_list:", rels_list
 
 	nodes_list = merge_node_dicts(path_nodes, non_path_nodes)
-	print "\nnodes_list:", nodes_list
+	# print "\nnodes_list:", nodes_list
 
 	return rels_list, nodes_list
 
