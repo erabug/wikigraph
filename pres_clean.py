@@ -16,19 +16,27 @@ PRESIDENTS = set([
 				'Barack_Obama'
 ])
 
+### This creates the presidents subgraph
 # parse page_links, if source or target is a president, write it
-
-one_hops = set()
-
 with open('data/page_links_en.ttl', 'r') as f, open('data/pres_links.ttl', 'wb+') as p:
 	for line in f:
 		l = line.split()
 		start = l[0][29:-1]
 		end = l[2][29:-1]
 		if start in PRESIDENTS or end in PRESIDENTS:
-			if start not in PRESIDENTS:
-				one_hops.add(start)
-			if end not in PRESIDENTS:
-				one_hops.add(end)
-		if start in PRESIDENTS or end in PRESIDENTS or start in one_hops or end in one_hops:
 			p.write(line)
+
+### This creates the presidents subgraph + 1 connection away
+# one_hops = set()
+# with open('data/page_links_en.ttl', 'r') as f, open('data/pres_links.ttl', 'wb+') as p:
+# 	for line in f:
+# 		l = line.split()
+# 		start = l[0][29:-1]
+# 		end = l[2][29:-1]
+# 		if start in PRESIDENTS or end in PRESIDENTS:
+# 			if start not in PRESIDENTS:
+# 				one_hops.add(start)
+# 			if end not in PRESIDENTS:
+# 				one_hops.add(end)
+# 		if start in PRESIDENTS or end in PRESIDENTS or start in one_hops or end in one_hops:
+# 			p.write(line)
