@@ -1,4 +1,6 @@
 function drawGraph(json) {
+
+  // establish width and height of the svg
   var width = 800,
       height = 500;
 

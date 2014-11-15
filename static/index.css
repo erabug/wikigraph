@@ -43,6 +43,7 @@ body {
 
 .background {
   background-color: #333;
+  padding: 10px 0 10px;
 }
 
 .title {
@@ -76,4 +77,13 @@ input {
   cursor: pointer;
   background-color: #666;
   border: solid 1px #666;
+}
+
+.scrollable-dropdown-menu .tt-dropdown-menu {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.tt-suggestion {
+  font-size: 14px;
 }

@@ -1,3 +1,5 @@
+# import cPickle as pickle
+
 def redirects_set():
 
 	print "Creating set of redirect pages..."
@@ -51,19 +53,23 @@ def write_nodes(data):
 
 	print "Writing 'nodes.csv'..."
 
+	# pickle_dict = {}
+
 	with open('nodes.csv', 'wb+') as d:
 		d.write('node\tname\tl:label\n')
 		for value in data:
 
 			node = str(value['id'])
-			name = value['name']
+			name = value['name'].replace('_', ' ')
 			label = 'Page'
 
 			if value.get('type', 0) != 0:
 				label = label + ',' + value['type']
 
+			# pickle_dict[name] = node
 			d. write(node + '\t' + name + '\t' + label + '\n')
-			# d.write(node, '\t' + name + '\t' + label + '\n')
+
+	# pickle.dump(pickle_dict, open('nodes.p', 'wb'))
 
 def parse_links():
 
@@ -74,17 +80,17 @@ def parse_links():
 	topics = {}
 	data = {}
 	
-	counter = 5000
+	# counter = 5000
 	id_counter = 0
 
 	print "Writing 'rels.csv'..."
 
-	with open('data/page_links_en.ttl', 'r') as f, open('rels.csv', 'wb+') as c:
+	with open('data/pres_links.ttl', 'r') as f, open('rels.csv', 'wb+') as c:
 		c.write('start\tend\ttype\n') # write headers
 		f.next()
 
 		for line in f:
-			if counter > 0:
+			# if counter > 0:
 
 				l = line.split()
 				start = l[0][29:-1]
@@ -114,31 +120,15 @@ def parse_links():
 
 							id_counter += 1
 
-					# if start not in data: # are you a new node?
-						
-					# 	data[start] = { 'id':   id_counter, 
-					# 					'name': names.get(start, start) }
-					# 	if types.get(start, 0) != 0: # only add type if it is known
-					# 		data[start].update({'type': types[start]})
-					# 	id_counter += 1
-
-					# if end not in data: # are you a new node?
-
-					# 	data[end] = { 'id':   id_counter, 
-					# 				  'name': names.get(end, end) }
-					# 	if types.get(end, 0) != 0:
-					# 		data[end].update({'type': types[end]})
-					# 	id_counter += 1
-
 					start_id = str(data[start]['id'])
 					end_id = str(data[end]['id'])
 
 					c.write(start_id + '\t' + end_id + '\tLINKS_TO\n')
 
-				counter -= 1
+			# 	counter -= 1
 
-			else:
-				break
+			# else:
+			# 	break
 
 	data_tup = sorted(data.values(), key=lambda k: k['id']) # sorted list of tuples
 	write_nodes(data_tup)
