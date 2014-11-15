@@ -2,22 +2,13 @@ Wikigraph
 ===========
 Let's consider Wikipedia as a graph, with pages as nodes (vertices) and inter-page links as relationships (edges). What's the shortest path between any two pages? For example, how many links do you have to click to get from Harry Potter to the Spanish Inquisition? 
 
-This project is my attempt to answer this question. In the process, I explore:
-* graph traversal (shortest path)
-* graph databases (Neo4j)
-* object-oriented programming in Python (py2neo library)
-* data visualization (Javascript, d3)
-* web microframeworks (Flask)
-* cloud services (Amazon EC2)
-* web servers (Apache)
-
 You can check out the project in progress [here](http://ec2-54-148-102-6.us-west-2.compute.amazonaws.com/).
 
 ###Core project
 Web interface that allows users to query a graph database of Wikipedia's page links and find/explore the shortest path between any two pages.
 
 ###Features
-Current
+*Current*
 - [x] Clean raw data files into nodes and relationships .csv files
 - [x] Wikipedia page links imported into a graph database
 - [x] Smaller subgraph of U.S. presidents imported into a graph database
@@ -29,7 +20,7 @@ Current
 - [x] Users can input page titles and they are converted to codes
 - [x] Search suggest for page titles (typeahead.js)
 
-Future
+*Future*
 - [ ] Error handling for non-existent paths
 - [ ] The secondary nodes and relationships returned are ranked by their connectance score
 - [ ] Embed title, abstract, photo on nodes in visualization (Wikipedia API?)
@@ -132,34 +123,48 @@ The script then traverses this path object, pulling out and deduping nodes and r
     "directed": true,
     "nodes": [
         {
-            "id": 0,
-            "name": "William Persse"
+            "node": 0,
+            "name": "William Persse",
+            "group": "path"
         },
         {
             "type": "OfficeHolder",
-            "id": 1,
-            "name": "George Washington"
+            "node": 1,
+            "name": "George Washington",
+            "group": "path"
         },
         {
             "type": "TelevisionShow",
-            "id": 2,
-            "name": "American Presidents: Life Portraits"
+            "node": 2,
+            "name": "American Presidents: Life Portraits",
+            "group": "none"
         }
     ],
     "links": [
         {
-            "source": 0,
-            "target": 1
+            "start": 0,
+            "end": 1,
+            "value": 1
         },
         {
-            "source": 1,
-            "target": 2
+            "start": 1,
+            "end": 2,
+            "value": 0
         }
     ],
     "multigraph": false
 }
 ```
 <kbd>wikigraph.py</kbd> is a small [Flask](http://flask.pocoo.org/) app that connects this reponse to the [d3 library](http://d3js.org/). <kbd>graph.js</kbd> handles the graph drawing while <kbd>index.js</kbd> handles everything else.
+
+###Improving query response time
+My first approach to improve response time for the full database was to fiddle with Neo4j's memory settings. The settings in neo4j.properties (e.g. neostore.nodestore.db.mapped_memory) didn't have a large impact on query time. I had more success with java.initmemory and java.maxmemory (in neo4j-wrapper.conf).
+
+*Results*
+
+I used the same query three times for each setting, cranking up both init and max memory. My machine only has 4G of RAM, which seems to coincide with the dramatic improvement in query time (1400s to 60s) after the 4G mark. 
+
+![Memory Test Results](mem_test.png)
 
 ###Deployment
 This code was tested on Amazon's [EC2](http://aws.amazon.com/ec2/) using [Apache](http://httpd.apache.org/) as a web server.
