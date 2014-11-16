@@ -6,8 +6,8 @@ app = Flask(__name__)
 app.secret_key = 'lisaneedsbraces'
 
 def connect():
-    conn = sqlite3.connect('data/nodes_pres.db')
-    cursor = conn.cursor()
+
+    cursor = sqlite3.connect('data/nodes_pres.db').cursor()
     return cursor
 
 @app.route('/')
@@ -18,9 +18,7 @@ def index():
 @app.route('/query')
 def get_path():
 
-	node1 = request.args.get('node1')
-	node2 = request.args.get('node2')
-
+	node1, node2 = request.args.values()
 	response = query.create_lists(node1, node2)
 
 	return response # string
@@ -29,19 +27,14 @@ def get_path():
 def get_page_names():
 
 	entry = request.args.get("query")
-
 	cursor = connect()
 	query = 'SELECT id, title FROM nodes WHERE title LIKE ?;'
-	cursor.execute(query, ('% ' + entry + '%', ))
-	rows = cursor.fetchall() # list of tuples
+	rows = cursor.execute(query, ('% ' + entry + '%', )).fetchall()
 
-	results = []
-	for row in rows:
-		results.append({ 'title': row[1], 'code': row[0] })
+	results = [{ 'title': row[1], 'code': row[0] } for row in rows]
+	response = jsonify(**{ 'results': results })
 
-	response = { 'results': results }
-
-	return jsonify(**response)
+	return response
 
 if __name__ == '__main__':
 	app.run(debug=True)

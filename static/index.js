@@ -14,9 +14,9 @@ $(document).ready(function(e) {
 
 // event handler for the query submission
 $('input#submit-query').click(function(e) {
-	e.preventDefault();
 
-  clear_all();
+	e.preventDefault();
+    clear_all();
 
 	$.get(
 		"/query",
@@ -26,7 +26,7 @@ $('input#submit-query').click(function(e) {
 			response = JSON.parse(data);
 			drawGraph(response);
 		});
-
+    
 });
 
 // the thing that works
@@ -54,7 +54,7 @@ var pageNames = new Bloodhound({
         return Bloodhound.tokenizers.whitespace(d.value);
     },
     queryTokenizer: Bloodhound.tokenizers.whitespace,
-    limit: 20,
+    limit: 30,
     remote: {
         url: '/page-names?query=%QUERY',
         filter: function (pageNames) {
@@ -75,9 +75,9 @@ pageNames.initialize();
 
 // sets up the typeahead on the two input fields
 $('.scrollable-dropdown-menu .typeahead').typeahead(null, {
-  name: 'pageNames',
-  displayKey: 'value',
-  source: pageNames.ttAdapter()
+    name: 'pageNames',
+    displayKey: 'value',
+    source: pageNames.ttAdapter()
 });
 
 // records the values chosen for each field as a global var
