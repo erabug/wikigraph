@@ -1,11 +1,14 @@
-from flask import Flask, render_template, request, jsonify
-import cPickle as pickle
+from flask import Flask, render_template, request, jsonify, g
 import query
+import sqlite3
 
 app = Flask(__name__)
 app.secret_key = 'lisaneedsbraces'
 
-NODE_CODES = pickle.load(open('nodes.p', 'rb'))
+def connect():
+    conn = sqlite3.connect('data/nodes_pres.db')
+    cursor = conn.cursor()
+    return cursor
 
 @app.route('/')
 def index():
@@ -15,14 +18,10 @@ def index():
 @app.route('/query')
 def get_path():
 
-	n1_name = request.args.get('node1')
-	n2_name = request.args.get('node2')
+	node1 = request.args.get('node1')
+	node2 = request.args.get('node2')
 
-	# node1 = str(NODE_CODES[n1_name])
-	# node2 = str(NODE_CODES[n2_name])
-
-	# response = query.create_lists(node1, node2)
-	response = query.create_lists(n1_name, n2_name)
+	response = query.create_lists(node1, node2)
 
 	return response # string
 
@@ -30,16 +29,19 @@ def get_path():
 def get_page_names():
 
 	entry = request.args.get("query")
-	print "user entered: %s" % entry
 
-	l = { 'results':
-			[
-				{'title': 'Bob\'s Burgers', 'code': 0},
-				{'title': 'Gilmore Girls', 'code': 1}
-			]
-		}
+	cursor = connect()
+	query = 'SELECT id, title FROM nodes WHERE title LIKE ?;'
+	cursor.execute(query, ('% ' + entry + '%', ))
+	rows = cursor.fetchall() # list of tuples
 
-	return jsonify(**l)
+	results = []
+	for row in rows:
+		results.append({ 'title': row[1], 'code': row[0] })
+
+	response = { 'results': results }
+
+	return jsonify(**response)
 
 if __name__ == '__main__':
 	app.run(debug=True)

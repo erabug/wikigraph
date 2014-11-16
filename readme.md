@@ -164,7 +164,7 @@ My first approach to improve response time for the full database was to fiddle w
 
 I used the same query three times for each setting, cranking up both init and max memory. My machine only has 4G of RAM, which seems to coincide with the dramatic improvement in query time (1400s to 60s) after the 4G mark. 
 
-![Memory Test Results](mem_test.png)
+![Memory Test Results](static/mem_test.png)
 
 ###Deployment
 This code was tested on Amazon's [EC2](http://aws.amazon.com/ec2/) using [Apache](http://httpd.apache.org/) as a web server.

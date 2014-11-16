@@ -8,6 +8,11 @@ function clear_all() {
     $('svg').remove();
 }
 
+$(document).ready(function(e) {
+    clear_all();
+});
+
+// event handler for the query submission
 $('input#submit-query').click(function(e) {
 	e.preventDefault();
 
@@ -43,17 +48,18 @@ $('input#submit-query').click(function(e) {
 //   }
 // });
 
-// experimental
+// tells typeahead how to handle the user input (e.g. the get request params)
 var pageNames = new Bloodhound({
     datumTokenizer: function (d) {
         return Bloodhound.tokenizers.whitespace(d.value);
     },
     queryTokenizer: Bloodhound.tokenizers.whitespace,
+    limit: 20,
     remote: {
         url: '/page-names?query=%QUERY',
         filter: function (pageNames) {
             // Map the remote source JSON array to a JavaScript array
-            console.log(pageNames);
+            // console.log(pageNames);
             return $.map(pageNames.results, function (page) {
                 return {
                     value: page.title,
@@ -65,15 +71,16 @@ var pageNames = new Bloodhound({
     }
 });
 
-// kicks off the loading/processing of `local` and `prefetch`
 pageNames.initialize();
 
+// sets up the typeahead on the two input fields
 $('.scrollable-dropdown-menu .typeahead').typeahead(null, {
   name: 'pageNames',
   displayKey: 'value',
   source: pageNames.ttAdapter()
 });
 
+// records the values chosen for each field as a global var
 $('#start-node').on('typeahead:selected', function (e, d) {
     node1Code = d.code;
 });
@@ -81,7 +88,3 @@ $('#start-node').on('typeahead:selected', function (e, d) {
 $('#end-node').on('typeahead:selected', function (e, d) {
     node2Code = d.code;
 });
-
-
-
-
