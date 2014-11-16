@@ -28,9 +28,13 @@ def get_page_names():
 
 	entry = request.args.get("query")
 	cursor = connect()
-	query = 'SELECT id, title FROM nodes WHERE title LIKE ?;'
-	rows = cursor.execute(query, ('% ' + entry + '%', )).fetchall()
 
+	query = '''SELECT id, title 
+				FROM nodes 
+				WHERE title LIKE ? 
+				OR title LIKE ?;'''
+
+	rows = cursor.execute(query, (entry + '%', '% ' + entry, )).fetchall()
 	results = [{ 'title': row[1], 'code': row[0] } for row in rows]
 	response = jsonify(**{ 'results': results })
 

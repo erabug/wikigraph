@@ -141,8 +141,6 @@ def create_lists(node1, node2):
 	IDs. Write output to a JSON file."""
 
 	path = find_shortest_path(str(node1), str(node2))
-	if path == None:
-		return "no path found"
 
 	rels_list, nodes_list = parse_nodes_and_rels(path)
 
