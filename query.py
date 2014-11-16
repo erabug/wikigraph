@@ -14,7 +14,7 @@ def find_shortest_path(node1, node2):
 	query = neo4j.CypherQuery(
 		graph_db, 
 		"""MATCH (m {node:'%s'}), (n {node:'%s'}), 
-		p = shortestPath((m)-[*..20]->(n)) RETURN p""" % (node1, node2)
+		p = shortestPath((m)-[*..5]->(n)) RETURN p""" % (node1, node2)
 		)
 
 	path = query.execute_one()
