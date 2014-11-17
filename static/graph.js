@@ -1,7 +1,7 @@
 function drawGraph(json) {
 
   // establish width and height of the svg
-  var width = 800,
+  var width = 500,
       height = 500;
 
   // color established as a scale

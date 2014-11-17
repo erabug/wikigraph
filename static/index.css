@@ -2,6 +2,7 @@
 svg {
   display: block;
   margin: 0 auto;
+  /*border: solid 2px #333;*/
 }
 
 .link {
@@ -29,6 +30,7 @@ body {
   margin: 0;
   font-family: sans-serif;
   font-weight: 100;
+  font-size: 18px;
   text-align: center;
 }
 
@@ -55,7 +57,6 @@ body {
 .query-form {
   margin-top: 20px;
   text-align: center;
-  font-size: 18px;
 }
 
 input { 
@@ -90,17 +91,21 @@ input {
 }
 
 /*FLOATING HEADS STUFF*/
-.circular {
-  /*border-radius: 45px;*/
+.page {
+  display: inline-block;
+  vertical-align: top;
 }
 
-/*Also for the cropping, I think a quick way to do this is make a square 
-wrapper div around your image then give it a border-radius (css) that is 
-half of the length of one of the sides. Set the overflow to hidden and you're set.*/
-.squareimage {
-  /*display: inline;*/
-  width: 90px;
-  height: 90px;
-  border-radius: 45px;
-  /*overflow: hidden;*/
+.squareimg {
+  width: 70px;
+  height: 70px;
+  border-radius: 35px;
+  overflow: hidden;
+  border: solid 2px black;
+  margin: 10px;
+}
+
+.subtitle {
+  margin: auto;
+  width: 80px;
 }

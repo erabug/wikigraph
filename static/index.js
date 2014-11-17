@@ -20,6 +20,28 @@ $('input#submit-query').click(function(e) {
 	e.preventDefault();
     clear_all();
 
+    var URL = 'http://en.wikipedia.org/w/api.php';
+    var queryParams = '?action=query&format=json&redirects&prop=pageimages&pithumbsize=100px&pilimit=2';
+    var pagesParams = node1Title + '|' + node2Title;
+    console.log(pagesParams);
+
+    $.getJSON(
+        URL + queryParams + '&titles=' + pagesParams + '&callback=?',
+        function(data) {
+            
+            console.log(data);
+            var pageObject = data['query']['pages'];
+
+            Object.keys(pageObject).forEach(function(pageKey, i) {
+                var page = pageObject[pageKey];
+                var title = page['title'];
+                var thumbnail = page['thumbnail']['source'];
+                $('.path').append('<div class="page"><div class="squareimg"><img id=' + i.toString() + ' src=' + thumbnail + '></div>'+'<div class="subtitle">'+title+'</div>'+'</div');
+            });
+                
+
+        });
+
 	$.get(
 		'/query',
 		{'node1': node1Code.toString(), 'node2': node2Code.toString()},
@@ -27,28 +49,9 @@ $('input#submit-query').click(function(e) {
 
 			response = JSON.parse(data);
 			drawGraph(response);
-            var URL = 'http://en.wikipedia.org/w/api.php';
-            var queryParams = '?action=query&format=json&redirects&prop=pageimages&pithumbsize=90px&pilimit=2';
-            var pagesParams = node1Title + '|' + node2Title;
-            console.log(pagesParams);
+            
 
-            $.getJSON(
-                URL + queryParams + '&titles=' + pagesParams + '&callback=?',
-                function(data) {
-                    
-                    console.log(data);
-                    var pageObject = data['query']['pages'];
-
-                    Object.keys(pageObject).forEach(function(pageKey) {
-                        var page = pageObject[pageKey];
-                        var title = page['title'];
-                        var thumbnail = page['thumbnail']['source'];
-                        var pageImage = page['pageimage'];
-                        $('.page').append('<div class="squareimg"><img class="circular" src=' + thumbnail + '></div>');
-                    });
-                        
-
-                });
+            
 
 		});
     
