@@ -10,11 +10,10 @@ def find_shortest_path(node1, node2):
 	graph_db = neo4j.GraphDatabaseService()
 
 	t0 = time.time()
-	query = neo4j.CypherQuery(
-		graph_db, 
-		"""MATCH (m {node:'%s'}), (n {node:'%s'}), 
-		p = shortestPath((m)-[*..5]->(n)) RETURN p""" % (node1, node2)
-		)
+	query = neo4j.CypherQuery(graph_db, 
+								"""MATCH (m {node:'%s'}), (n {node:'%s'}), 
+								p = shortestPath((m)-[*..5]->(n)) 
+								RETURN p""" % (node1, node2))
 
 	path = query.execute_one()
 	t1 = time.time()
@@ -70,14 +69,7 @@ def parse_node_objs(node_objs_list, in_path=False):
 def parse_rel_objs(rel_objs_list, in_path=False):
 	"""Takes a list of relationship objects. Returns list of rel dicts."""
 
-	# rel_dict_list = []
-
 	rel_dict_list = [parse_rel(rel=rel, in_path=in_path) for rel in rel_objs_list]
-
-	# for rel in rel_objs_list:
-
-	# 	rel_dict = parse_rel(rel=rel, in_path=in_path)
-	# 	rel_dict_list.append(rel_dict)
 
 	return rel_dict_list
 
@@ -108,11 +100,7 @@ def merge_node_dicts(path_nodes, non_path_nodes):
 	node dicts."""
 
 	d = dict(non_path_nodes.items() + path_nodes.items())
-
-	node_dict_list = []
-
-	for node_dict in d.values():
-		node_dict_list.append(node_dict)
+	node_dict_list = [node_dict for node_dict in d.values()]
 
 	return node_dict_list
 
@@ -162,8 +150,3 @@ def create_lists(node1, node2):
 	"multigraph": false }""" % (json.dumps(nodes_list), json.dumps(rels_list))
 
 	return response
-
-if __name__ == '__main__':
-	path = find_shortest_path('1', '4')
-	parse_nodes_and_rels(path)
-
