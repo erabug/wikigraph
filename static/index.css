@@ -79,6 +79,7 @@ input {
   border: solid 1px #666;
 }
 
+/*TYPEAHEAD STUFF*/
 .scrollable-dropdown-menu .tt-dropdown-menu {
   max-height: 200px;
   overflow-y: auto;
@@ -86,4 +87,20 @@ input {
 
 .tt-suggestion {
   font-size: 14px;
+}
+
+/*FLOATING HEADS STUFF*/
+.circular {
+  /*border-radius: 45px;*/
+}
+
+/*Also for the cropping, I think a quick way to do this is make a square 
+wrapper div around your image then give it a border-radius (css) that is 
+half of the length of one of the sides. Set the overflow to hidden and you're set.*/
+.squareimage {
+  /*display: inline;*/
+  width: 90px;
+  height: 90px;
+  border-radius: 45px;
+  /*overflow: hidden;*/
 }

@@ -1,5 +1,3 @@
-# import cPickle as pickle
-
 def redirects_set():
 
 	print "Creating set of redirect pages..."
@@ -53,8 +51,6 @@ def write_nodes(data):
 
 	print "Writing 'nodes.csv'..."
 
-	# pickle_dict = {}
-
 	with open('nodes.csv', 'wb+') as d:
 		d.write('node\tname\tl:label\n')
 		for value in data:
@@ -66,10 +62,7 @@ def write_nodes(data):
 			if value.get('type', 0) != 0:
 				label = label + ',' + value['type']
 
-			# pickle_dict[name] = node
 			d. write(node + '\t' + name + '\t' + label + '\n')
-
-	# pickle.dump(pickle_dict, open('nodes.p', 'wb'))
 
 def parse_links():
 
