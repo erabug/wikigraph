@@ -32,7 +32,8 @@ def get_page_names():
 	query = '''SELECT id, title 
 				FROM nodes 
 				WHERE title LIKE ? 
-				OR title LIKE ?;'''
+				OR title LIKE ?
+				LIMIT 50;'''
 
 	rows = cursor.execute(query, (entry + '%', '% ' + entry, )).fetchall()
 	results = [{ 'title': row[1], 'code': row[0] } for row in rows]

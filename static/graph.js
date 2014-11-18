@@ -2,7 +2,7 @@ function drawGraph(json) {
 
   // establish width and height of the svg
   var width = 500,
-      height = 500;
+      height = 300;
 
   // color established as a scale
   var color = d3.scale.category10();
@@ -14,8 +14,8 @@ function drawGraph(json) {
 
   // this function handles the parameters of the force-directed layout
   var force = d3.layout.force()
-      .gravity(0.07)
-      .distance(90)
+      .gravity(0.2)
+      .distance(70)
       .charge(-100)
       .size([width, height]);
 
@@ -70,6 +70,20 @@ function drawGraph(json) {
   // this appends a mouseover text field to each node with name and type
   node.append("title")
       .text(function(d) { return d.name + " (" + d.id + "), " + d.type; });
+
+  function tick() {
+      node.attr("cx", function(d) { return d.x = Math.max(15, Math.min(width - 15, d.x)); })
+        .attr("cy", function(d) { return d.y = Math.max(15, Math.min(height - 15, d.y)); });
+
+      link.attr("x1", function(d) { return d.source.x; })
+          .attr("y1", function(d) { return d.source.y; })
+          .attr("x2", function(d) { return d.target.x; })
+          .attr("y2", function(d) { return d.target.y; });
+
+      node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+
+      }
+  
 
   // for each ticky, the distance between each pair of linked nodes is computed,
   // the links move to converge on the desired distance

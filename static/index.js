@@ -67,7 +67,7 @@ $('input#submit-query').click(function(e) {
             });
 
             // insert a load animation gif in between the two floating heads
-            $('#page1').after('<div class="page arrow"><img height="60px" src="static/arrow.png"></div>');
+            $('#page1').after('<div class="page arrow loading"></div>');
                 
         });
 
@@ -78,6 +78,8 @@ $('input#submit-query').click(function(e) {
 
 			response = JSON.parse(data);
 			drawGraph(response);
+            // $('.arrow').html('<img src="static/arrow.png" width=80px>');
+            $('.arrow').removeClass('loading');
             
             // insert floating heads for the inner path nodes here
             // $('#page1').append(x)

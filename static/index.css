@@ -112,8 +112,14 @@ input {
 }
 
 .arrow {
-  display: inline-block;
-  position: relative;
-  top: 25px;
+  /*display: inline-block;*/
+  /*position: relative;*/
+  height: 80px;
+  width: 80px;
+  background: url("chevron.png") no-repeat fixed center;
+  /*top: 40px;*/
+}
 
+.loading {
+  background: url("arrow.gif") no-repeat fixed center;
 }
