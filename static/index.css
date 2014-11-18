@@ -39,7 +39,7 @@ body {
 }
 
 .border {
-  background: url('../static/logo-background.png');
+  background: url('logo-background.png');
   height: 20px;
 }
 
@@ -106,7 +106,14 @@ input {
   background-color: #333;
 }
 
-.subtitle {
+.page-title {
   margin: auto;
   width: 90px;
+}
+
+.arrow {
+  display: inline-block;
+  position: relative;
+  top: 25px;
+
 }

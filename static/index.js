@@ -6,7 +6,7 @@ c = { 'node1': { 'code': '', 'title': '' },
 function clear_all() {
     $('input#start-node').val('');
     $('input#end-node').val('');
-    $('.path').val('');
+    $('.path').html('');
     $('svg').remove();
 }
 
@@ -21,7 +21,7 @@ $('input#submit-query').click(function(e) {
     clear_all();
 
     var URL = 'http://en.wikipedia.org/w/api.php';
-    var queryParams = '?action=query&format=json&redirects&'+
+    var queryParams = '?action=query&format=json&redirects&'+ // what does redirects do here?
         'prop=pageimages&pithumbsize=100px&pilimit=2';
     var pagesParams = c['node1']['title'] + '|' + c['node2']['title'];
 
@@ -31,32 +31,43 @@ $('input#submit-query').click(function(e) {
         URL + queryParams + '&titles=' + pagesParams + '&callback=?',
         function(data) {
             
-            console.log(data);
+            // console.log(data);
             var pageObject = data['query']['pages'];
 
-            var startNode;
-            var endNode;
+            var htmlSnippets = { '1': '', '2': '' };
 
             Object.keys(pageObject).forEach(function(pageKey) {
-                var node;
+
                 var page = pageObject[pageKey];
                 var title = page['title'];
                 var thumbnail = page['thumbnail']['source'];
-                $('.path').append('<div class="page"><div class="squareimg">'+
-                    '<img src='+thumbnail+'></div>'+
-                    '<div class="subtitle">'+title+'</div></div>');
-                //iterate through values of keys
-                Object.keys(c).forEach(function(node) {
-                    if (c[node]['title'] == title) {
-                        console.log("match!");
-                    }
-                });
 
-                // startNode = '<div class="page"><div class="squareimg">'+
+                // this code works, but loses the order of input
+                // $('.path').append('<div class="page"><div class="squareimg">'+
                 //     '<img src='+thumbnail+'></div>'+
-                //     '<div class="subtitle">'+title+'</div></div>';
+                //     '<div class="subtitle">'+title+'</div></div>');
+
+                var node;
+                //find the node that matches my title, add it and page html as an object
+                if (title == c['node1']['title']) { node = 1; } else { node = 2; }
+
+                //create a snippet of HTML
+                html = '<div class="page" id="page'+node.toString()+'">'+
+                       '<div class="squareimg"><img src='+thumbnail+'></div>'+
+                       '<div class="page-title">'+title+'</div></div>';
+
+                htmlSnippets[node] = html;
 
             });
+
+            var path = $('.path');
+            // for each item in the sorted list, append its html to the path div
+            Object.keys(htmlSnippets).forEach(function(node) {
+                path.append(htmlSnippets[node]);
+            });
+
+            // insert a load animation gif in between the two floating heads
+            $('#page1').after('<div class="page arrow"><img height="60px" src="static/arrow.png"></div>');
                 
         });
 
@@ -69,8 +80,11 @@ $('input#submit-query').click(function(e) {
 			drawGraph(response);
             
             // insert floating heads for the inner path nodes here
+            // $('#page1').append(x)
+            // need to get the graph db codes for the paths first
+            // I think that data should be returned in addition to response
+            // e.g. response = { 'path': [0, 2, 4], 'results': ... }
             
-
 		});
     
 });
@@ -109,7 +123,6 @@ $('.scrollable-dropdown-menu .typeahead').typeahead(null, {
 function decodeInput(d, node) {
     c[node]['code'] = d.code.toString();
     c[node]['title'] = d.value;
-    return null;
 }
 
 // records the values chosen for each field as a global var
