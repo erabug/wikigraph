@@ -113,13 +113,15 @@ input {
 
 .arrow {
   /*display: inline-block;*/
-  /*position: relative;*/
-  height: 80px;
-  width: 80px;
-  background: url("chevron.png") no-repeat fixed center;
-  /*top: 40px;*/
+  position: relative;
+  height: 50px;
+  width: 50px;
+  background: url("arrow.png") center;
+  background-size: 80px;
+  top: 27px;
 }
 
 .loading {
-  background: url("arrow.gif") no-repeat fixed center;
+  background: url("arrow.gif") no-repeat center;
+  /*top: 15px;*/
 }

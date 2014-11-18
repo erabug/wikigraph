@@ -42,11 +42,6 @@ $('input#submit-query').click(function(e) {
                 var title = page['title'];
                 var thumbnail = page['thumbnail']['source'];
 
-                // this code works, but loses the order of input
-                // $('.path').append('<div class="page"><div class="squareimg">'+
-                //     '<img src='+thumbnail+'></div>'+
-                //     '<div class="subtitle">'+title+'</div></div>');
-
                 var node;
                 //find the node that matches my title, add it and page html as an object
                 if (title == c['node1']['title']) { node = 1; } else { node = 2; }
@@ -78,8 +73,7 @@ $('input#submit-query').click(function(e) {
 
 			response = JSON.parse(data);
 			drawGraph(response);
-            // $('.arrow').html('<img src="static/arrow.png" width=80px>');
-            $('.arrow').removeClass('loading');
+            $('.arrow').removeClass('loading'); // change arrow img
             
             // insert floating heads for the inner path nodes here
             // $('#page1').append(x)
