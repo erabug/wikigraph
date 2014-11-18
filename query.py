@@ -82,11 +82,11 @@ def find_secondary_rels_and_nodes(node_objs_list):
 
 	for node in node_objs_list:
 
-		for rel in node.match_incoming(limit=5):
+		for rel in node.match_incoming(limit=2):
 			rels.append(rel)
 			nodes.append(rel.start_node)
 
-		for rel in node.match_outgoing(limit=5):
+		for rel in node.match_outgoing(limit=2):
 			rels.append(rel)
 			nodes.append(rel.end_node)
 
@@ -114,6 +114,12 @@ def parse_nodes_and_rels(path):
 	# parse nodes, create list of unique nodes
 	path_nodes = parse_node_objs(node_objs_list=path.nodes, in_path=True)
 
+	# this is a quick/dirty way to grab the names for each path node in order
+	path_names = []
+	for node in path.nodes:
+		path_dict = node.get_properties().values()[0]
+		path_names.append(path_nodes[int(path_dict)]['name'])
+
 	# rel dict list for secondary rels
 	non_path_rels, non_path_nodes = find_secondary_rels_and_nodes(node_objs_list=path.nodes)
 
@@ -121,7 +127,7 @@ def parse_nodes_and_rels(path):
 	rels_list = path_rels + non_path_rels
 	nodes_list = merge_node_dicts(path_nodes, non_path_nodes)
 
-	return rels_list, nodes_list
+	return rels_list, nodes_list, path_names
 
 def create_lists(node1, node2):
 	"""Request the shortest path between two nodes from the database. Assemble 
@@ -130,7 +136,7 @@ def create_lists(node1, node2):
 
 	path = find_shortest_path(str(node1), str(node2))
 
-	rels_list, nodes_list = parse_nodes_and_rels(path)
+	rels_list, nodes_list, path_names = parse_nodes_and_rels(path)
 
 	codes = {}
 	id_counter = 0
@@ -146,7 +152,9 @@ def create_lists(node1, node2):
 		rel['source'] = codes[rel['source']]
 		rel['target'] = codes[rel['target']]
 
-	response = """{ "directed": true, "nodes":%s, "links":%s, 
-	"multigraph": false }""" % (json.dumps(nodes_list), json.dumps(rels_list))
+	# response = """{ "directed": true, "nodes":%s, "links":%s, 
+	# "multigraph": false }""" % (json.dumps(nodes_list), json.dumps(rels_list))
+	response = """{ "path": %s, "results": { "directed": true, "nodes": %s, "links": %s, 
+	"multigraph": false }}""" % (json.dumps(path_names), json.dumps(nodes_list), json.dumps(rels_list))
 
 	return response

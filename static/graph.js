@@ -33,8 +33,8 @@ function drawGraph(json) {
       .attr("id", String)
       .attr("viewBox", "0 -5 10 10")
       .attr("refX", 23)
-      .attr("markerWidth", 6)
-      .attr("markerHeight", 6)
+      .attr("markerWidth", 7)
+      .attr("markerHeight", 7)
       .attr("orient", "auto")
       .append("svg:path")
       .attr("d", "M0,-4L10,0L0,4Z");
@@ -57,6 +57,7 @@ function drawGraph(json) {
       .attr("class", "node")
       .attr("r", function(d) {
         if (d.group == "path") {
+          pathPages.push(d.name);
           return 10;
         } else { return 8; }
       })
@@ -69,7 +70,9 @@ function drawGraph(json) {
 
   // this appends a mouseover text field to each node with name and type
   node.append("title")
-      .text(function(d) { return d.name + " (" + d.id + "), " + d.type; });
+      .text(function(d) {
+        return d.name + " (" + d.id + "), " + d.type;
+      });
 
   function tick() {
       node.attr("cx", function(d) { return d.x = Math.max(15, Math.min(width - 15, d.x)); })

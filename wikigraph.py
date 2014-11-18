@@ -38,9 +38,9 @@ def get_page_names():
 	rows = cursor.execute(query, (entry + '%', '% ' + entry, )).fetchall()
 	results = [{ 'title': row[1], 'code': row[0] } for row in rows]
 	response = jsonify(**{ 'results': results })
-
+	print response
 	return response
 
 if __name__ == '__main__':
-	# app.run(debug=True)
-	app.run(host="54", debug=True)
+	app.run(debug=True)
+	# app.run(host="54", debug=True)
