@@ -55,7 +55,7 @@ body {
 }
 
 .query-form {
-  margin-top: 20px;
+  margin: 20px;
   text-align: center;
 }
 
@@ -102,10 +102,11 @@ input {
   border-radius: 35px;
   overflow: hidden;
   border: solid 2px black;
-  margin: 10px;
+  margin: 15px;
+  background-color: #333;
 }
 
 .subtitle {
   margin: auto;
-  width: 80px;
+  width: 90px;
 }
