@@ -2,12 +2,21 @@ Wikigraph
 ===========
 Let's consider Wikipedia as a graph, with pages as nodes (vertices) and inter-page links as relationships (edges). What's the shortest path between any two pages? For example, how many links do you have to click to get from Harry Potter to the Spanish Inquisition? 
 
+####Core project
+Web interface that allows users to query a graph database of Wikipedia's page links and find/explore the shortest path between any two pages. 
+
 You can check out the project in progress [here](http://ec2-54-148-102-6.us-west-2.compute.amazonaws.com/).
 
-###Core project
-Web interface that allows users to query a graph database of Wikipedia's page links and find/explore the shortest path between any two pages.
+###Contents
+- [Features](#features)
+- [The graphs](#the-graphs)
+- [Queries](#queries)
+- [Data visualization](#data-visualization)
+- [User input](#user-input)
+- [Improving response time](#improving-response-time)
+- [Deployment](#deployment)
 
-###Features
+#### Features
 *Current*
 - [x] Wikipedia page links imported into a graph database (Neo4j)
 - [x] Python wrapper queries database for shortest path between two nodes, outputs path and secondary relationships as JSON (py2neo)
@@ -26,14 +35,7 @@ Web interface that allows users to query a graph database of Wikipedia's page li
     - Scale horizontally (distributed processing with Giraph)
     - More efficient query (change parameters, possibly rewrite algorithm)
 
-###Contents
-- [The graphs](#the-graphs)
-- [Queries](#queries)
-- [Data visualization](#data-visualization)
-- [Improving response time](#improving-response-time)
-- [Deployment](#deployment)
-
-### The graphs
+#### The graphs
 I downloaded RDF files (.ttl) for page links, titles, redirects, and ontology from [DBPedia](http://wiki.dbpedia.org/Downloads39). I used <kbd>master_clean.py</kbd> to parse and clean the page links, removing redirects and duplicates, and incorporating titles and page types.
 
 ```python
@@ -103,14 +105,14 @@ start   end type
 ```
 I used Michael Hunger's [batch import tool](https://github.com/jexp/batch-import/tree/20) to insert the data into a [Neo4j](http://neo4j.com/) graph database.
 
-At this point, after some initial queries, I realized that a responsive query of such a large database would take some refinement and I wanted to figure out how to display my data first. I wrote <kbd>pres_clean.py</kbd> to sample the pagelinks file for only those pages and links that include the names of U.S. Presidents. After cleaning, this small subgraph had 77 thousand nodes and 137 thousand relationships. For now, everything that follows uses this smaller subgraph.
+At this point, after some initial queries, I realized that a responsive query of such a large database would take some refinement and I wanted to figure out how to display my data first. I wrote <kbd>pres_clean.py</kbd> to sample the pagelinks file for only those pages and links that include the names of U.S. Presidents. After cleaning, this small subgraph had 77 thousand nodes and 137 thousand relationships. For now, the deployed project uses this smaller subgraph simply because the response is much faster.
 
 Complete graph | Small graph
 -------------- | -----------
 11m nodes | 77k nodes 
 127m links | 137k links
 
-### Queries
+#### Queries
 I used Nigel Small's Python library [py2neo](http://nigelsmall.com/py2neo/1.6/) to interact with my database's RESTful web service interface. <kbd>query.py</kbd> translates my shortest-path request into a CypherQuery object, queries the database, and returns the results as a Path object. 
 ```python
 query = neo4j.CypherQuery(
@@ -158,15 +160,17 @@ The script then traverses this path object, pulling out and deduping nodes and r
     "multigraph": false
 }
 ```
+
+#### Data visualization
 <kbd>wikigraph.py</kbd> is a small [Flask](http://flask.pocoo.org/) app that connects this reponse to the [d3 library](http://d3js.org/). <kbd>graph.js</kbd> handles the graph drawing while <kbd>index.js</kbd> handles everything else.
 
-### Data visualization
+#### User input
+To help users input page names correctly (and to suggest possible queries) I implemented a predictive seach with [typeahead.js](https://twitter.github.io/typeahead.js/). Via an AJAX call, it queries an [SQLite](http://www.sqlite.org/) database that just holds the page titles and their codes.
 
-
-### Improving query response time
+#### Improving query response time
 My first approach to improve response time for the full database was to fiddle with Neo4j's memory settings. The settings in **neo4j.properties** (e.g. *neostore.nodestore.db.mapped_memory*) didn't have a large impact on query time. I had more success with *java.initmemory* and *java.maxmemory* (in **neo4j-wrapper.conf**).
 
-I used the same query three times for each setting, increasing both init and max memory. My machine only has 4G of RAM, which seems to coincide with the dramatic improvement in query time (1400s to 60s) after the 4G mark. 
+Each time I increased both init and max memory, I ran the same query three times and recorded the response time. My MacBook Air has 4G of RAM, which seems to coincide with the dramatic improvement in query time (1400s to 60s) after passing the 4G mark. 
 
 ![Memory Test Results](static/images/mem_test.png)
 
@@ -175,5 +179,5 @@ I also tweaked the query, decreasing the maximum number of relationships to trav
 p = shortestPath((m)-[*..5]->(n))
 ```
 
-### Deployment
+#### Deployment
 This code was tested on Amazon's [EC2](http://aws.amazon.com/ec2/) using [Apache](http://httpd.apache.org/) as a web server.
