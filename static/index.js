@@ -16,7 +16,8 @@ $(document).ready(function(e) {
     clear_all();
 });
 
-function makeImageSnippets(data, initQuery) {
+function makeHTMLSnippets(data, innerNodes) {
+
     var pageObject = data['query']['pages'];
     var htmlSnippets = {};
 
@@ -24,14 +25,18 @@ function makeImageSnippets(data, initQuery) {
 
         var page = pageObject[pageKey];
         var title = page['title'];
-        var thumbnail = page['thumbnail']['source'];
-        console.log(thumbnail);
+
+        // console.log('is thumbnail in page?', 'thumbnail' in page);
+        var thumbnail;
+        if ('thumbnail' in page) {
+            thumbnail = page['thumbnail']['source'];
+        } else { thumbnail = '../static/cat.jpg'; }
 
         // two different ways to define node, based on whether it's an init query
         var node;
-        if (initQuery) {
+        if (innerNodes === null) {
             if (title == c['node1']['title']) { node = 1; } else { node = 2; }
-        } else { node = innerNodes.indexOf("title"); }
+        } else { node = innerNodes.indexOf(title); }
 
         html = '<div class="page" id="page'+node.toString()+'">'+
                '<div class="squareimg"><img src='+thumbnail+'></div>'+
@@ -40,7 +45,16 @@ function makeImageSnippets(data, initQuery) {
         htmlSnippets[node] = html;
 
     });
+
     return htmlSnippets;
+}
+
+function makeQueryURL(numPages, pagesParams) {
+    var queryURL = 'http://en.wikipedia.org/w/api.php' +
+                   '?action=query&format=json&redirects&prop=pageimages&' +
+                   'pithumbsize=100px&pilimit=' + numPages + '&titles=' +
+                   pagesParams + '&callback=?';
+    return queryURL;
 }
 
 // event handler for the query submission
@@ -49,18 +63,15 @@ $('input#submit-query').click(function(e) {
 	e.preventDefault();
     clear_all();
 
-    var URL = 'http://en.wikipedia.org/w/api.php';
-    var queryParams = '?action=query&format=json&redirects&'+ // what does redirects do here?
-        'prop=pageimages&pithumbsize=100px&pilimit=2';
     var pagesParams = c['node1']['title'] + '|' + c['node2']['title'];
-
+    var queryURL = makeQueryURL(numPages=2, pagesParams);
     console.log('USER INPUT:', pagesParams);
 
     $.getJSON(
-        URL + queryParams + '&titles=' + pagesParams + '&callback=?',
+        queryURL,
         function(data) {
 
-            var htmlSnippets = makeImageSnippets(data, 'True');
+            var htmlSnippets = makeHTMLSnippets(data, null);
 
             var path = $('.path');
             // for each item in the sorted list, append its html to the path div
@@ -69,7 +80,7 @@ $('input#submit-query').click(function(e) {
             });
 
             // insert a load animation gif in between the two floating heads
-            $('#page1').after('<div class="page arrow loading"></div>');
+            $('#page1').after('<div class="page arrow loading" id="arrow1"></div>');
                 
         });
 
@@ -79,7 +90,6 @@ $('input#submit-query').click(function(e) {
 		function(data) {
 
 			response = JSON.parse(data); // decode the JSON
-            
 			drawGraph(response['results']); // graph the results
             $('.arrow').removeClass('loading'); // change arrow img
 
@@ -87,22 +97,29 @@ $('input#submit-query').click(function(e) {
             // // remove the start and end nodes from innerNodes
             var innerNodes = response['path'].slice(1, -1);
 
-            if (innerNodes) { // if there are intermediary nodes
+            if (0 < innerNodes.length) { // if there are intermediary nodes
 
+                var numPages = innerNodes.length;
                 var pagesParams;
-                if (innerNodes.length > 1) {
+                if (numPages > 1) {
                     pagesParams = innerNodes.join('|');
                 } else { pagesParams = innerNodes; }
 
-                console.log(innerNodes);
+                var queryURL = makeQueryURL(numPages, pagesParams);
 
                 $.getJSON(
-                    URL + queryParams + '&titles=' + pagesParams + '&callback=?',
+                    queryURL,
                     function(data) {
-                        var htmlSnippets = makeImageSnippets(data, 'False');
 
+                        var htmlSnippets = makeHTMLSnippets(data, innerNodes);
+
+                        var stuff = [];
+                        Object.keys(htmlSnippets).forEach(function(snippet, i) {
+                            stuff.push(htmlSnippets[i]);
+                        });
+
+                        $('#arrow1').after(stuff+'<div class="page arrow"></div>');
                         
-
                     });
             }
             
