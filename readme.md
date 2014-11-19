@@ -9,26 +9,25 @@ Web interface that allows users to query a graph database of Wikipedia's page li
 
 ###Features
 *Current*
-- [x] Clean raw data files into nodes and relationships .csv files
-- [x] Wikipedia page links imported into a graph database
-- [x] Smaller subgraph of U.S. presidents imported into a graph database
-- [x] Python wrapper queries database for shortest path between two nodes
-- [x] Python script outputs path and secondary relationships as a JSON object
-- [x] d3 library reads subgraph and returns a visualization
+- [x] Wikipedia page links imported into a graph database (Neo4j)
+- [x] Python wrapper queries database for shortest path between two nodes, outputs path and secondary relationships as JSON (py2neo)
+- [x] Subgraph rendered as a force-directed graph (d3.js)
 - [x] Flask app renders html and handles AJAX requests to the database
-- [x] Flask app and database moved to EC2 server, Apache enables connection
-- [x] Users can input page titles and they are converted to codes
-- [x] Search suggest for page titles (typeahead.js)
+- [x] Flask app and database deployed (EC2, Apache)
+- [x] Search suggest for page titles (typeahead.js, SQLite)
 
 *Future*
 - [ ] Error handling for non-existent paths
 - [ ] The secondary nodes and relationships returned are ranked by their connectance score
-- [ ] Embed title, abstract, photo on nodes in visualization (Wikipedia API?)
+- [ ] Embed title, abstract, image on nodes in visualization (Wikipedia API)
 - [ ] Query time reduced enough to use the complete Wikipedia graph
     - Scale vertically (add more memory allocation, use larger machine)
     - Prune graph if possible (remove trailing linked tails?)
     - Scale horizontally (distributed processing with Giraph)
     - More efficient query (change parameters, possibly rewrite algorithm)
+
+[Queries](#Queries)
+
 
 ###The graphs
 I downloaded RDF files (.ttl) for page links, titles, redirects, and ontology from [DBPedia](http://wiki.dbpedia.org/Downloads39). I used <kbd>master_clean.py</kbd> to parse and clean the page links, removing redirects and duplicates, and incorporating titles and page types.
@@ -107,7 +106,7 @@ Complete graph | Small graph
 11m nodes | 77k nodes 
 127m links | 137k links
 
-###Queries
+###Queries(#Queries)
 I used Nigel Small's Python library [py2neo](http://nigelsmall.com/py2neo/1.6/) to interact with my database's RESTful web service interface. <kbd>query.py</kbd> translates my shortest-path request into a CypherQuery object, queries the database, and returns the results as a Path object. 
 ```python
 query = neo4j.CypherQuery(
@@ -157,14 +156,20 @@ The script then traverses this path object, pulling out and deduping nodes and r
 ```
 <kbd>wikigraph.py</kbd> is a small [Flask](http://flask.pocoo.org/) app that connects this reponse to the [d3 library](http://d3js.org/). <kbd>graph.js</kbd> handles the graph drawing while <kbd>index.js</kbd> handles everything else.
 
+###Data visualization
+
+
 ###Improving query response time
-My first approach to improve response time for the full database was to fiddle with Neo4j's memory settings. The settings in neo4j.properties (e.g. neostore.nodestore.db.mapped_memory) didn't have a large impact on query time. I had more success with java.initmemory and java.maxmemory (in neo4j-wrapper.conf).
+My first approach to improve response time for the full database was to fiddle with Neo4j's memory settings. The settings in **neo4j.properties** (e.g. *neostore.nodestore.db.mapped_memory*) didn't have a large impact on query time. I had more success with *java.initmemory* and *java.maxmemory* (in **neo4j-wrapper.conf**).
 
-*Results*
-
-I used the same query three times for each setting, cranking up both init and max memory. My machine only has 4G of RAM, which seems to coincide with the dramatic improvement in query time (1400s to 60s) after the 4G mark. 
+I used the same query three times for each setting, increasing both init and max memory. My machine only has 4G of RAM, which seems to coincide with the dramatic improvement in query time (1400s to 60s) after the 4G mark. 
 
 ![Memory Test Results](static/images/mem_test.png)
+
+I also tweaked the query, decreasing the maximum number of relationships to traverse before giving up, but saw no decrease in response time. 
+```
+p = shortestPath((m)-[*..5]->(n))
+```
 
 ###Deployment
 This code was tested on Amazon's [EC2](http://aws.amazon.com/ec2/) using [Apache](http://httpd.apache.org/) as a web server.
