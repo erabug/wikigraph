@@ -72,7 +72,6 @@ $('input#submit-query').click(function(e) {
         function(data) {
 
             var htmlSnippets = makeHTMLSnippets(data, null);
-
             var path = $('.path');
             // for each item in the sorted list, append its html to the path div
             Object.keys(htmlSnippets).forEach(function(node) {
@@ -113,9 +112,9 @@ $('input#submit-query').click(function(e) {
 
                         var htmlSnippets = makeHTMLSnippets(data, innerNodes);
 
-                        var stuff = [];
+                        var stuff = '';
                         Object.keys(htmlSnippets).forEach(function(snippet, i) {
-                            stuff.push(htmlSnippets[i]);
+                            stuff = stuff+htmlSnippets[i];
                         });
 
                         $('#arrow1').after(stuff+'<div class="page arrow"></div>');
@@ -164,10 +163,14 @@ function decodeInput(d, node) {
 }
 
 // records the values chosen for each field as a global var
-$('#start-node').on('typeahead:selected', function (e, d) {
+$('#start-node').on('typeahead:selected typeahead:autocompleted', function (e, d) {
     decodeInput(d, 'node1');
 });
 
-$('#end-node').on('typeahead:selected', function (e, d) {
+$('#end-node').on('typeahead:selected typeahead:autocompleted', function (e, d) {
     decodeInput(d, 'node2');
 });
+
+// $('.page').click(function(e){
+//     window.location.href = "http://www.wikipedia.org/wiki/"+;
+// });
