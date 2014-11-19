@@ -51,7 +51,7 @@ def write_nodes(data):
 
 	print "Writing 'nodes.csv'..."
 
-	with open('nodes.csv', 'wb+') as d:
+	with open('data/nodes.csv', 'wb+') as d:
 		d.write('node\tname\tl:label\n')
 		for value in data:
 
@@ -78,7 +78,7 @@ def parse_links():
 
 	print "Writing 'rels.csv'..."
 
-	with open('data/pres_links.ttl', 'r') as f, open('rels.csv', 'wb+') as c:
+	with open('data/pres_links.ttl', 'r') as f, open('data/rels.csv', 'wb+') as c:
 		c.write('start\tend\ttype\n') # write headers
 		f.next()
 

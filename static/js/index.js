@@ -30,7 +30,7 @@ function makeHTMLSnippets(data, innerNodes) {
         var thumbnail;
         if ('thumbnail' in page) {
             thumbnail = page['thumbnail']['source'];
-        } else { thumbnail = '../static/cat.jpg'; }
+        } else { thumbnail = '../static/images/cat.jpg'; }
 
         // two different ways to define node, based on whether it's an init query
         var node;
