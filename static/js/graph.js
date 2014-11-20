@@ -25,9 +25,11 @@ function drawGraph(json) {
       .links(json.links)
       .start();
 
-  // this appends the marker tag to the svg tag, and defines the arrowhead 
-  // shape within it
-  svg.append("svg:defs").selectAll("marker")
+var defs = svg.append("defs")
+      .attr("id", "imgdefs");
+
+  // this appends the marker tag to the svg tag, applies arrowhead attributes
+  defs.selectAll("marker")
       .data(["arrow"])
     .enter().append("svg:marker")
       .attr("id", String)
@@ -38,6 +40,13 @@ function drawGraph(json) {
       .attr("orient", "auto")
       .append("svg:path")
       .attr("d", "M0,-4L10,0L0,4Z");
+
+  var catpattern = defs.append("pattern")
+                        .attr("id", "catpattern")
+                        .attr("height", 1)
+                        .attr("width", 1)
+                        .attr("x", "0")
+                        .attr("y", "0");
 
   // append attributes for each link in the json
   var link = svg.selectAll(".link")
@@ -50,23 +59,53 @@ function drawGraph(json) {
       .style("opacity", 0.7)
       .attr("marker-end", "url(#arrow)");
 
+  // works!
   // append attributes for each node in the json
-  var node = svg.selectAll(".node")
-      .data(json.nodes)
-    .enter().append("circle")
-      .attr("class", "node")
-      .attr("r", function(d) {
+  // var node = svg.selectAll(".node")
+  //     .data(json.nodes)
+  //   .enter().append("circle")
+  //     .attr("class", "node")
+  //     .attr("r", function(d) {
+  //       if (d.group == "path") {
+  //         pathPages.push(d.name);
+  //         return 10;
+  //       } else { return 8; }
+  //     })
+  //     .style("fill", function(d) {
+  //       if (d.group == "path") {
+  //         return "#333";
+  //       } else { return color(d.type); }
+  //     })
+  //     .call(force.drag); // allows dragging and stops movement upon mouseover
+
+  // experimental
+  var node = svg.selectAll("g.node")
+        .data(json.nodes)
+      .enter().append("svg:g")
+        .attr("class", "node")
+        .call(force.drag);
+
+  catpattern.append("image")
+     .attr("x", -8)
+     .attr("y", -25)
+     .attr("height", 100)
+     .attr("width", 100)
+     .attr("xlink:href", "http://localhost:8000/static/images/cat.jpg");
+
+  node.append("circle")
+    // .attr("r", 25)
+    // .attr("cy", 80)
+    // .attr("cx", 120)
+    .attr("r", function(d) {
         if (d.group == "path") {
-          pathPages.push(d.name);
-          return 10;
+          return 25;
         } else { return 8; }
       })
-      .style("fill", function(d) {
+    .attr("fill", function(d) {
         if (d.group == "path") {
-          return "#333";
+          return "url(#catpattern)";
         } else { return color(d.type); }
-      })
-      .call(force.drag); // allows dragging and stops movement upon mouseover
+    });
 
   // this appends a mouseover text field to each node with name and type
   node.append("title")

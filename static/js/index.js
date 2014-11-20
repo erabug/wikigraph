@@ -1,20 +1,38 @@
 var response;
-var pathPages = [];
 
 c = { 'node1': { 'code': '', 'title': '' },
       'node2': { 'code': '', 'title': '' } };
+
+// tells typeahead how to handle the user input (e.g. the get request params)
+var pageNames = new Bloodhound({
+    datumTokenizer: function(d) {
+        return Bloodhound.tokenizers.whitespace(d.value);
+    },
+    queryTokenizer: Bloodhound.tokenizers.whitespace,
+    limit: 30,
+    remote: {
+        url: '/page-names?query=%QUERY',
+        filter: function(pageNames) {
+            // Map the remote source JSON array to a JavaScript array
+            return $.map(pageNames.results, function(page) {
+                return {
+                    value: page.title,
+                    code: page.code
+                };
+
+            });
+        }
+    }
+});
+
+pageNames.initialize();
 
 function clear_all() {
     $('input#start-node').val('');
     $('input#end-node').val('');
     $('.path').html('');
     $('svg').remove();
-    pathPages = [];
 }
-
-$(document).ready(function(e) {
-    clear_all();
-});
 
 function makeHTMLSnippets(data, innerNodes) {
 
@@ -26,11 +44,10 @@ function makeHTMLSnippets(data, innerNodes) {
         var page = pageObject[pageKey];
         var title = page['title'];
 
-        // console.log('is thumbnail in page?', 'thumbnail' in page);
         var thumbnail;
-        if ('thumbnail' in page) {
+        if ('thumbnail' in page) { // if wikipedia query returned a thumbnail
             thumbnail = page['thumbnail']['source'];
-        } else { thumbnail = '../static/images/cat.jpg'; }
+        } else { thumbnail = '../static/images/cat.jpg'; } // else returns grumpycat
 
         // two different ways to define node, based on whether it's an init query
         var node;
@@ -56,6 +73,15 @@ function makeQueryURL(numPages, pagesParams) {
                    pagesParams + '&callback=?';
     return queryURL;
 }
+
+function decodeInput(d, node) {
+    c[node]['code'] = d.code.toString();
+    c[node]['title'] = d.value;
+}
+
+$(document).ready(function(e) {
+    clear_all();
+});
 
 // event handler for the query submission
 $('input#submit-query').click(function(e) {
@@ -126,29 +152,6 @@ $('input#submit-query').click(function(e) {
     
 });
 
-// tells typeahead how to handle the user input (e.g. the get request params)
-var pageNames = new Bloodhound({
-    datumTokenizer: function(d) {
-        return Bloodhound.tokenizers.whitespace(d.value);
-    },
-    queryTokenizer: Bloodhound.tokenizers.whitespace,
-    limit: 30,
-    remote: {
-        url: '/page-names?query=%QUERY',
-        filter: function(pageNames) {
-            // Map the remote source JSON array to a JavaScript array
-            return $.map(pageNames.results, function(page) {
-                return {
-                    value: page.title,
-                    code: page.code
-                };
-
-            });
-        }
-    }
-});
-
-pageNames.initialize();
 
 // sets up the typeahead on the two input fields
 $('.scrollable-dropdown-menu .typeahead').typeahead(null, {
@@ -156,11 +159,6 @@ $('.scrollable-dropdown-menu .typeahead').typeahead(null, {
     displayKey: 'value',
     source: pageNames.ttAdapter()
 });
-
-function decodeInput(d, node) {
-    c[node]['code'] = d.code.toString();
-    c[node]['title'] = d.value;
-}
 
 // records the values chosen for each field as a global var
 $('#start-node').on('typeahead:selected typeahead:autocompleted', function (e, d) {
@@ -170,7 +168,3 @@ $('#start-node').on('typeahead:selected typeahead:autocompleted', function (e, d
 $('#end-node').on('typeahead:selected typeahead:autocompleted', function (e, d) {
     decodeInput(d, 'node2');
 });
-
-// $('.page').click(function(e){
-//     window.location.href = "http://www.wikipedia.org/wiki/"+;
-// });
