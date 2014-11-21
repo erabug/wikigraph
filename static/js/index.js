@@ -1,7 +1,9 @@
 var response;
 
-c = { 'node1': { 'code': '', 'title': '' },
-      'node2': { 'code': '', 'title': '' } };
+CODES = { 'node1': { 'code': '', 'title': '' },
+          'node2': { 'code': '', 'title': '' } };
+
+var imageURLs = [];
 
 // tells typeahead how to handle the user input (e.g. the get request params)
 var pageNames = new Bloodhound({
@@ -34,7 +36,7 @@ function clear_all() {
     $('svg').remove();
 }
 
-function makeHTMLSnippets(data, innerNodes) {
+function initImageURL(data) {
 
     var pageObject = data['query']['pages'];
     var htmlSnippets = {};
@@ -50,20 +52,52 @@ function makeHTMLSnippets(data, innerNodes) {
         } else { thumbnail = '../static/images/cat.jpg'; } // else returns grumpycat
 
         // two different ways to define node, based on whether it's an init query
-        var node;
-        if (innerNodes === null) {
-            if (title == c['node1']['title']) { node = 1; } else { node = 2; }
-        } else { node = innerNodes.indexOf(title); }
+        // var node;
+        // if (innerNodes === null) {
+        //     if (title == CODES['node1']['title']) { node = 0; } else { node = 1; }
+        // } else { node = innerNodes.indexOf(title); }
 
-        html = '<div class="page" id="page'+node.toString()+'">'+
-               '<div class="squareimg"><img src='+thumbnail+'></div>'+
-               '<div class="page-title">'+title+'</div></div>';
+        if (title == CODES['node1']['title']) { node = 0; } else { node = 1; }
 
+        html = makeHTMLSnippet(node, thumbnail, title);
         htmlSnippets[node] = html;
+        
+        imageURLs[node] = {'title': title, 'thumbnail': thumbnail};
 
     });
-
+    console.log('image urls:', imageURLs);
     return htmlSnippets;
+}
+
+function pathImageURL(data, innerNodes) {
+
+    var pageObject = data['query']['pages'];
+
+    Object.keys(pageObject).forEach(function(pageKey) {
+
+        var page = pageObject[pageKey];
+        var title = page['title'];
+
+        var thumbnail;
+        if ('thumbnail' in page) { // if wikipedia query returned a thumbnail
+            thumbnail = page['thumbnail']['source'];
+        } else { thumbnail = '../static/images/cat.jpg'; } // else returns grumpycat
+
+        node = innerNodes.indexOf(title)+1;
+        
+        imageURLs[node] = {'title': title, 'thumbnail': thumbnail};
+
+    });
+    console.log('image urls:', imageURLs);
+    // return htmlSnippets;
+    
+}
+
+function makeHTMLSnippet(node, thumbnail, title) {
+    html = '<div class="page" id="page'+node.toString()+'">'+
+       '<div class="squareimg"><img src='+thumbnail+'></div>'+
+       '<div class="page-title">'+title+'</div></div>';
+    return html;
 }
 
 function makeQueryURL(numPages, pagesParams) {
@@ -75,8 +109,8 @@ function makeQueryURL(numPages, pagesParams) {
 }
 
 function decodeInput(d, node) {
-    c[node]['code'] = d.code.toString();
-    c[node]['title'] = d.value;
+    CODES[node]['code'] = d.code.toString();
+    CODES[node]['title'] = d.value;
 }
 
 $(document).ready(function(e) {
@@ -89,7 +123,7 @@ $('input#submit-query').click(function(e) {
 	e.preventDefault();
     clear_all();
 
-    var pagesParams = c['node1']['title'] + '|' + c['node2']['title'];
+    var pagesParams = CODES['node1']['title'] + '|' + CODES['node2']['title'];
     var queryURL = makeQueryURL(numPages=2, pagesParams);
     console.log('USER INPUT:', pagesParams);
 
@@ -97,7 +131,7 @@ $('input#submit-query').click(function(e) {
         queryURL,
         function(data) {
 
-            var htmlSnippets = makeHTMLSnippets(data, null);
+            var htmlSnippets = initImageURL(data);
             var path = $('.path');
             // for each item in the sorted list, append its html to the path div
             Object.keys(htmlSnippets).forEach(function(node) {
@@ -105,17 +139,16 @@ $('input#submit-query').click(function(e) {
             });
 
             // insert a load animation gif in between the two floating heads
-            $('#page1').after('<div class="page arrow loading" id="arrow1"></div>');
+            $('#page0').after('<div class="page arrow loading" id="arrow1"></div>');
                 
         });
 
 	$.get(
 		'/query',
-		{'node1': c['node1']['code'], 'node2': c['node2']['code']},
+		{'node1': CODES['node1']['code'], 'node2': CODES['node2']['code']},
 		function(data) {
 
 			response = JSON.parse(data); // decode the JSON
-			drawGraph(response['results']); // graph the results
             $('.arrow').removeClass('loading'); // change arrow img
 
             console.log('RETURNED PATH:', response['path']);
@@ -125,6 +158,10 @@ $('input#submit-query').click(function(e) {
             if (0 < innerNodes.length) { // if there are intermediary nodes
 
                 var numPages = innerNodes.length;
+                //move the last node to the end of imageURLs array
+                imageURLs[response['path'].length - 1] = imageURLs[1];
+                delete imageURLs[1];
+
                 var pagesParams;
                 if (numPages > 1) {
                     pagesParams = innerNodes.join('|');
@@ -135,19 +172,12 @@ $('input#submit-query').click(function(e) {
                 $.getJSON(
                     queryURL,
                     function(data) {
-
-                        var htmlSnippets = makeHTMLSnippets(data, innerNodes);
-
-                        var stuff = '';
-                        Object.keys(htmlSnippets).forEach(function(snippet, i) {
-                            stuff = stuff+htmlSnippets[i];
-                        });
-
-                        $('#arrow1').after(stuff+'<div class="page arrow"></div>');
-                        
+                        pathImageURL(data, innerNodes); //updates imageURLs
                     });
             }
-            
+
+            drawGraph(response['results']); // graph the results
+
 		});
     
 });

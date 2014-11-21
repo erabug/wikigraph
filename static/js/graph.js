@@ -14,7 +14,7 @@ function drawGraph(json) {
 
   // this function handles the parameters of the force-directed layout
   var force = d3.layout.force()
-      .gravity(0.15)
+      .gravity(0.12)
       .distance(70)
       .charge(-100)
       .size([width, height]);
@@ -25,7 +25,7 @@ function drawGraph(json) {
       .links(json.links)
       .start();
 
-var defs = svg.append("defs")
+  var defs = svg.append("defs")
       .attr("id", "imgdefs");
 
   // this appends the marker tag to the svg tag, applies arrowhead attributes
@@ -35,8 +35,8 @@ var defs = svg.append("defs")
       .attr("id", String)
       .attr("viewBox", "0 -5 10 10")
       .attr("refX", 23)
-      .attr("markerWidth", 7)
-      .attr("markerHeight", 7)
+      .attr("markerWidth", 8)
+      .attr("markerHeight", 8)
       .attr("orient", "auto")
       .append("svg:path")
       .attr("d", "M0,-4L10,0L0,4Z");
@@ -67,7 +67,6 @@ var defs = svg.append("defs")
   //     .attr("class", "node")
   //     .attr("r", function(d) {
   //       if (d.group == "path") {
-  //         pathPages.push(d.name);
   //         return 10;
   //       } else { return 8; }
   //     })
@@ -93,7 +92,6 @@ var defs = svg.append("defs")
      .attr("xlink:href", "http://localhost:8000/static/images/cat.jpg");
 
   node.append("circle")
-    // .attr("r", 25)
     // .attr("cy", 80)
     // .attr("cx", 120)
     .attr("r", function(d) {
@@ -126,8 +124,7 @@ var defs = svg.append("defs")
 
       }
   
-
-  // for each ticky, the distance between each pair of linked nodes is computed,
+  // for each tick, the distance between each pair of linked nodes is computed,
   // the links move to converge on the desired distance
   force.on("tick", function() {
     link.attr("x1", function(d) { return d.source.x; })
