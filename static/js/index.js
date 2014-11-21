@@ -3,6 +3,7 @@ var response;
 CODES = { 'node1': { 'code': '', 'title': '' },
           'node2': { 'code': '', 'title': '' } };
 
+var queryImages = {};
 var imageURLs = [];
 
 // tells typeahead how to handle the user input (e.g. the get request params)
@@ -51,27 +52,23 @@ function initImageURL(data) {
             thumbnail = page['thumbnail']['source'];
         } else { thumbnail = '../static/images/cat.jpg'; } // else returns grumpycat
 
-        // two different ways to define node, based on whether it's an init query
-        // var node;
-        // if (innerNodes === null) {
-        //     if (title == CODES['node1']['title']) { node = 0; } else { node = 1; }
-        // } else { node = innerNodes.indexOf(title); }
-
         if (title == CODES['node1']['title']) { node = 0; } else { node = 1; }
 
         html = makeHTMLSnippet(node, thumbnail, title);
         htmlSnippets[node] = html;
         
+        queryImages[title] = {'url': thumbnail, 'id': node};
         imageURLs[node] = {'title': title, 'thumbnail': thumbnail};
 
     });
-    console.log('image urls:', imageURLs);
     return htmlSnippets;
 }
 
 function pathImageURL(data, innerNodes) {
 
     var pageObject = data['query']['pages'];
+
+    var counter = 1;
 
     Object.keys(pageObject).forEach(function(pageKey) {
 
@@ -83,14 +80,10 @@ function pathImageURL(data, innerNodes) {
             thumbnail = page['thumbnail']['source'];
         } else { thumbnail = '../static/images/cat.jpg'; } // else returns grumpycat
 
-        node = innerNodes.indexOf(title)+1;
-        
-        imageURLs[node] = {'title': title, 'thumbnail': thumbnail};
-
+        queryImages[title] = {'url': thumbnail, 'id': counter};
+        counter = counter + 1;
     });
-    console.log('image urls:', imageURLs);
-    // return htmlSnippets;
-    
+   
 }
 
 function makeHTMLSnippet(node, thumbnail, title) {
@@ -158,9 +151,6 @@ $('input#submit-query').click(function(e) {
             if (0 < innerNodes.length) { // if there are intermediary nodes
 
                 var numPages = innerNodes.length;
-                //move the last node to the end of imageURLs array
-                imageURLs[response['path'].length - 1] = imageURLs[1];
-                delete imageURLs[1];
 
                 var pagesParams;
                 if (numPages > 1) {
@@ -172,11 +162,12 @@ $('input#submit-query').click(function(e) {
                 $.getJSON(
                     queryURL,
                     function(data) {
-                        pathImageURL(data, innerNodes); //updates imageURLs
+                        queryImages[CODES['node2']['title']]['id'] = response['path'].length - 1;
+                        pathImageURL(data, innerNodes); //updates queryImages
+                        console.log('queryImages:',queryImages);
+                        drawGraph(response['results']); // graph the results
                     });
             }
-
-            drawGraph(response['results']); // graph the results
 
 		});
     

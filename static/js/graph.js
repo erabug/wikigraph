@@ -41,12 +41,6 @@ function drawGraph(json) {
       .append("svg:path")
       .attr("d", "M0,-4L10,0L0,4Z");
 
-  var catpattern = defs.append("pattern")
-                        .attr("id", "catpattern")
-                        .attr("height", 1)
-                        .attr("width", 1)
-                        .attr("x", "0")
-                        .attr("y", "0");
 
   // append attributes for each link in the json
   var link = svg.selectAll(".link")
@@ -59,37 +53,31 @@ function drawGraph(json) {
       .style("opacity", 0.7)
       .attr("marker-end", "url(#arrow)");
 
-  // works!
-  // append attributes for each node in the json
-  // var node = svg.selectAll(".node")
-  //     .data(json.nodes)
-  //   .enter().append("circle")
-  //     .attr("class", "node")
-  //     .attr("r", function(d) {
-  //       if (d.group == "path") {
-  //         return 10;
-  //       } else { return 8; }
-  //     })
-  //     .style("fill", function(d) {
-  //       if (d.group == "path") {
-  //         return "#333";
-  //       } else { return color(d.type); }
-  //     })
-  //     .call(force.drag); // allows dragging and stops movement upon mouseover
-
-  // experimental
   var node = svg.selectAll("g.node")
         .data(json.nodes)
       .enter().append("svg:g")
         .attr("class", "node")
         .call(force.drag);
 
-  catpattern.append("image")
-     .attr("x", -8)
-     .attr("y", -25)
-     .attr("height", 100)
-     .attr("width", 100)
-     .attr("xlink:href", "http://localhost:8000/static/images/cat.jpg");
+
+  Object.keys(queryImages).forEach(function(img) {
+      var url = queryImages[img]['url'];
+      var id = queryImages[img]['id'];
+      console.log(url);
+        defs.append("pattern")
+            .attr("id", 'img'+id.toString())
+            .attr("height", 1)
+            .attr("width", 1)
+            .attr("x", "0")
+            .attr("y", "0")
+          .append("image")
+            .attr("x", -25)
+            .attr("y", -8)
+            .attr("height", 100)
+            .attr("width", 100)
+            .attr("xlink:href", url);
+      
+  });
 
   node.append("circle")
     // .attr("cy", 80)
@@ -101,7 +89,9 @@ function drawGraph(json) {
       })
     .attr("fill", function(d) {
         if (d.group == "path") {
-          return "url(#catpattern)";
+          var x = 'img'+queryImages[d.name]['id'];
+          // return "url(#catpattern)";
+          return "url(#"+x+")";
         } else { return color(d.type); }
     });
 
