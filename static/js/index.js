@@ -45,43 +45,62 @@ function initImageURL(data) {
 
     Object.keys(pageObject).forEach(function(pageKey) {
 
-        var page = pageObject[pageKey];
-        var title = page['title'];
+        item = getThumbnail(pageObject, pageKey);
 
-        var thumbnail;
-        if ('thumbnail' in page) { // if wikipedia query returned a thumbnail
-            thumbnail = page['thumbnail']['source'];
-        } else { thumbnail = '../static/images/cat.jpg'; } // else returns grumpycat
+        if (item.title == CODES['node1']['title']) { node = 0; } else { node = 1; }
 
-        if (title == CODES['node1']['title']) { node = 0; } else { node = 1; }
-
-        html = makeHTMLSnippet(node, thumbnail, title);
+        html = makeHTMLSnippet(node, item.thumbnail, item.title);
         htmlSnippets[node] = html;
-        
-        queryImages[title] = {'url': thumbnail, 'id': node};
-        imageURLs[node] = {'title': title, 'thumbnail': thumbnail};
+
+        console.log('item', item);
+        addImage(item, node);
+        // queryImages[item.title] = {'url': item.thumbnail,
+        //                            'id': node,
+        //                             'height': item.height,
+        //                             'width': item.width};
+        imageURLs[node] = {'title': item.title, 'thumbnail': item.thumbnail};
 
     });
     return htmlSnippets;
 }
 
+function addImage(item, node) {
+    queryImages[item.title] = {'url': item.thumbnail,
+                               'id': node,
+                               'height': item.height,
+                               'width': item.width};
+}
+
+function getThumbnail(pageObject, pageKey) {
+    var page = pageObject[pageKey];
+    var title = page['title'];
+
+    var thumbnail, thWidth, thHeight;
+    if ('thumbnail' in page) { // if wikipedia query returned a thumbnail
+        thumbnail = page['thumbnail']['source'];
+        thWidth = page['thumbnail']['width'];
+        thHeight = page['thumbnail']['height'];
+    } else { // else returns grumpycat
+        thumbnail = '../static/images/cat.jpg';
+        thWidth = 100;
+        thHeight = 75;
+    }
+
+    var response = {'title': title,
+                    'thumbnail': thumbnail,
+                    'width': thWidth,
+                    'height': thHeight};
+    return response;
+}
+
 function pathImageURL(data, innerNodes) {
 
     var pageObject = data['query']['pages'];
-
     var counter = 1;
 
     Object.keys(pageObject).forEach(function(pageKey) {
-
-        var page = pageObject[pageKey];
-        var title = page['title'];
-
-        var thumbnail;
-        if ('thumbnail' in page) { // if wikipedia query returned a thumbnail
-            thumbnail = page['thumbnail']['source'];
-        } else { thumbnail = '../static/images/cat.jpg'; } // else returns grumpycat
-
-        queryImages[title] = {'url': thumbnail, 'id': counter};
+        item = getThumbnail(pageObject, pageKey);
+        addImage(item, counter);
         counter = counter + 1;
     });
    
