@@ -75,22 +75,17 @@ function drawGraph(json) {
     // iterate through queryImages, write a unique pattern for each (e.g. 'id0')
     Object.keys(queryImages).forEach(function(img) {
         img = queryImages[img];
-        var url = img['url'];
-        var id = img['id'];
-        var height = img['height'];
-        var width = img['width'];
         console.log(img);
           defs.append("pattern")
-              .attr("id", 'img'+id.toString())
+              .attr("id", 'img'+img['id'].toString())
               .attr("height", 1)
               .attr("width", 1)
               .attr("x", "0")
               .attr("y", "0")
             .append("image")
-              .attr("height", height)
-              .attr("width", width)
-              .attr("xlink:href", url);
-        
+              .attr("height", img['height'])
+              .attr("width", img['width'])
+              .attr("xlink:href", img['url']);
     });
 
   // <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
@@ -100,12 +95,8 @@ function drawGraph(json) {
   //   <rect width="100" height="100" clip-path="url(#clipCircle)"/>
   // </svg>
 
-
-
     pathLinks
-        // .style("stroke", "#666")
         .style("stroke-width", "3px");
-        // .style("opacity", 1);
 
     node.append("circle")
         .attr("r", 12)

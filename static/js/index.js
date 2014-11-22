@@ -1,10 +1,13 @@
+// establish variables for the json response and the two image objects
 var response;
+var queryImages = {}; // an object to pass information to the graph
+var imageURLs = []; // an array so it will retain order
 
-CODES = { 'node1': { 'code': '', 'title': '' },
-          'node2': { 'code': '', 'title': '' } };
-
-var queryImages = {};
-var imageURLs = [];
+// this object will be populated once the user inputs two pages
+CODES = {
+            'node1': {'code': '', 'title': ''},
+            'node2': {'code': '', 'title': ''}
+        };
 
 // tells typeahead how to handle the user input (e.g. the get request params)
 var pageNames = new Bloodhound({
@@ -28,7 +31,7 @@ var pageNames = new Bloodhound({
     }
 });
 
-pageNames.initialize();
+pageNames.initialize(); // initialize the bloodhound
 
 function clear_all() {
     $('input#start-node').val('');
@@ -36,39 +39,6 @@ function clear_all() {
     $('.path').html('');
     $('svg').remove();
     queryImages = {};
-}
-
-function initImageURL(data) {
-
-    var pageObject = data['query']['pages'];
-    var htmlSnippets = {};
-
-    Object.keys(pageObject).forEach(function(pageKey) {
-
-        item = getThumbnail(pageObject, pageKey);
-
-        if (item.title == CODES['node1']['title']) { node = 0; } else { node = 1; }
-
-        html = makeHTMLSnippet(node, item.thumbnail, item.title);
-        htmlSnippets[node] = html;
-
-        console.log('item', item);
-        addImage(item, node);
-        // queryImages[item.title] = {'url': item.thumbnail,
-        //                            'id': node,
-        //                             'height': item.height,
-        //                             'width': item.width};
-        imageURLs[node] = {'title': item.title, 'thumbnail': item.thumbnail};
-
-    });
-    return htmlSnippets;
-}
-
-function addImage(item, node) {
-    queryImages[item.title] = {'url': item.thumbnail,
-                               'id': node,
-                               'height': item.height,
-                               'width': item.width};
 }
 
 function getThumbnail(pageObject, pageKey) {
@@ -91,6 +61,37 @@ function getThumbnail(pageObject, pageKey) {
                     'width': thWidth,
                     'height': thHeight};
     return response;
+}
+
+function addImage(item, node) {
+
+    queryImages[item.title] = {'url': item.thumbnail,
+                               'id': node,
+                               'height': item.height,
+                               'width': item.width};
+                               
+}
+
+function initImageURL(data) {
+
+    var pageObject = data['query']['pages'];
+    var htmlSnippets = {};
+
+    Object.keys(pageObject).forEach(function(pageKey) {
+
+        item = getThumbnail(pageObject, pageKey);
+
+        if (item.title == CODES['node1']['title']) {node = 0;} else {node = 1;}
+
+        html = makeHTMLSnippet(node, item.thumbnail, item.title);
+        htmlSnippets[node] = html;
+
+        addImage(item, node);
+        imageURLs[node] = {'title': item.title,
+                           'thumbnail': item.thumbnail};
+
+    });
+    return htmlSnippets;
 }
 
 function pathImageURL(data, innerNodes) {
