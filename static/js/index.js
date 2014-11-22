@@ -35,6 +35,7 @@ function clear_all() {
     $('input#end-node').val('');
     $('.path').html('');
     $('svg').remove();
+    queryImages = {};
 }
 
 function initImageURL(data) {
@@ -165,6 +166,7 @@ $('input#submit-query').click(function(e) {
                         queryImages[CODES['node2']['title']]['id'] = response['path'].length - 1;
                         pathImageURL(data, innerNodes); //updates queryImages
                         console.log('queryImages:',queryImages);
+                        $('.path').html('');
                         drawGraph(response['results']); // graph the results
                     });
             }

@@ -2,10 +2,10 @@ function drawGraph(json) {
 
   // establish width and height of the svg
   var width = 500,
-      height = 300;
+      height = 500;
 
   // color established as a scale
-  var color = d3.scale.category10();
+  var color = d3.scale.category20();
 
   // appends svg tag to graph-result div
   var svg = d3.select(".graph-result").append("svg")
@@ -14,9 +14,9 @@ function drawGraph(json) {
 
   // this function handles the parameters of the force-directed layout
   var force = d3.layout.force()
-      .gravity(0.12)
-      .distance(70)
-      .charge(-100)
+      .gravity(0.05)
+      .distance(150)
+      .charge(-200)
       .size([width, height]);
 
   // this calls the function force on the nodes and links
@@ -59,11 +59,11 @@ function drawGraph(json) {
         .attr("class", "node")
         .call(force.drag);
 
-
+  // iterate through queryImages, write a unique pattern for each (e.g. 'id0')
   Object.keys(queryImages).forEach(function(img) {
       var url = queryImages[img]['url'];
       var id = queryImages[img]['id'];
-      console.log(url);
+      // console.log(img);
         defs.append("pattern")
             .attr("id", 'img'+id.toString())
             .attr("height", 1)
@@ -71,29 +71,38 @@ function drawGraph(json) {
             .attr("x", "0")
             .attr("y", "0")
           .append("image")
-            .attr("x", -25)
-            .attr("y", -8)
             .attr("height", 100)
             .attr("width", 100)
             .attr("xlink:href", url);
       
   });
 
+
+  var pathNodes = node.filter(function(d) {
+    return d.group == "path";
+  });
+
   node.append("circle")
-    // .attr("cy", 80)
-    // .attr("cx", 120)
-    .attr("r", function(d) {
-        if (d.group == "path") {
-          return 25;
-        } else { return 8; }
-      })
-    .attr("fill", function(d) {
-        if (d.group == "path") {
+      .attr("r", 12)
+      .style("fill", function(d) { return color(d.type); });
+
+  pathNodes.append("circle")
+      .attr("r", 35)
+      .style("fill", "#333");
+
+  pathNodes.append("circle")
+      .attr("r", 35)
+      .style("fill", function(d) {
           var x = 'img'+queryImages[d.name]['id'];
-          // return "url(#catpattern)";
           return "url(#"+x+")";
-        } else { return color(d.type); }
-    });
+      });
+
+  pathNodes.append("text")
+      .text(function(d) {
+          return d.name;
+      })
+      .attr("y", 60)
+      .attr("text-anchor", "middle");
 
   // this appends a mouseover text field to each node with name and type
   node.append("title")
