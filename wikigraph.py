@@ -33,12 +33,13 @@ def get_page_names():
 				FROM nodes 
 				WHERE title LIKE ? 
 				OR title LIKE ?
-				LIMIT 30;'''
+				LIMIT 50;'''
 
 	rows = cursor.execute(query, (entry + '%', '% ' + entry, )).fetchall()
 	results = [{ 'title': row[1], 'code': row[0] } for row in rows]
 	response = jsonify(**{ 'results': results })
 	print response
+	
 	return response
 
 if __name__ == '__main__':
