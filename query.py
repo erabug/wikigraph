@@ -12,7 +12,7 @@ def find_shortest_path(node1, node2):
 	t0 = time.time()
 	query = neo4j.CypherQuery(graph_db, 
 								"""MATCH (m {node:'%s'}), (n {node:'%s'}), 
-								p = shortestPath((m)-[*..5]->(n)) 
+								p = shortestPath((m)-[*..10]->(n)) 
 								RETURN p""" % (node1, node2))
 
 	path = query.execute_one()
@@ -123,7 +123,7 @@ def parse_nodes_and_rels(path):
 	# rel dict list for secondary rels
 	non_path_rels, non_path_nodes = find_secondary_rels_and_nodes(node_objs_list=path.nodes)
 
-	# combine the two lists
+	# combine the two lists for nodes and rels
 	rels_list = path_rels + non_path_rels
 	nodes_list = merge_node_dicts(path_nodes, non_path_nodes)
 
@@ -152,8 +152,6 @@ def create_lists(node1, node2):
 		rel['source'] = codes[rel['source']]
 		rel['target'] = codes[rel['target']]
 
-	# response = """{ "directed": true, "nodes":%s, "links":%s, 
-	# "multigraph": false }""" % (json.dumps(nodes_list), json.dumps(rels_list))
 	response = """{ "path": %s, "results": { "directed": true, "nodes": %s, "links": %s, 
 	"multigraph": false }}""" % (json.dumps(path_names), json.dumps(nodes_list), json.dumps(rels_list))
 
