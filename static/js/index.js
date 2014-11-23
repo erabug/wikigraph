@@ -25,7 +25,6 @@ var pageNames = new Bloodhound({
                     value: page.title,
                     code: page.code
                 };
-
             });
         }
     }
@@ -64,12 +63,10 @@ function getThumbnail(pageObject, pageKey) {
 }
 
 function addImage(item, node) {
-
     queryImages[item.title] = {'url': item.thumbnail,
                                'id': node,
                                'height': item.height,
                                'width': item.width};
-                               
 }
 
 function initImageURL(data) {
@@ -183,13 +180,18 @@ $('input#submit-query').click(function(e) {
                 $.getJSON(
                     queryURL,
                     function(data) {
+                        // move the second query page to the last position
                         queryImages[CODES['node2']['title']]['id'] = response['path'].length - 1;
                         pathImageURL(data, innerNodes); //updates queryImages
                         console.log('queryImages:',queryImages);
-                        $('.path').html('');
+                        // $('.path').html('');
                         drawGraph(response['results']); // graph the results
                     });
+            } else {
+                // make sure it will still graph results for two-node paths
+                drawGraph(response['results']); // graph the results
             }
+
 
 		});
     

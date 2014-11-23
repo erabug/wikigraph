@@ -1,22 +1,4 @@
-/******GRAPH STUFF******/
-svg {
-  display: block;
-  margin: 0 auto;
-  /*border: solid 2px #333;*/
-}
 
-/*.link {
-  stroke: #666;
-}*/
-
-circle {
-  stroke: #333;
-  stroke-width: 2px;
-}
-
-marker#arrow {
-  fill: #666;
-}
 
 /******HTML STUFF******/
 :focus {
@@ -52,6 +34,21 @@ body {
   font-family: "Signika", sans-serif;
   color: #fff;
   font-size: 40px;
+  display: inline-block;
+}
+
+.info {
+  color: #999;
+  text-align: right;
+  position: absolute;
+  right: 20px;
+  top: 45px;
+  display: inline-block;
+}
+
+.info:hover {
+  cursor: pointer;
+  color: #fff;
 }
 
 .query-form {
@@ -78,6 +75,27 @@ input {
   cursor: pointer;
   background-color: #666;
   border: solid 1px #666;
+}
+
+.nav {
+  /*float: center;*/
+  margin-right: 30px;
+}
+
+/******GRAPH STUFF******/
+svg {
+  /*display: block;*/
+  margin: 0 auto;
+  border: solid 1px #666;
+}
+
+circle {
+  stroke: #333;
+  stroke-width: 2px;
+}
+
+marker#arrow {
+  fill: #666;
 }
 
 /*TYPEAHEAD STUFF*/
@@ -125,9 +143,9 @@ input {
 }
 
 .squareimg {
-  width: 70px;
-  height: 70px;
-  border-radius: 35px;
+  width: 60px;
+  height: 60px;
+  border-radius: 30px;
   overflow: hidden;
   border: solid 2px black;
   margin: 15px;

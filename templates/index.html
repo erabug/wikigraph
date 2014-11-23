@@ -3,6 +3,7 @@
 
   <head>
     <meta charset="utf-8">
+    <title>wikiGraph</title>
     <link href='http://fonts.googleapis.com/css?family=Signika' rel='stylesheet' type='text/css'>
     <link href="../static/css/index.css" rel="stylesheet" type="text/css">
   </head>
@@ -11,18 +12,24 @@
 
   <div class="border logo"></div>
   <div class="background logo">
-    <div class="title">wikiGraph</div>
+    <div class="title">wikiGraph</div><div class="info">About</div>
   </div>
 
   <div class="query-form scrollable-dropdown-menu">
+    
     <input class="typeahead" id="start-node" type="text" placeholder="Start page">
     <input class="typeahead" id="end-node" type="text" placeholder="End page">
     <input type="submit" class="button" id="submit-query" value="Go">
-  </div>
+    <input type="submit" class="button" id="submit-query" value="Random">
 
-  <div class="path"></div>
+  </div>
   
+
+
+
   <div class="graph-result"></div>
+<!-- <div class="nav"><input type="submit" class="button hidden" id="reverse-query" value="Reverse path"></div> -->
+  <div class="path"></div>
 
   <!--<script src="http://d3js.org/d3.v3.min.js"></script>
   <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>

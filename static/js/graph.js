@@ -1,8 +1,8 @@
 function drawGraph(json) {
 
     // establish width and height of the svg
-    var width = 500,
-        height = 500;
+    var width = 600,
+        height = 400;
 
     // color established as a scale
     var color = d3.scale.category10();
@@ -17,8 +17,8 @@ function drawGraph(json) {
         .gravity(0.05)
         .distance(function(d) {
           if (d.value == 1) {
-            return 150;
-          } else { return 80; }
+            return 125;
+          } else { return 70; }
         })
         .charge(-200)
         .size([width, height]);
@@ -38,13 +38,12 @@ function drawGraph(json) {
       .enter().append("svg:marker")
         .attr("id", String)
         .attr("viewBox", "0 -5 10 10")
-        .attr("refX", 23)
-        .attr("markerWidth", 8)
-        .attr("markerHeight", 8)
+        .attr("refX", 30)
+        .attr("markerWidth", 7)
+        .attr("markerHeight", 7)
         .attr("orient", "auto")
         .append("svg:path")
         .attr("d", "M0,-4L10,0L0,4Z");
-
 
     // append attributes for each link in the json
     var link = svg.selectAll(".link")
@@ -52,7 +51,6 @@ function drawGraph(json) {
       .enter().append("line")
         .attr("class", "link")
         .style("stroke", "#666")
-        // .style("opacity", 0.5)
         .attr("marker-end", "url(#arrow)");
 
     // select subset of g that are nodes
@@ -67,58 +65,42 @@ function drawGraph(json) {
         return d.group == "path";
     });
 
+    var nonPathNodes = node.filter(function(d) {
+        return d.group != "path";
+    })
+
     var pathLinks = link.filter(function(d) {
         return d.value == 1;
     });
-    console.log(pathLinks);
 
-    // iterate through queryImages, write a unique pattern for each (e.g. 'id0')
     Object.keys(queryImages).forEach(function(img) {
         img = queryImages[img];
-        console.log(img);
-          defs.append("pattern")
-              .attr("id", 'img'+img['id'].toString())
-              .attr("height", 1)
-              .attr("width", 1)
-              .attr("x", "0")
-              .attr("y", "0")
-            .append("image")
-              .attr("height", img['height'])
-              .attr("width", img['width'])
-              .attr("xlink:href", img['url']);
+        defs.append("clipPath")
+            .attr("id", 'img'+img['id'].toString())
+          .append("circle")
+            // .attr("cy", -img['height'])
+            // .attr("cx", img['width'])
+            .attr("r", 35);
     });
 
-  // <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
-  //   <clipPath id="clipCircle">
-  //     <circle r="50" cx="50" cy="50"/>
-  //   </clipPath>
-  //   <rect width="100" height="100" clip-path="url(#clipCircle)"/>
-  // </svg>
-
     pathLinks
-        .style("stroke-width", "3px");
+        .style("stroke-width", "2px");
 
-    node.append("circle")
+    nonPathNodes.append("circle")
         .attr("r", 12)
+        // .attr("transform", "translate(200)")
         .style("fill", function(d) { return color(d.type); });
 
-    pathNodes.append("circle")
-        .attr("r", 35)
-        .style("fill", "#333");
-
-    pathNodes.append("circle")
-        .attr("r", 35)
-        .style("fill", function(d) {
+    pathNodes.append("image")
+        .attr("xlink:href", function(d) { return queryImages[d.name]['url'];})
+        .attr("x", function(d) { return -queryImages[d.name]['width']/2;})
+        .attr("y", function(d) { return -queryImages[d.name]['height']/2;})
+        .attr("height", function(d) { return queryImages[d.name]['height'];})
+        .attr("width", function(d) { return queryImages[d.name]['width'];})
+        .attr("clip-path", function(d) {
             var x = 'img'+queryImages[d.name]['id'];
             return "url(#"+x+")";
         });
-
-    // pathNodes.append("text")
-    //     .text(function(d) {
-    //         return d.name;
-    //     })
-    //     .attr("y", 60)
-    //     .attr("text-anchor", "middle");
 
     // this appends a mouseover text field to each node with name and type
     node.append("title")
