@@ -1,13 +1,12 @@
-// establish variables for the json response and the two image objects
-var response;
-var queryImages = {}; // an object to pass information to the graph
-var imageURLs = []; // an array so it will retain order
-
 // this object will be populated once the user inputs two pages
 CODES = {
             'node1': {'code': '', 'title': ''},
             'node2': {'code': '', 'title': ''}
         };
+// establish variables for the json response and the two image objects
+var response;
+var queryImages = {}; // an object to pass information to the graph
+var imageURLs = []; // an array so it will retain order
 
 // tells typeahead how to handle the user input (e.g. the get request params)
 var pageNames = new Bloodhound({
@@ -33,9 +32,21 @@ var pageNames = new Bloodhound({
 pageNames.initialize(); // initialize the bloodhound
 
 function clear_all() {
+    
+    CODES = {
+                'node1': {'code': '', 'title': ''},
+                'node2': {'code': '', 'title': ''}
+            };
+
     $('input#start-node').val('');
     $('input#end-node').val('');
-    $('.path').html('');
+    $('.details').html('');
+    $('svg').remove();
+    queryImages = {};
+}
+
+function clear_partial() {
+    $('.details').html('');
     $('svg').remove();
     queryImages = {};
 }
@@ -52,7 +63,7 @@ function getThumbnail(pageObject, pageKey) {
     } else { // else returns grumpycat
         thumbnail = '../static/images/cat.jpg';
         thWidth = 100;
-        thHeight = 75;
+        thHeight = 100;
     }
 
     var response = {'title': title,
@@ -69,7 +80,7 @@ function addImage(item, node) {
                                'width': item.width};
 }
 
-function initImageURL(data) {
+function addQueryImages(data) {
 
     var pageObject = data['query']['pages'];
     var htmlSnippets = {};
@@ -91,7 +102,7 @@ function initImageURL(data) {
     return htmlSnippets;
 }
 
-function pathImageURL(data, innerNodes) {
+function addPathImages(data, innerNodes) {
 
     var pageObject = data['query']['pages'];
     var counter = 1;
@@ -106,8 +117,8 @@ function pathImageURL(data, innerNodes) {
 
 function makeHTMLSnippet(node, thumbnail, title) {
     html = '<div class="page" id="page'+node.toString()+'">'+
-       '<div class="squareimg"><img src='+thumbnail+'></div>'+
-       '<div class="page-title">'+title+'</div></div>';
+           '<div class="squareimg"><img src='+thumbnail+'></div>'+
+           '<div class="page-title">'+title+'</div></div>';
     return html;
 }
 
@@ -132,18 +143,20 @@ $(document).ready(function(e) {
 $('input#submit-query').click(function(e) {
 
 	e.preventDefault();
-    clear_all();
+    clear_partial();
 
     var pagesParams = CODES['node1']['title'] + '|' + CODES['node2']['title'];
     var queryURL = makeQueryURL(numPages=2, pagesParams);
     console.log('USER INPUT:', pagesParams);
 
+    var path = $('.details');
+
     $.getJSON(
         queryURL,
         function(data) {
 
-            var htmlSnippets = initImageURL(data);
-            var path = $('.path');
+            var htmlSnippets = addQueryImages(data);
+            
             // for each item in the sorted list, append its html to the path div
             Object.keys(htmlSnippets).forEach(function(node) {
                 path.append(htmlSnippets[node]);
@@ -161,6 +174,8 @@ $('input#submit-query').click(function(e) {
 
 			response = JSON.parse(data); // decode the JSON
             $('.arrow').removeClass('loading'); // change arrow img
+            // $('.arrow').remove();
+            $('.arrow').html("&#8594;");
 
             console.log('RETURNED PATH:', response['path']);
             // // remove the start and end nodes from innerNodes
@@ -182,9 +197,20 @@ $('input#submit-query').click(function(e) {
                     function(data) {
                         // move the second query page to the last position
                         queryImages[CODES['node2']['title']]['id'] = response['path'].length - 1;
-                        pathImageURL(data, innerNodes); //updates queryImages
+                        addPathImages(data, innerNodes); //updates queryImages
                         console.log('queryImages:',queryImages);
-                        // $('.path').html('');
+
+                        // var path = $('.details');
+                        // // path.html('');
+                        // var len = response['path'].length;
+                        // response['path'].forEach(function(page, i) {
+                        //     if (i < len - 1) {
+                        //         path.append(page+' &#10148; ');
+                        //     } else {
+                        //         path.append(page);
+                        //     }
+                        // });
+                        // $('.path').html(CODES['node1']['title']+' -> '+CODES['node2']['title']);
                         drawGraph(response['results']); // graph the results
                     });
             } else {
@@ -212,4 +238,8 @@ $('#start-node').on('typeahead:selected typeahead:autocompleted', function (e, d
 
 $('#end-node').on('typeahead:selected typeahead:autocompleted', function (e, d) {
     decodeInput(d, 'node2');
+});
+
+$("input[type=text]").focus(function(){
+    this.select();
 });

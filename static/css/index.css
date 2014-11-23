@@ -42,7 +42,7 @@ body {
   text-align: right;
   position: absolute;
   right: 20px;
-  top: 45px;
+  top: 50px;
   display: inline-block;
 }
 
@@ -52,7 +52,7 @@ body {
 }
 
 .query-form {
-  margin: 20px;
+  margin: 30px;
   text-align: center;
 }
 
@@ -77,25 +77,30 @@ input {
   border: solid 1px #666;
 }
 
-.nav {
-  /*float: center;*/
-  margin-right: 30px;
+.results {
+  width: 100%;
+  display: inline-block;
+}
+
+.graph {
+  display: inline-block;
+}
+
+.details {
+  /*float: right;*/
+  vertical-align: top;
+  display: inline-block;
+  width: 30%;
+  /*height: 400px;*/
+  /*background-color: pink;*/
+  /*border: solid 1px #666;*/
 }
 
 /******GRAPH STUFF******/
 svg {
-  /*display: block;*/
-  margin: 0 auto;
-  border: solid 1px #666;
-}
-
-circle {
-  stroke: #333;
-  stroke-width: 2px;
-}
-
-marker#arrow {
-  fill: #666;
+  display: inline-block;
+  /*margin: 0 auto;*/
+  /*border: solid 1px #666;*/
 }
 
 /*TYPEAHEAD STUFF*/
@@ -126,7 +131,7 @@ marker#arrow {
     line-height: 18px;
 }
 
-.tt-suggestion.tt-cursor { /* UPDATE: newer versions use .tt-suggestion.tt-cursor */
+.tt-suggestion.tt-cursor {
     color: #fff;
     background-color: #0097cf;
     cursor: pointer;
@@ -148,7 +153,7 @@ marker#arrow {
   border-radius: 30px;
   overflow: hidden;
   border: solid 2px black;
-  margin: 15px;
+  margin: 10px;
   background-color: #333;
 }
 
@@ -160,11 +165,8 @@ marker#arrow {
 
 .arrow {
   position: relative;
-  height: 50px;
-  width: 50px;
-  background: url("../images/arrow.png") no-repeat center;
-  background-size: 80px;
-  top: 27px;
+  font-size: 30px;
+  top: 25px;
 }
 
 .loading {
