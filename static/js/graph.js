@@ -72,10 +72,13 @@ function drawGraph(json) {
 
     var start;
     Object.keys(queryImages).forEach(function(key) {
+
         img = queryImages[key];
-        if (img.id === 0) { start = key; }
+        if (img.id === 0) {
+          start = key;
+        }
         defs.append("clipPath")
-            .attr("id", 'img'+img.id.toString())
+            .attr("id", 'img'+key.toString())
           .append("circle")
             // .attr("cy", -img['height']*0.1)
             // .attr("cx", img['width'])
@@ -83,7 +86,7 @@ function drawGraph(json) {
     });
 
     var startNode = pathNode.filter(function(d) {
-        return d.name == start;
+        return d.id == start;
     });
 
     pathLinks
@@ -91,23 +94,22 @@ function drawGraph(json) {
 
     nonPathNode.append("circle")
         .attr("r", 10)
-
         .style("fill", function(d) { return color(d.type); });
 
     pathNode.append("image")
-        .attr("xlink:href", function(d) { return queryImages[d.name].url;})
-        .attr("x", function(d) { return -queryImages[d.name].width/2;})
+        .attr("xlink:href", function(d) { return queryImages[d.id].url;})
+        .attr("x", function(d) { return -queryImages[d.id].width/2;})
         // this seems to help for portraits, where height > width
         .attr("y", function(d) {
-          var h = queryImages[d.name].height;
+          var h = queryImages[d.id].height;
           var x;
-          if (h > queryImages[d.name].width) { x = 15; } else { x = 0; }
+          if (h > queryImages[d.id].width) { x = 15; } else { x = 0; }
           return -(h/2)+x;
         })
-        .attr("height", function(d) { return queryImages[d.name].height;})
-        .attr("width", function(d) { return queryImages[d.name].width;})
+        .attr("height", function(d) { return queryImages[d.id].height;})
+        .attr("width", function(d) { return queryImages[d.id].width;})
         .attr("clip-path", function(d) {
-            var x = 'img'+queryImages[d.name].id;
+            var x = 'img'+d.id;
             return "url(#"+x+")"; // unique clip path for this node
         });
 

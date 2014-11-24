@@ -29,6 +29,10 @@ def parse_node(node, in_path):
 	n, name = node.get_properties().values()
 	name = name.replace('_', ' ')
 
+	if 'US ' in name: # silly hack because DBPedia removed periods for US???
+		name = name.replace('US ', 'U.S. ')
+		name = name.replace('U.S. P', 'U.S. p')
+
 	node_dict = {'id': int(n), 'name': name, 'group': 'none'}
 
 	label = node.get_labels() - set(['Page']) # does it have a label other than Page?
@@ -118,7 +122,9 @@ def parse_nodes_and_rels(path):
 	path_names = []
 	for node in path.nodes:
 		path_dict = node.get_properties().values()[0]
-		path_names.append(path_nodes[int(path_dict)]['name'])
+		# path_names.append(path_nodes[int(path_dict)]['name'])
+		path_names.append({'name': path_nodes[int(path_dict)]['name'], 'code': path_nodes[int(path_dict)]['id']})
+
 
 	# rel dict list for secondary rels
 	non_path_rels, non_path_nodes = find_secondary_rels_and_nodes(node_objs_list=path.nodes)
@@ -146,11 +152,12 @@ def create_lists(node1, node2):
 		if node_id not in codes:
 			codes[node_id] = id_counter
 			id_counter += 1
-		node['id'] = codes[node_id]
 
 	for rel in rels_list: # look up the source and target in codes
 		rel['source'] = codes[rel['source']]
 		rel['target'] = codes[rel['target']]
+	print '****', rels_list
+	print '&&&&', nodes_list
 
 	response = """{ "path": %s, "results": { "directed": true, "nodes": %s, "links": %s, 
 	"multigraph": false }}""" % (json.dumps(path_names), json.dumps(nodes_list), json.dumps(rels_list))

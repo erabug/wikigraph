@@ -28,7 +28,6 @@ def get_page_names():
 
 	entry = request.args.get("query")
 	cursor = connect()
-
 	query = '''SELECT id, title 
 				FROM nodes 
 				WHERE title LIKE ? 
@@ -44,18 +43,12 @@ def get_page_names():
 
 @app.route('/random')
 def get_random_names():
-	# print "GETTING RANDOM NAMES"
 
 	cursor = connect()
-
 	query = 'SELECT id, title FROM nodes ORDER BY RANDOM() LIMIT 2'
-
 	rows = cursor.execute(query).fetchall()
-	# print rows, "ROWS"
 	results = [{ 'title': row[1], 'code': row[0] } for row in rows]
-	# print results, "RESULTS"
 	response = jsonify(**{ 'results': results })
-	# print response, "RESPONSE"
 
 	return response
 
