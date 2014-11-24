@@ -143,7 +143,7 @@ function query() {
 
             response = JSON.parse(data); // decode the JSON
             path.html('');
-            console.log('RETURNED PATH:', response.path);
+            // console.log('RETURNED PATH:', response.path);
             var inner = response.path.slice(1, -1);
 
             if (0 < inner.length) { // if there are intermediary nodes
@@ -166,9 +166,8 @@ function query() {
                         response.path.forEach(function(node) {
                             queryImages[node.code].id = response.path.indexOf(node);
                         });
-                        console.log("QUERY IMAGES:", queryImages);
+                        // console.log("QUERY IMAGES:", queryImages);
                         drawGraph(response.results); // graph the results
-
                     });
             } else {
                 drawGraph(response.results);
@@ -185,13 +184,10 @@ $('input#random-query').click(function(e) {
         function(data) {
             var n1 = data.results[0];
             var n2 = data.results[1];
-            var title1 = n1.title.replace('_', ' ');
-            var title2 = n2.title.replace('_', ' ');
-            CODES.node1 = {'title': title1, 'code': n1.code.toString()};
-            CODES.node2 = {'title': title2, 'code': n2.code.toString()};
-            $('input#start-node').val(title1);
-            $('input#end-node').val(title2);
-            // console.log(title1, title2);
+            CODES.node1 = {'title': n1.title, 'code': n1.code.toString()};
+            CODES.node2 = {'title': n2.title, 'code': n2.code.toString()};
+            $('input#start-node').val(n1.title);
+            $('input#end-node').val(n2.title);
             query();
         });
 });

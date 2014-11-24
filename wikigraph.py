@@ -47,7 +47,7 @@ def get_random_names():
 	cursor = connect()
 	query = 'SELECT id, title FROM nodes ORDER BY RANDOM() LIMIT 2'
 	rows = cursor.execute(query).fetchall()
-	results = [{ 'title': row[1], 'code': row[0] } for row in rows]
+	results = [{ 'title': row[1].replace('_', ' '), 'code': row[0] } for row in rows]
 	response = jsonify(**{ 'results': results })
 
 	return response
