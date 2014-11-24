@@ -1,10 +1,10 @@
 function drawGraph(json) {
 
-    console.log("raw data:", json);
+    // console.log("raw data:", json);
 
     // establish width and height of the svg
-    var width = 400,
-        height = 500;
+    var width = 600,
+        height = 300;
 
     // color established as a scale
     var color = d3.scale.category10();
@@ -86,15 +86,12 @@ function drawGraph(json) {
         return d.name == start;
     });
 
-
-
-
-
     pathLinks
         .style("stroke-width", "2px");
 
     nonPathNode.append("circle")
         .attr("r", 10)
+
         .style("fill", function(d) { return color(d.type); });
 
     pathNode.append("image")
@@ -104,7 +101,7 @@ function drawGraph(json) {
         .attr("y", function(d) {
           var h = queryImages[d.name].height;
           var x;
-          if (h > queryImages[d.name].width) { x = 12; } else { x = 0; }
+          if (h > queryImages[d.name].width) { x = 15; } else { x = 0; }
           return -(h/2)+x;
         })
         .attr("height", function(d) { return queryImages[d.name].height;})
@@ -126,42 +123,39 @@ function drawGraph(json) {
             return d.name + " (" + d.id + "), " + d.type;
         });
 
+    startNode.each(function(d) {
+      d.fixed = true;
+      d.x = width/8;
+      d.y = height/3;
+    });
+
     // this calls the function force on the nodes and links
     force
         .nodes(json.nodes)
         .links(json.links)
         .start();
 
-    function tick() {
-        node.attr("cx", function(d) { return d.x = Math.max(15, Math.min(width - 15, d.x)); })
-            .attr("cy", function(d) { return d.y = Math.max(15, Math.min(height - 15, d.y)); });
-
-        link.attr("x1", function(d) { return d.source.x; })
-            .attr("y1", function(d) { return d.source.y; })
-            .attr("x2", function(d) { return d.target.x; })
-            .attr("y2", function(d) { return d.target.y; });
-
-        node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
-
-        }
-
-    // for each tick, the distance between each pair of linked nodes is computed,
-    // the links move to converge on the desired distance
     force.on("tick", function() {
-      startNode.each(function(d) {
-        d.fixed = true;
-        d.x = width/2;
-        d.y = height/6;
-      });
+      node.attr("cx", function(d) { return d.x = Math.max(15, Math.min(width - 15, d.x)); })
+      .attr("cy", function(d) { return d.y = Math.max(15, Math.min(height - 15, d.y)); });
 
       link.attr("x1", function(d) { return d.source.x; })
           .attr("y1", function(d) { return d.source.y; })
           .attr("x2", function(d) { return d.target.x; })
           .attr("y2", function(d) { return d.target.y; });
 
-      node.attr("transform", function(d) {
-        return "translate(" + d.x + "," + d.y + ")";
-      });
-
+      node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
     });
+    // for each tick, the distance between each pair of linked nodes is computed,
+    // the links move to converge on the desired distance
+    // force.on("tick", function() {
+    //   link.attr("x1", function(d) { return d.source.x; })
+    //       .attr("y1", function(d) { return d.source.y; })
+    //       .attr("x2", function(d) { return d.target.x; })
+    //       .attr("y2", function(d) { return d.target.y; });
+    //   node.attr("transform", function(d) {
+    //     return "translate(" + d.x + "," + d.y + ")";
+    //   });
+
+    // });
 }
