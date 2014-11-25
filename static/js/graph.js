@@ -16,7 +16,7 @@ function drawGraph(json) {
 
     // this function handles the parameters of the force-directed layout
     var force = d3.layout.force()
-        .gravity(0)
+        .gravity(0.05)
         .distance(function(d) {
           if (d.value == 1) {
             return 130;
