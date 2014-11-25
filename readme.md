@@ -32,7 +32,13 @@ You can check out the project in progress [here](http://ec2-54-148-235-143.us-we
 - [ ] Path responses cached (CouchDB)
 
 #### The graphs
-I downloaded RDF files (.ttl) for page links, titles, redirects, and ontology from [DBPedia](http://wiki.dbpedia.org/Downloads39). I used <kbd>master_clean.py</kbd> to parse and clean the page links, removing redirects and duplicates, and incorporating titles and page types. It assembles a dictionary of all the information within the raw data file.
+I downloaded RDF files (.ttl) for page links and redirects from [DBPedia](http://wiki.dbpedia.org/Downloads2014). Here's what the raw page links file looks like:
+```
+<http://dbpedia.org/resource/Anarchism> <http://dbpedia.org/ontology/wikiPageWikiLink> <http://dbpedia.org/resource/William_McKinley> .
+<http://dbpedia.org/resource/Alabama> <http://dbpedia.org/ontology/wikiPageWikiLink> <http://dbpedia.org/resource/Andrew_Jackson> .
+```
+
+I used <kbd>master_clean.py</kbd> to parse and clean the page links, removing redirects and duplicates, and incorporating titles and page types. It assembles a dictionary of all the information within the raw data file.
 
 ```python
 def assemble_dict(link_path, redirects):
@@ -62,20 +68,13 @@ def assemble_dict(link_path, redirects):
     return data
 ```
 
-Wikipedia is big! The raw data include over 172 million relationships. After cleaning, the complete graph has just over 11 million nodes and 127 million edges. The data are stored in two tsv files: a list of all relationships (*start, end*) and a list of all nodes (*node, name, label*).
-
-*Raw data:*
-```
-<http://dbpedia.org/resource/Anarchism> <http://dbpedia.org/ontology/wikiPageWikiLink> <http://dbpedia.org/resource/William_McKinley> .
-<http://dbpedia.org/resource/Alabama> <http://dbpedia.org/ontology/wikiPageWikiLink> <http://dbpedia.org/resource/Andrew_Jackson> .
-```
-*Cleaned data:*
+Wikipedia is big! The raw data include over 172 million relationships. After cleaning, the complete graph has just over 11 million nodes and 127 million edges. The data are stored in two tsv files: a list of all relationships (*start, end*) and a list of all nodes (*node, name, label, degrees*).
 
 __nodes.tsv__
 ```
-node    name            l:label                     degrees
-0       Alabama         Page,AdministrativeRegion   83
-1       Andrew Jackson  Page,OfficeHolder           51
+node    name            l:label    degrees
+0       Alabama         Pages      83
+1       Andrew Jackson  Pages      51
 ```
 __rels.tsv__
 ```
@@ -83,10 +82,12 @@ start   end type
 0       1   LINKS_TO
 2       3   LINKS_TO
 ```
-I used Michael Hunger's [batch import tool](https://github.com/jexp/batch-import/tree/20) to insert the data into a [Neo4j](http://neo4j.com/) graph database.
+I used Michael Hunger's [batch import tool](https://github.com/jexp/batch-import/tree/20) to insert the data into a [Neo4j](http://neo4j.com/) graph database. Then, I applied a constraint on all nodes that their id ('node') was unique (using Neo4j's browser interface).
+```
+CREATE CONSTRAINT ON (p:Page) ASSERT p.node IS UNIQUE;
+```
 
-#####Smaller subgraph
-At this point, after some initial queries, I realized that a responsive query of such a large database would take some refinement (see [Improving query response time](#improving-query-response-time) below) and I wanted to figure out how to display my data first. I wrote <kbd>pres_clean.py</kbd> to sample the pagelinks file for only those pages and links that include the names of U.S. Presidents. After cleaning, this small subgraph had 77 thousand nodes and 137 thousand relationships. All of my initial testing and design used this smaller subgraph until I could decrease the response time.
+At this point, after some initial queries, I realized that a responsive query of such a large database would take some refinement (see [Improving query response time](#improving-query-response-time) below) and I wanted to figure out how to display my data first. I wrote <kbd>pres_clean.py</kbd> to sample the pagelinks file for only those pages and links that include the names of U.S. Presidents. After cleaning, this graph had 77 thousand nodes and 137 thousand relationships. All of my initial testing and design used this subgraph until I could decrease the response time.
 
 Complete graph | Subgraph
 -------------- | -----------
@@ -146,7 +147,7 @@ The script then traverses this path object, pulling out and deduping nodes and r
 #### Data visualization
 <kbd>wikigraph.py</kbd> is a small [Flask](http://flask.pocoo.org/) app that connects the database's reponse to the [d3 library](http://d3js.org/). <kbd>graph.js</kbd> handles the graph drawing while <kbd>index.js</kbd> handles everything else.
 
-Wikipedia page images are sourced from the Wikimedia API via two AJAX requests: once for the start and end nodes upon the query request, and then for the inner path nodes once the result is received.
+Wikipedia page images are sourced from the [Wikimedia API](http://www.mediawiki.org/wiki/API:Main_page) via two AJAX requests: once for the start and end nodes upon the query request, and then for the inner path nodes once the result is received.
 
 #### User input
 To help users input page names correctly (and to suggest possible queries) I implemented a predictive seach with [typeahead.js](https://twitter.github.io/typeahead.js/). Via an AJAX call, it queries an indexed [SQLite](http://www.sqlite.org/) database that holds the page titles and their codes.
@@ -168,7 +169,7 @@ Each time I increased both init and max memory, I ran the same query three times
 Then, I deployed the database to a larger machine (see [Deployment](#deployment) below). I scaled the java memory settings to the new specs, but the query time only halved (60 sec to 30 sec) despite the four-fold increase in RAM.
 
 #####Query efficiency
-I received advice from the Neo4j Google Group that the lookup of the two nodes was likely the slowest factor (rather than the pathfinding algorithm). Here is my initial query:
+I received advice from the [Neo4j Google Group](https://groups.google.com/forum/#!forum/neo4j) that the lookup of the two nodes was likely the slowest factor (rather than the pathfinding algorithm). Here is my initial query:
 ```python
 query = neo4j.CypherQuery(
     graph_db, 
@@ -181,7 +182,7 @@ I added a constraint in the database for the Page label (all nodes are Pages) to
 ```
 CREATE CONSTRAINT ON (p:Page) ASSERT p.node IS UNIQUE;
 ```
-And then I modified my query to use the Page label in the node lookup, as well as pass the nodes as arguments, rather than via string substitution:
+And then I modified my query to use the Page label in the node lookup, as well as pass the nodes as arguments (instead of via string substitution):
 ```python
 query = neo4j.CypherQuery(
     graph_db, 
@@ -193,4 +194,4 @@ query.execute(n1=node1, n2=node2)
 Surprisingly, auto-indexing had no effect on this query. I'd had it turned on (and assigned to index on 'node', e.g. id), but it was not adding efficiency. The constraint added via the Page label increased the speed with which the database finds the two nodes.
 
 #### Deployment
-This code was tested on Amazon's [EC2](http://aws.amazon.com/ec2/) using [Apache](http://httpd.apache.org/) as a web server. The database is housed on a 30 GiB EBS. Currently it is on an r3.large server, with 15G RAM, and the query of the full database takes just 0.5 seconds. Since EC2 servers do not come with virtual memory, I set up the 32G SSD ephemeral instance storage as a paging (or swap) partition to give the database access if needed.
+This code was tested on Amazon's [EC2](http://aws.amazon.com/ec2/) using [Apache](http://httpd.apache.org/) as a web server. The database is housed on a 30 GiB EBS. Currently it is on an r3.large server with 15G RAM, and the query of the full database takes just 0.5 seconds. Since EC2 servers do not come with virtual memory, I set up the 32G SSD ephemeral instance storage as a paging (or swap) partition to give the database access if needed.
