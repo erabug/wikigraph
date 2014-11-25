@@ -1,131 +1,86 @@
+import os
+import urllib2
+
+def parse_url(url):
+    path, name = os.path.split(urllib2.urlparse.urlparse(url).path)
+    return name[:-1]
+
 def redirects_set():
 
-	print "Creating set of redirect pages..."
-	redirects = set()
+    print "Creating set of redirect pages..."
+    redirects = set()
 
-	with open('data/redirects_en.ttl', 'r') as r:
-		for line in r:
-			l = line.split()
-			start = l[0][29:-1]
-			redirects.add(start)
+    with open('data/redirects_en.ttl', 'r') as r:
+        for line in r:
+            l = line.split()
+            name = parse_url(l[0])
+            redirects.add(name)
 
-	return redirects # as a set
-
-def names_dict():
-
-	print "Creating dictionary of names..."
-	names = {}
-
-	with open('data/labels_en.ttl', 'r') as r:
-		for line in r:
-			l = line.partition('<http://www.w3.org/2000/01/rdf-schema#label>')
-			name_link = l[0][29:-2]
-			name = l[2][1:-3].replace('@en', '').replace('"', '')
-			names[name_link] = name
-
-	return names # as a dict
-
-def types_dict():
-
-	print "Creating dictionary of types..."
-	types = {}
-
-	with open('data/instance_types_en.ttl', 'r') as r:
-		for line in r:
-			l = line.split()
-			if l[2][:29] == '<http://dbpedia.org/ontology/': # only if the type is dbpedia's
-				name_link = l[0][29:-1]
-				typ = l[2][29:-1]
-				if '__' in name_link:
-					continue
-				if name_link in types: # are you currently in a topic?
-					continue
-					# types[name_link].append(typ) # use this to append all types
-				else:
-					types[name_link] = typ
-					# types[name_link] = [typ] # for collecting more than one type
-
-	return types # as a dict
-
-def write_nodes(data):
-
-	print "Writing 'nodes.csv'..."
-
-	with open('data/nodes.csv', 'wb+') as d:
-		d.write('node\tname\tl:label\n')
-		for value in data:
-
-			node = str(value['id'])
-			name = value['name'].replace('_', ' ')
-			label = 'Page'
-
-			if value.get('type', 0) != 0:
-				label = label + ',' + value['type']
-
-			d. write(node + '\t' + name + '\t' + label + '\n')
+    return redirects # as a set
 
 def parse_links():
 
-	redirects = redirects_set() # create set of redirects
-	names = names_dict()
-	types = types_dict()
+    redirects = redirects_set() # create set of redirects
 
-	topics = {}
-	data = {}
-	
-	# counter = 5000
-	id_counter = 0
+    print "reading page_links_en.ttl..."
+    data = {}
+    
+    counter = 100000
+    id_counter = 0
 
-	print "Writing 'rels.csv'..."
+    lp = 'data/page_links_en.ttl'
+    rp = 'data/rels.tsv'
+    np = 'data/nodes.tsv'
 
-	with open('data/pres_links.ttl', 'r') as f, open('data/rels.csv', 'wb+') as c:
-		c.write('start\tend\ttype\n') # write headers
-		f.next()
+    with open(lp, 'r') as p, open(rp, 'wb+') as rels, open(np, 'wb+') as nodes:
 
-		for line in f:
-			# if counter > 0:
+        rels.write('start\tend\ttype\n') # write headers
+        nodes.write('node\tname\tl:label\tdegrees\n')
+        p.next()
 
-				l = line.split()
-				start = l[0][29:-1]
-				end = l[2][29:-1]
+        for line in p:
+            if counter > 0:
 
-				if start in topics: # are you currently in a topic?
-					if end in topics[start]: # are you a repeat link?
-						continue
-					else:
-						topics[start].append(end) # add yourself to topics
-				else:
-					topics = { start: [end] } # overwrite topics dict with new topic
+                l = line.split()
+                start = parse_url(l[0])
+                end = parse_url(l[2])
+                if end[:5] == "File:" or start in redirects:
+                    continue
 
-				if start not in redirects and end[:5] != "File:":
+                # STRUCTURE: data = {'page1': {'code': 41, 'links': ['page2', 'page3']}}
+                if start not in data: # give it a counter
+                    start_id = id_counter
+                    id_counter += 1
 
-					links = (start, end)
+                if end not in data: # give it a counter
+                    end_id = id_counter
+                    id_counter += 1
+                else:
+                    end_id = data[end]['code']
 
-					for link in links:
+                data.setdefault(start, {'code': start_id, 'title': start,'links': set()})['links'].add(end_id)
+                data.setdefault(end, {'code': end_id, 'title': end,'links': set()})
 
-						if link not in data: # are you a new link?
+                counter -= 1
 
-							data[link] = { 'id':   id_counter, 
-										   'name': names.get(link, link) }
+            else:
+                break
 
-							if types.get(link, 0) != 0: # only add type if it is known
-								data[link].update({'type': types[link]})
-
-							id_counter += 1
-
-					start_id = str(data[start]['id'])
-					end_id = str(data[end]['id'])
-
-					c.write(start_id + '\t' + end_id + '\tLINKS_TO\n')
-
-			# 	counter -= 1
-
-			# else:
-			# 	break
-
-	data_tup = sorted(data.values(), key=lambda k: k['id']) # sorted list of tuples
-	write_nodes(data_tup)
+        print "Writing 'rels.tsv'..."
+        # grab each key, iterate through it to write lines to rels.tsv
+        for key, value in data.iteritems():
+            link_counter = 0
+            for link in value['links']:
+                rels.write(str(value['code']) + '\t' + str(link) + '\tLINKS_TO\n')
+                link_counter += 1
+            data[key].update({'degrees': link_counter})
+        
+        print "Writing nodes.tsv..."
+        # sort the nodes by code before writing to nodes.tsv
+        for page in sorted(data.values(), key=lambda k: k['code']):
+            code = page['code']
+            nodes.write(str(code) + '\t' + page['title'] + '\tPage\t'+ str(page['degrees']) + '\n')
 
 if __name__ == "__main__":
-	parse_links()
+    parse_links()
 
