@@ -113,14 +113,14 @@ Complete graph | Small graph
 127m links | 137k links
 
 #### Queries
-I used Nigel Small's Python library [py2neo](http://nigelsmall.com/py2neo/1.6/) to interact with my database's RESTful web service interface. <kbd>query.py</kbd> translates my shortest-path request into a CypherQuery object, queries the database, and returns the results as a Path object. 
+I used Nigel Small's Python library [py2neo](http://nigelsmall.com/py2neo/1.6/) to interact with Neo4j's RESTful web service interface. <kbd>query.py</kbd> translates my shortest-path request into a CypherQuery object, queries the database, and returns the results as a Path object. 
 ```python
 query = neo4j.CypherQuery(
     graph_db, 
-    """MATCH (m {node:'%s'}), (n {node:'%s'}), 
-    p = shortestPath((m)-[*..20]->(n)) RETURN p""" % (node1, node2)
+    """MATCH (m:Page {node:{n1}}), (n:Page {node:{n2}}), 
+    p = shortestPath((m)-[*..20]->(n)) RETURN p"""
 )
-path = query.execute_one()
+query.execute(n1=node1, n2=node2)
 ```
 The script then traverses this path object, pulling out and deduping nodes and relationships. The ids need to be recoded to be sequential, starting from 0. Finally, the nodes and relationships are formatted and returned as JSON.
 ```
@@ -162,7 +162,9 @@ The script then traverses this path object, pulling out and deduping nodes and r
 ```
 
 #### Data visualization
-<kbd>wikigraph.py</kbd> is a small [Flask](http://flask.pocoo.org/) app that connects this reponse to the [d3 library](http://d3js.org/). <kbd>graph.js</kbd> handles the graph drawing while <kbd>index.js</kbd> handles everything else.
+<kbd>wikigraph.py</kbd> is a small [Flask](http://flask.pocoo.org/) app that connects the database's reponse to the [d3 library](http://d3js.org/). <kbd>graph.js</kbd> handles the graph drawing while <kbd>index.js</kbd> handles everything else.
+
+Wikipedia page images are sourced from the Wikimedia API via two AJAX requests, initially for the start and end nodes upon the query request, and then for the inner path nodes once the result is received.
 
 #### User input
 To help users input page names correctly (and to suggest possible queries) I implemented a predictive seach with [typeahead.js](https://twitter.github.io/typeahead.js/). Via an AJAX call, it queries an [SQLite](http://www.sqlite.org/) database that just holds the page titles and their codes.
@@ -174,10 +176,28 @@ Each time I increased both init and max memory, I ran the same query three times
 
 ![Memory Test Results](static/images/mem_test.png)
 
-I also tweaked the query, decreasing the maximum number of relationships to traverse before giving up, but saw no decrease in response time. 
+I received advice from the Neo4j Google Group that the lookup of the two nodes was likely the slowest factor (rather than the pathfinding algorithm). Here is my initial query:
+```python
+query = neo4j.CypherQuery(
+    graph_db, 
+    """MATCH (m {node:'%s'}), (n {node:'%s'}), 
+    p = shortestPath((m)-[*..20]->(n)) RETURN p""" % (node1, node2)
+)
+query.execute_one()
 ```
-p = shortestPath((m)-[*..5]->(n))
+I added a constraint in the database for the Page label (all nodes are Pages) to express that node id is unique:
+```
+CREATE CONSTRAINT ON (p:Page) ASSERT p.node IS UNIQUE;
+```
+And then I modified my query to use the Page label as well as pass parameters as arguments, rather than string substitution:
+```python
+query = neo4j.CypherQuery(
+    graph_db, 
+    """MATCH (m:Page {node:{n1}}), (n:Page {node:{n2}}), 
+    p = shortestPath((m)-[*..20]->(n)) RETURN p"""
+)
+query.execute(n1=node1, n2=node2)
 ```
 
 #### Deployment
-This code was tested on Amazon's [EC2](http://aws.amazon.com/ec2/) using [Apache](http://httpd.apache.org/) as a web server.
+This code was tested on Amazon's [EC2](http://aws.amazon.com/ec2/) using [Apache](http://httpd.apache.org/) as a web server. The database is housed on a 30 GiB EBS. Currently it is on an r3.large, with 15G RAM, where the query of the full database takes just 0.5 seconds. I set up the 32G SSD ephemeral instance storage as a paging (or swap) partition to give the database access to virtual memory if needed.

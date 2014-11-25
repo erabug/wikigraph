@@ -59,7 +59,7 @@ body {
 input { 
   border: none;
   border-bottom: solid 1px #999; 
-  margin: 0 5px 0 5px;
+  margin: 0 10px 0 10px;
   font-size: 14px;
 } 
 
@@ -95,7 +95,7 @@ input {
 svg {
   display: inline-block;
   /*margin: 0 auto;*/
-  border: solid 1px #666;
+  /*border: solid 1px #666;*/
 }
 
 /*TYPEAHEAD STUFF*/

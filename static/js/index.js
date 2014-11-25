@@ -9,9 +9,11 @@ var pageNames = new Bloodhound({
         return Bloodhound.tokenizers.whitespace(d.value);
     },
     queryTokenizer: Bloodhound.tokenizers.whitespace,
-    limit: 30,
+    limit: 50,
     remote: {
         url: '/page-names?query=%QUERY',
+        // rateLimitBy: 'throttle',
+        rateLimitWait: 100,
         filter: function(pageNames) {
             // Map the remote source JSON array to a JavaScript array
             return $.map(pageNames.results, function(page) {
@@ -100,7 +102,9 @@ function addPathImages(data) {
         item = getThumbnail(pageObject, pageKey);
         var node;
         response.path.forEach(function(pathNode) {
-            if (pathNode.name == item.title) {
+            // if (pathNode.name == item.title) {
+            // another stupid hack for title mismatch
+            if (pathNode.name.slice(0,6) == item.title.slice(0, 6)) {
                 node = pathNode.code;
             }
         });
@@ -111,7 +115,7 @@ function addPathImages(data) {
 function makeQueryURL(numPages, pagesParams) {
     var queryURL = 'http://en.wikipedia.org/w/api.php' +
                    '?action=query&format=json&redirects&prop=pageimages&' +
-                   'pithumbsize=100px&pilimit=' + numPages + '&titles=' +
+                   'pithumbsize=150px&pilimit=' + numPages + '&titles=' +
                    pagesParams + '&callback=?';
     return queryURL;
 }
@@ -126,8 +130,8 @@ function query() {
     var queryURL = makeQueryURL(numPages=2, pagesParams);
     var path = $('.details');
 
-    $.getJSON(
-        queryURL, // get the start/end images from wikipedia API
+    $.getJSON( // get the start/end images from Wikipedia API
+        queryURL,
         function(data) {
             var htmlSnippets = addQueryImages(data);
             Object.keys(htmlSnippets).forEach(function(node) {
@@ -136,14 +140,15 @@ function query() {
             $('#page0').after('<div class="page arrow loading" id="arrow1"></div>');
         });
 
-    $.get(
+    $.get( // get the shortest path from the database
         '/query',
         {'node1': CODES.node1.code, 'node2': CODES.node2.code},
         function(data) {
 
             response = JSON.parse(data); // decode the JSON
             path.html('');
-            // console.log('RETURNED PATH:', response.path);
+            // $('.arrow1').removeClass('loading');
+            console.log('RETURNED PATH:', response.path);
             var inner = response.path.slice(1, -1);
 
             if (0 < inner.length) { // if there are intermediary nodes
@@ -158,10 +163,12 @@ function query() {
                     pagesParams = innerNodes.join('|');
                 } else { pagesParams = innerNodes; }
                 var queryURL = makeQueryURL(numPages, pagesParams);
-                $.getJSON(
+
+                $.getJSON( // get the inner node images from Wikipedia API
                     queryURL,
                     function(data) {
                         addPathImages(data); //updates queryImages with inner ndoes
+                        console.log("QUERY IMAGES:", queryImages);
                         // updates queryImages with index numbers for ordering
                         response.path.forEach(function(node) {
                             queryImages[node.code].id = response.path.indexOf(node);
@@ -188,7 +195,8 @@ $('input#random-query').click(function(e) {
             CODES.node2 = {'title': n2.title, 'code': n2.code.toString()};
             $('input#start-node').val(n1.title);
             $('input#end-node').val(n2.title);
-            query();
+            console.log("CODES:", CODES);
+            // query();
         });
 });
 

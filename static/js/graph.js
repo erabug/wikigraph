@@ -3,8 +3,8 @@ function drawGraph(json) {
     // console.log("raw data:", json);
 
     // establish width and height of the svg
-    var width = 600,
-        height = 300;
+    var width = 650,
+        height = 400;
 
     // color established as a scale
     var color = d3.scale.category10();
@@ -16,11 +16,11 @@ function drawGraph(json) {
 
     // this function handles the parameters of the force-directed layout
     var force = d3.layout.force()
-        .gravity(0.05)
+        .gravity(0)
         .distance(function(d) {
           if (d.value == 1) {
-            return 100;
-          } else { return 70; }
+            return 130;
+          } else { return 100; }
         })
         .charge(-200)
         .size([width, height]);
@@ -82,7 +82,7 @@ function drawGraph(json) {
           .append("circle")
             // .attr("cy", -img['height']*0.1)
             // .attr("cx", img['width'])
-            .attr("r", 30);
+            .attr("r", 45);
     });
 
     var startNode = pathNode.filter(function(d) {
@@ -114,7 +114,7 @@ function drawGraph(json) {
         });
 
     pathNode.append("circle") // outline for the path nodes
-        .attr("r", 30)
+        .attr("r", 45)
         .style("fill", "none")
         .style("stroke", "#333")
         .style("stroke-width", "2px");

@@ -10,12 +10,27 @@ def find_shortest_path(node1, node2):
 	graph_db = neo4j.GraphDatabaseService()
 
 	t0 = time.time()
-	query = neo4j.CypherQuery(graph_db, 
-								"""MATCH (m {node:'%s'}), (n {node:'%s'}), 
-								p = shortestPath((m)-[*..10]->(n)) 
-								RETURN p""" % (node1, node2))
 
-	path = query.execute_one()
+	# experimental
+	# query = neo4j.CypherQuery(
+	# 	graph_db, 
+	# 	"""MATCH (m:Page {node:{n1}})
+	# 	   USING INDEX m:Page(node)
+	# 	   WITH m
+	# 	   MATCH (n:Page {node:{n2}}), p = shortestPath((m)-[*..20]->(n))
+	# 	   USING INDEX n:Page(node)
+	# 	   RETURN p"""
+	# )
+	# path = query.execute_one(n1=node1, n2=node2)
+
+	# works
+	query = neo4j.CypherQuery(
+		graph_db, 
+	    """MATCH (m:Page {node:{n1}}), (n:Page {node:{n2}}), 
+	    p = shortestPath((m)-[*..20]->(n)) RETURN p"""
+	)
+	path = query.execute_one(n1=node1, n2=node2)
+
 	t1 = time.time()
 
 	print "Shortest Path:", path
@@ -156,8 +171,6 @@ def create_lists(node1, node2):
 	for rel in rels_list: # look up the source and target in codes
 		rel['source'] = codes[rel['source']]
 		rel['target'] = codes[rel['target']]
-	print '****', rels_list
-	print '&&&&', nodes_list
 
 	response = """{ "path": %s, "results": { "directed": true, "nodes": %s, "links": %s, 
 	"multigraph": false }}""" % (json.dumps(path_names), json.dumps(nodes_list), json.dumps(rels_list))
