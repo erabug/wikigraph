@@ -77,16 +77,11 @@ input {
   border: solid 1px #666;
 }
 
-.results {
-  width: 100%;
-  display: inline-block;
-}
 
 
 /******GRAPH STUFF******/
 svg {
-  /*display: inline-block;*/
-  /*border: solid 1px #666;*/
+  border: solid 1px #666;
 }
 
 /*TYPEAHEAD STUFF*/
@@ -127,14 +122,25 @@ svg {
     margin: 0;
 }
 
-/*SIDEBAR STUFF*/
+/*RESULTS STUFF*/
+.results {
+    width: 100%;
+    display: inline-block;
+}
+
+.graph {
+    display: inline-block;
+}
+
 .details {
-    width: 200px;
+    width: 175px;
     margin: auto;
     border-radius: 5px;
-    position: relative;
+/*    position: relative;
     top: -400px;
-    left: 250px;
+    left: 250px;*/
+    vertical-align: top;
+    display: inline-block;
     border: solid 2px;
     padding: 5px;
     background-color: #E5E5E5;

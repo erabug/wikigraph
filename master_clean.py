@@ -1,4 +1,5 @@
 import time
+import urllib2
 
 def redirects_dict(redirects_path):
     """Iterates through the redirects file and creates a set of redirect page 
@@ -14,13 +15,19 @@ def redirects_dict(redirects_path):
 
     return redirects
 
+def convert_to_unicode(title):
+    title = urllib2.unquote(title)
+    return title
+
 def assemble_dict(link_path, redirects):
     """Iterates through the pagelinks file and returns a dictionary containing
-    information about the page, its unique code, and what it links to."""
+    information about the page, its unique code, and what it links to.
+    Dictionary looks like: 
+    {'page1': {'code': 41, 'title': 'page1', 'links': set([42, 108])}}"""
 
     with open(link_path, 'rb') as paths:
         data = {}
-        counter = 500000
+        # counter = 5000
         foo = 0
         id_counter = 0
 
@@ -30,24 +37,28 @@ def assemble_dict(link_path, redirects):
                 l = line.split('\t')
                 start = l[0]
                 end = l[1].rstrip()
-                
-                if end[:5] == "File:" or start in redirects:
+
+                if end[:5] == "File:" or end[:9] == "Category:" or start in redirects:
                     continue
+
+                if '%' in start:
+                    start = convert_to_unicode(start)
+
+                if '%' in end:
+                    end = convert_to_unicode(end)
 
                 if end in redirects: # if start points to a redirect page
                     end = redirects[end] # replace it with the real page
 
-                if start not in data:
-                    sid = id_counter
+                if start not in data: 
+                    sid = id_counter # assign the page a code
                     id_counter += 1
 
                 if end not in data:
-                    eid = id_counter
+                    eid = id_counter # assign the page a code
                     id_counter += 1
                 else:
-                    eid = data[end]['code']
-
-                # print "START: %s (%d), END: %s (%d)" % (start, sid, end, eid)
+                    eid = data[end]['code'] # else look up its code in data
 
                 if data.get(start, 0) == 0:
                     data[start] = {'code': sid, 'title': start, 'links': {eid}}
@@ -58,9 +69,9 @@ def assemble_dict(link_path, redirects):
                     data[end] = {'code': eid, 'title': end, 'links': set()}
 
                 foo += 1
-                if foo % 100000 == 0:
+                if foo % 10000000 == 0:
                     time_elapsed = (time.time() - t0)/60
-                    print """%d m lines read in %.2f minutes""" % (foo/100000, time_elapsed)
+                    print """%d million lines read in %.2f minutes""" % (foo/1000000, time_elapsed)
   
             #     counter -= 1
             # else: 
@@ -95,13 +106,15 @@ def write_nodes(data, nodes_path):
             nodes.write(code + '\t' + page['title'] + '\tPage\t'+ degrees + '\n')
 
 def clean_data():
+    """Creates a tsv file for page links and one for pages. First it assembles 
+    a dictionary of redirect pages, then uses that to create a dictionary of 
+    deduped page links. It then parses the dictionary of links to write the 
+    two files."""
 
     print "Creating set of redirect pages..."
     redirects = redirects_dict('data/cleaned_redirects.tsv')
     print "Reading page links..."
     data = assemble_dict('data/cleaned_links.tsv', redirects)
-
-    #{'page1': {'code': 41, 'title': 'page1', 'links': set([24, 8])}}
     print "Writing 'rels.tsv'..."
     write_rels(data, 'data/rels.tsv')
     print "Writing 'nodes.tsv'..."

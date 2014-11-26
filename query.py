@@ -44,9 +44,9 @@ def parse_node(node, in_path):
 	n, name = node.get_properties().values()
 	name = name.replace('_', ' ')
 
-	if 'US ' in name: # silly hack because DBPedia removed periods for US???
-		name = name.replace('US ', 'U.S. ')
-		name = name.replace('U.S. P', 'U.S. p')
+	# if 'US ' in name: # silly hack because DBPedia removed periods for US???
+	# 	name = name.replace('US ', 'U.S. ')
+	# 	name = name.replace('U.S. P', 'U.S. p')
 
 	node_dict = {'id': int(n), 'name': name, 'group': 'none'}
 
