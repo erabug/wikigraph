@@ -37,38 +37,28 @@ I downloaded RDF files (.ttl) for page links and redirects from [DBPedia](http:/
 <http://dbpedia.org/resource/Anarchism> <http://dbpedia.org/ontology/wikiPageWikiLink> <http://dbpedia.org/resource/William_McKinley> .
 <http://dbpedia.org/resource/Alabama> <http://dbpedia.org/ontology/wikiPageWikiLink> <http://dbpedia.org/resource/Andrew_Jackson> .
 ```
+Since the links file was quite large, I ran <kbd>clean_ttl.py</kbd> to just pull out the page names from the source and target and write them to a tab-separated file, since I didn't need the url or the link between them. This significantly reduced the file sizes for both links and redirects (23GB -> 6.2GB, 980MB -> 275MB).
 
-I used <kbd>master_clean.py</kbd> to parse and clean the page links, removing redirects and duplicates, and incorporating titles and page types. It assembles a dictionary of all the information within the raw data file.
+I then used <kbd>master_clean.py</kbd> to parse and clean the page links, removing redirects and duplicates, and incorporating titles and page types. 
 
 ```python
-def assemble_dict(link_path, redirects):
-    """Iterates through the pagelinks file and returns a dictionary containing
-    information about the page, its unique code, and what it links to."""
+def clean_data():
+    """Creates a tsv file for page links and one for pages. First it assembles 
+    a dictionary of redirect pages, then uses that to create a dictionary of 
+    deduped page links. It then parses the dictionary of links to write the 
+    two files."""
 
-    with open(link_path, 'r') as paths:
-        paths.next()
-        data = {}
-        id_counter = 0
-        for line in paths:
-            l = line.split()
-            start = parse_url(l[0])
-            end = parse_url(l[2])
-            if end[:5] == "File:" or start in redirects:
-                continue
-            if start not in data:
-                sid = id_counter
-                id_counter += 1
-            if end not in data:
-                eid = id_counter
-                id_counter += 1
-            else:
-                eid = data[end]['code']
-            data.setdefault(start, {'code': sid, 'title': start,'links': set()})['links'].add(eid)
-            data.setdefault(end, {'code': eid, 'title': end,'links': set()})
-    return data
+    redirects = redirects_dict('data/cleaned_redirects.tsv')
+    data = assemble_dict('data/cleaned_links.tsv', redirects)
+    write_rels(data, 'data/rels.tsv')
+    write_nodes(data, 'data/nodes.tsv')
+```
+It assembles a dictionary of all the information within the raw data file. Degrees are calculated and added during the write_rels function, after which the page links dictionary now looks like this:
+```python
+{'page1': {'code': 41, 'title': 'page1', 'degrees': 3, links': set([42, 108, 109])}}
 ```
 
-Wikipedia is big! The raw data include over 172 million relationships. After cleaning, the complete graph has just over 11 million nodes and 127 million edges. The data are stored in two tsv files: a list of all relationships (*start, end*) and a list of all nodes (*node, name, label, degrees*).
+Wikipedia is big! The raw data include over 152 million relationships. After cleaning, the complete graph has over 11 million nodes and 140 million edges. The data are stored in two tsv files: a list of all relationships (*start, end*) and a list of all nodes (*node, name, label, degrees*).
 
 __nodes.tsv__
 ```
