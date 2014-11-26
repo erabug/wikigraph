@@ -3,7 +3,7 @@ function drawGraph(json) {
     // console.log("raw data:", json);
 
     // establish width and height of the svg
-    var width = 650,
+    var width = 700,
         height = 400;
 
     // color established as a scale
@@ -34,7 +34,7 @@ function drawGraph(json) {
       .enter().append("svg:marker")
         .attr("id", String)
         .attr("viewBox", "0 -5 10 10")
-        .attr("refX", 30)
+        .attr("refX", 25)
         .attr("markerWidth", 7)
         .attr("markerHeight", 7)
         .attr("orient", "auto")
@@ -55,6 +55,7 @@ function drawGraph(json) {
           .data(json.nodes)
         .enter().append("svg:g")
           .attr("class", "node")
+          .attr("id", function(d) {return d.name + '|' + d.id;})
           .call(force.drag);
 
     // select subset of nodes that are in the path
@@ -120,10 +121,10 @@ function drawGraph(json) {
         .style("stroke-width", "2px");
 
     // this appends a mouseover text field to each node with name and type
-    node.append("title")
-        .text(function(d) {
-            return d.name + " (" + d.id + "), " + d.type;
-        });
+    // node.append("title")
+    //     .text(function(d) {
+    //         return d.name + " (" + d.id + "), " + d.type;
+    //     });
 
     startNode.each(function(d) {
       d.fixed = true;

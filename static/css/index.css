@@ -82,19 +82,10 @@ input {
   display: inline-block;
 }
 
-.details {
-  vertical-align: top;
-  width: 600px;
-  height: 100px;
-  margin: auto;
-  /*background-color: #999;*/
-  border-radius: 10px;
-}
 
 /******GRAPH STUFF******/
 svg {
-  display: inline-block;
-  /*margin: 0 auto;*/
+  /*display: inline-block;*/
   /*border: solid 1px #666;*/
 }
 
@@ -136,38 +127,53 @@ svg {
     margin: 0;
 }
 
-/*FLOATING HEADS STUFF*/
-.page {
-  display: inline-block;
-  vertical-align: top;
+/*SIDEBAR STUFF*/
+.details {
+    width: 200px;
+    margin: auto;
+    border-radius: 5px;
+    position: relative;
+    top: -400px;
+    left: 250px;
+    border: solid 2px;
+    padding: 5px;
+    background-color: #E5E5E5;
 }
-
-.squareimg {
-  width: 80px;
-  height: 80px;
-  border-radius: 40px;
-  overflow: hidden;
-  border: solid 2px black;
-  margin: 10px;
-  background-color: #333;
+.page-image {
+    margin-top: 5px;
 }
 
 .page-title {
-  margin: auto;
-  width: 90px;
-  font-size: 14px;
+    margin-top: 10px;
+}
+
+.page {
+    display: inline-block;
+    vertical-align: top;
+}
+
+.squareimg {
+    width: 80px;
+    height: 80px;
+    border-radius: 40px;
+    overflow: hidden;
+    border: solid 2px black;
+    margin: 10px;
+    background-color: #333;
 }
 
 .arrow {
-  position: relative;
-  font-size: 30px;
-  top: 35px;
-  width: 50px;
-  height: 30px;
+    position: relative;
+    font-size: 30px;
+    top: 35px;
+    width: 50px;
+    height: 30px;
 }
 
 .loading {
-  background: url("../images/arrow.gif") no-repeat center;
+    background: url("../images/arrow.gif") no-repeat center;
 }
 
-/*TOOLTIP STUFF*/
+.loading-images {
+    display: inline-block;
+}

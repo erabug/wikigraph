@@ -32,7 +32,7 @@ def get_page_names():
 	entry = request.args.get("query")
 	cursor = connect()
 	query = '''SELECT id, title 
-				FROM nodes 
+				FROM nodes
 				WHERE title LIKE ? 
 				OR title LIKE ?
 				LIMIT 100;'''
