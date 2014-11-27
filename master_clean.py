@@ -31,7 +31,7 @@ def assemble_dict(link_path, redirects):
 
     with open(link_path, 'rb') as paths:
         data = {}
-        # counter = 50000
+        # counter = 500000
         foo = 0
         code_counter = 0
 
@@ -94,49 +94,37 @@ def assemble_dict(link_path, redirects):
 
     return data
 
-def recode_dict(data):
-    """Returns a dictionary of codes with pages as keys. If the page has 
-    outgoing links, its value is a new code; otherwise, its value is None.
+def find_deadends(data):
 
-    Example of returned dictionary:
-    {{41: None}, {23: None}, {45: 2}}"""
+    # iterate through data, if empty set, add to dead
+    deadends = set()
+    keys = data.keys()
+    for key in keys:
+        value = data[key]
+        if not value['links']:
+            deadends.add(value['code'])
+            del data[key] # remove key from data
 
-    codes = {}
+    return keys, deadends
+
+def prune_deadends(data, deadends, keys):
+
+    # iterate through data, if link in deadends, remove it
+    for key in keys:
+        value = data.get(key)
+        if value != None:
+            links = value['links'].copy()
+            for link in links:
+                if link in deadends:
+                    value['links'].remove(link)
+
+def recode_data(data):
+
+    # iterate through data, assign new code to every entry
     code_counter = 0
     for value in data.values():
-        if value['links']:
-            codes[value['code']] = code_counter
-            code_counter += 1
-        else:
-            codes[value['code']] = None
-    return codes
-
-def prune_data(data, codes):
-    """Returns a dictionary of page links with continuous, sequential codes
-    that have at least one outgoing link. Also adds a field for degrees.
-
-    Example of returned dictionary:
-    {'page1': {'code': 41, 
-               'title': 'page1', 
-               'degrees': 2, 
-               'links': set([42, 108])}}"""
-    
-    pruned_data = {}
-    for i in data.keys():
-        value = data.pop(i)
-        if value['links']: # if the page has outgoing links
-            new_links = set()
-            for link in value['links']: # iterate through the set of links
-                if codes.get(link) != None:
-                    new_links.add(codes[link])
-            if new_links:
-                title = value['title']
-                pruned_data[title] = {'code': codes[value['code']],
-                                      'title': title,
-                                      'degrees': len(new_links),
-                                      'links': new_links}
-
-    return pruned_data
+        value['code'] = code_counter
+        code_counter += 1
 
 def write_rels(data, rels_path):
     """Iterates through the information dictionary and writes the results to 
@@ -158,29 +146,35 @@ def write_nodes(data, nodes_path):
         # sort the nodes by code (list of tuples) before writing
         for page in sorted(data.values(), key=lambda k: k['code']):
             code = str(page['code'])
-            degrees = str(page['degrees'])
-            nodes.write(code + '\t' + page['title'] + '\tPage\t'+ degrees + '\n')
+            deg = str(len(page['links']))
+            nodes.write(code + '\t' + page['title'] + '\tPage\t'+ deg + '\n')
 
 def clean_data():
     """Creates a tsv file for page links and one for pages. First it assembles 
-    a dictionary of redirect pages, then uses that to create a dictionary of 
-    deduped page links. It then parses the dictionary of links to write the 
-    two files."""
+    a dictionary of redirect pages, then it creates a page link dictionary, 
+    filtering out redirects and specific page types. Then, pages with no 
+    outgoing links are removed and their code is added to a 'deadend' set. Then,
+    pages in the dictionary remove links to pages in the 'deadend set'. Finally,
+    the dictionary is parsed and information is written to two .tsv files."""
 
     print "Creating set of redirect pages..."
     redirects = redirects_dict('data/cleaned_redirects.tsv')
     print "Reading page links..."
     data = assemble_dict('data/cleaned_links.tsv', redirects)
-    print "Page links dictionary created (length: %d)" % len(data)
-    print "Creating dictionary of new codes..."
-    codes = recode_dict(data)
-    print "Pruning data..."
-    pruned_data = prune_data(data, codes)
-    print "Page links dictionary pruned (length: %d)" % len(pruned_data)
+    raw_length = len(data)
+    print "Page links dictionary created with %d pages." % raw_length
+    print "Finding deadends..."
+    keys, deadends = find_deadends(data)
+    print "Pruning %d deadends..." % len(deadends)
+    prune_deadends(data, deadends, keys)
+    print "Recoding data..."
+    recode_data(data)
+    perc = (len(data)/float(raw_length))*100
+    print "Pages pruned, now has %d pages (%.2f%% of original)." % (len(data), perc)
     print "Writing 'rels.tsv'..."
-    write_rels(pruned_data, 'data/rels.tsv')
+    write_rels(data, 'data/rels.tsv')
     print "Writing 'nodes.tsv'..."
-    write_nodes(pruned_data, 'data/nodes.tsv')
+    write_nodes(data, 'data/nodes.tsv')
 
 if __name__ == "__main__":
     clean_data()
