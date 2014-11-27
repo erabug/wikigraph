@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, g
+from flask import Flask, render_template, request, jsonify
 import query
 import sqlite3
 import random
@@ -28,8 +28,8 @@ def get_path():
 @app.route('/page-names')
 def get_page_names():
 
-	print "requesting page names..."
 	entry = request.args.get("query")
+	print "requesting page names for %s..." % entry
 	cursor = connect()
 	query1 = 'SELECT id, title FROM nodes WHERE title = ? COLLATE NOCASE'
 	row = cursor.execute(query1, (entry,)).fetchone()

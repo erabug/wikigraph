@@ -12,7 +12,7 @@ var pageNames = new Bloodhound({
     limit: 50,
     remote: {
         url: '/page-names?query=%QUERY',
-        rateLimitBy: 'throttle',
+        // rateLimitBy: 'throttle',
         // rateLimitWait: 100,
         filter: function(pageNames) {
             // Map the remote source JSON array to a JavaScript array
@@ -55,11 +55,11 @@ function getThumbnail(pageObject, pageKey) {
         thWidth = 100;
         thHeight = 100;
     }
-    var info = {'title': page.title,
-             'thumbnail': thumbnail,
-             'width': thWidth,
-             'height': thHeight};
-    return info;
+    var item = {'title': page.title,
+                'thumbnail': thumbnail,
+                'width': thWidth,
+                'height': thHeight};
+    return item;
 }
 
 function addImage(item, node) {
@@ -189,20 +189,19 @@ function getExtracts() {
         var info = this.id.split('|');
         $('.page-title').html(info[0]);
         if (info[1] in queryImages) {
-            console.log(queryImages[info[1]].url);
             $('.page-image').html('<img src='+queryImages[info[1]].url+' style="border:solid 2px #666; background-color: #fff">');
         } else {
-            var queryURL = makeQueryURL(2, info[1]);
+            var queryURL = makeQueryURL(2, info[0]);
             $.getJSON(
                 queryURL,
                 function(data) {
-                    // console.log(data);
                     var pageObject = data.query.pages;
                     Object.keys(pageObject).forEach(function(pageKey) {
                         item = getThumbnail(pageObject, pageKey);
-                        addImage(item, info[0]);
+                        addImage(item, info[1]);
                     });
                     console.log('UPDATED QUERY IMAGES:', queryImages);
+                    $('.page-image').html('<img src='+queryImages[info[1]].url+' style="border:solid 2px #666; background-color: #fff">');
                 });
         }
     });
@@ -235,7 +234,7 @@ $('input#submit-query').click(function(e) {
 
 // sets up the typeahead on the two input fields
 $('.scrollable-dropdown-menu .typeahead').typeahead(null, {
-    minLength: 3,
+    // minLength: 3,
     name: 'pageNames',
     displayKey: 'value',
     source: pageNames.ttAdapter()
