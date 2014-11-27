@@ -31,14 +31,22 @@ def get_page_names():
 	print "requesting page names..."
 	entry = request.args.get("query")
 	cursor = connect()
-	query = '''SELECT id, title 
+	query1 = 'SELECT id, title FROM nodes WHERE title = ? COLLATE NOCASE'
+	row = cursor.execute(query1, (entry,)).fetchone()
+
+	if row == None:
+		results = []
+	else:
+		results = [{ 'title': row[1], 'code': row[0]}]
+
+	query2 = '''SELECT id, title 
 				FROM nodes
 				WHERE title LIKE ? 
 				OR title LIKE ?
 				LIMIT 100;'''
 
-	rows = cursor.execute(query, (entry + '%', '% ' + entry, )).fetchall()
-	results = [{ 'title': row[1], 'code': row[0] } for row in rows]
+	rows = cursor.execute(query2, (entry + '%', '% ' + entry, )).fetchall()
+	results.extend([{ 'title': row[1], 'code': row[0] } for row in rows])
 	response = jsonify(**{ 'results': results })
 	print response, len(results)
 
@@ -52,7 +60,6 @@ def get_random_names():
 	node2 = str(random.randrange(11135648))
 
 	cursor = connect()
-	# query = 'SELECT id, title FROM nodes ORDER BY RANDOM() LIMIT 2'
 	query = 'SELECT id, title FROM nodes WHERE id = ? OR id = ?'
 	rows = cursor.execute(query, (node1, node2, )).fetchall()
 	results = [{ 'title': row[1].replace('_', ' '), 'code': row[0] } for row in rows]
