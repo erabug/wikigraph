@@ -95,8 +95,10 @@ def assemble_dict(link_path, redirects):
     return data
 
 def find_deadends(data):
+    """Iterates through the page links dictionary, and for every page without
+    outgoing links, adds the code number to the 'deadends' set and deletes the
+    key from the dictionary."""
 
-    # iterate through data, if empty set, add to dead
     deadends = set()
     keys = data.keys()
     for key in keys:
@@ -108,8 +110,9 @@ def find_deadends(data):
     return keys, deadends
 
 def prune_deadends(data, deadends, keys):
+    """Iterates through the page links dictionary, and for every page, removes
+    links that are in the 'deadends' set."""
 
-    # iterate through data, if link in deadends, remove it
     for key in keys:
         value = data.get(key)
         if value != None:
@@ -119,16 +122,17 @@ def prune_deadends(data, deadends, keys):
                     value['links'].remove(link)
 
 def recode_data(data):
+    """Iterates through the page links dictionary and assigns a new code to 
+    every page."""
 
-    # iterate through data, assign new code to every entry
     code_counter = 0
     for value in data.values():
         value['code'] = code_counter
         code_counter += 1
 
 def write_rels(data, rels_path):
-    """Iterates through the information dictionary and writes the results to 
-    the rels.tsv file (node, name, label, degrees)."""
+    """Iterates through the page links dictionary and writes the results to 
+    the rels.tsv file (start, end, link_type)."""
     
     with open(rels_path, 'wb+') as rels:
         rels.write('start\tend\ttype\n')
@@ -137,7 +141,7 @@ def write_rels(data, rels_path):
                 rels.write(str(value['code']) + '\t' + str(lk) + '\tLINKS_TO\n')
 
 def write_nodes(data, nodes_path):
-    """Iterates through the information dictionary (sorted by code number)
+    """Iterates through the page links dictionary (sorted by code number)
     and writes the results to the nodes.tsv file (code, title, label, degrees).
     """
 
@@ -151,7 +155,7 @@ def write_nodes(data, nodes_path):
 
 def clean_data():
     """Creates a tsv file for page links and one for pages. First it assembles 
-    a dictionary of redirect pages, then it creates a page link dictionary, 
+    a dictionary of redirect pages, then it creates a page links dictionary, 
     filtering out redirects and specific page types. Then, pages with no 
     outgoing links are removed and their code is added to a 'deadend' set. Then,
     pages in the dictionary remove links to pages in the 'deadend set'. Finally,
