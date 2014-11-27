@@ -31,13 +31,13 @@ def assemble_dict(link_path, redirects):
 
     with open(link_path, 'rb') as paths:
         data = {}
-        counter = 50000
+        # counter = 50000
         foo = 0
         code_counter = 0
 
         t0 = time.time()
         for line in paths:
-            if counter > 0:
+            # if counter > 0:
                 l = line.split('\t')
                 start = l[0]
                 end = l[1].rstrip()
@@ -88,9 +88,9 @@ def assemble_dict(link_path, redirects):
                     y = (time.time() - t0)/60
                     print "%d million lines read in %.2f minutes" % (x, y)
   
-                counter -= 1
-            else: 
-                break
+            #     counter -= 1
+            # else: 
+            #     break
 
     return data
 
@@ -102,9 +102,6 @@ def recode_dict(data):
     {{41: None}, {23: None}, {45: 2}}"""
 
     codes = {}
-
-
-    # iterate through data, give new code to pages that have outgoing links
     code_counter = 0
     for value in data.values():
         if value['links']:
@@ -124,11 +121,10 @@ def prune_data(data, codes):
                'degrees': 2, 
                'links': set([42, 108])}}"""
     
-    # add information to new dict for pages with outgoing links    
     pruned_data = {}
     for i in data.keys():
         value = data.pop(i)
-        if value['links']:
+        if value['links']: # if the page has outgoing links
             new_links = set()
             for link in value['links']: # iterate through the set of links
                 if codes.get(link) != None:
@@ -136,9 +132,9 @@ def prune_data(data, codes):
             if new_links:
                 title = value['title']
                 pruned_data[title] = {'code': codes[value['code']],
-                                       'title': title,
-                                       'degrees': len(new_links),
-                                       'links': new_links}
+                                      'title': title,
+                                      'degrees': len(new_links),
+                                      'links': new_links}
 
     return pruned_data
 
@@ -147,9 +143,8 @@ def write_rels(data, rels_path):
     the rels.tsv file (node, name, label, degrees)."""
     
     with open(rels_path, 'wb+') as rels:
-        rels.write('start\tend\ttype\n') # write headers
-        # grab each key, iterate through its values to write lines to rels.tsv
-        for key, value in data.iteritems():
+        rels.write('start\tend\ttype\n')
+        for value in data.values():
             for lk in value['links']:
                 rels.write(str(value['code']) + '\t' + str(lk) + '\tLINKS_TO\n')
 
@@ -160,7 +155,7 @@ def write_nodes(data, nodes_path):
 
     with open(nodes_path, 'wb+') as nodes:
         nodes.write('node\tname\tl:label\tdegrees\n')
-        # sort the nodes by code (list of tuples) before writing to nodes.tsv
+        # sort the nodes by code (list of tuples) before writing
         for page in sorted(data.values(), key=lambda k: k['code']):
             code = str(page['code'])
             degrees = str(page['degrees'])
