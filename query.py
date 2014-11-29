@@ -26,7 +26,7 @@ def find_shortest_path(node1, node2):
 	query = neo4j.CypherQuery(
 		graph_db, 
 	    """MATCH (m:Page {node:{n1}}), (n:Page {node:{n2}}), 
-	    p = shortestPath((m)-[*..20]->(n)) RETURN p"""
+	    p = shortestPath((m)-[*..10]->(n)) RETURN p"""
 	)
 	path = query.execute_one(n1=node1, n2=node2)
 
@@ -98,11 +98,11 @@ def find_secondary_rels_and_nodes(node_objs_list):
 
 	for node in node_objs_list:
 
-		for rel in node.match_incoming(limit=2):
+		for rel in node.match_incoming(limit=8):
 			rels.append(rel)
 			nodes.append(rel.start_node)
 
-		for rel in node.match_outgoing(limit=2):
+		for rel in node.match_outgoing(limit=8):
 			rels.append(rel)
 			nodes.append(rel.end_node)
 
@@ -153,27 +153,30 @@ def create_lists(node1, node2):
 	list of nodes and relationships from the path, then process	to recode their 
 	IDs. Write output to a JSON file."""
 
-	print "\nRequesting shortest path for %s -> %s" % (node1, node2)
 	path = find_shortest_path(str(node1), str(node2))
-	print "Path:", path
 
-	rels_list, nodes_list, path_names = parse_nodes_and_rels(path)
+	if path:
+		
+		rels_list, nodes_list, path_names = parse_nodes_and_rels(path)
 
-	codes = {}
-	id_counter = 0
+		codes = {}
+		id_counter = 0
 
-	for node in nodes_list: # create a dict to translate id codes
-		node_id = node['code']
-		if node_id not in codes:
-			codes[node_id] = id_counter
-			id_counter += 1
+		for node in nodes_list: # create a dict to translate id codes
+			node_id = node['code']
+			if node_id not in codes:
+				codes[node_id] = id_counter
+				id_counter += 1
 
-	for rel in rels_list: # look up the source and target in codes
-		rel['source'] = codes[rel['source']]
-		rel['target'] = codes[rel['target']]
+		for rel in rels_list: # look up the source and target in codes
+			rel['source'] = codes[rel['source']]
+			rel['target'] = codes[rel['target']]
 
-	response = """{ "path": %s, "results": { "directed": true, "nodes": %s, "links": %s, 
-	"multigraph": false }}""" % (json.dumps(path_names), json.dumps(nodes_list), json.dumps(rels_list))
+		response = """{ "path": %s, "results": { "directed": true, "nodes": %s, "links": %s, 
+		"multigraph": false }}""" % (json.dumps(path_names), json.dumps(nodes_list), json.dumps(rels_list))
+
+	else:
+		response = '{ "path": None, "results": None }'
 
 	return response
 

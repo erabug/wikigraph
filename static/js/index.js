@@ -28,19 +28,17 @@ var pageNames = new Bloodhound({
 
 pageNames.initialize(); // initialize the bloodhound
 
-function clear_all() {
-    CODES = {};
-    $('input#start-node').val('');
-    $('input#end-node').val('');
-    $('.loading-images').html('');
+function clear_partial() {
+    $('.loading-images').empty();
     $('svg').remove();
     queryImages = {};
 }
 
-function clear_partial() {
-    $('.loading-images').html('');
-    $('svg').remove();
-    queryImages = {};
+function clear_all() {
+    CODES = {};
+    $('input#start-node').val('');
+    $('input#end-node').val('');
+    clear_partial();
 }
 
 function getThumbnail(pageObject, pageKey) {
@@ -135,18 +133,16 @@ function query() {
             Object.keys(htmlSnippets).forEach(function(node) {
                 path.append(htmlSnippets[node]);
             });
-            $('#page0').after('<div class="page arrow loading" id="arrow1"></div>');
+            $('#page0').after('<div class="page loading"></div>');
         // });
 
         $.get( // get the shortest path from the database
             '/query',
-            // {'node1': CODES.node1.code, 'node2': CODES.node2.code},
             CODES,
             function(data) {
 
                 response = JSON.parse(data); // decode the JSON
                 path.html('');
-                // $('.arrow1').removeClass('loading');
                 console.log('RETURNED PATH:', response.path);
                 
                 var inner = response.path.slice(1, -1);

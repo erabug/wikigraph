@@ -81,7 +81,7 @@ input {
 
 /******GRAPH STUFF******/
 svg {
-  border: solid 1px #666;
+  /*border: solid 1px #666;*/
 }
 
 /*TYPEAHEAD STUFF*/
@@ -168,18 +168,11 @@ svg {
     background-color: #333;
 }
 
-.arrow {
+.loading {
+    background: url("../images/arrow.gif") no-repeat center;
     position: relative;
     font-size: 30px;
     top: 35px;
     width: 50px;
     height: 30px;
-}
-
-.loading {
-    background: url("../images/arrow.gif") no-repeat center;
-}
-
-.loading-images {
-    display: inline-block;
 }

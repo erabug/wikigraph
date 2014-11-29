@@ -72,7 +72,7 @@ def get_page_names():
 	rows = cursor.execute(query2, (entry + '%', '% ' + entry, )).fetchall()
 	results.extend([{ 'title': row[1], 'code': row[0] } for row in rows])
 	response = jsonify(**{ 'results': results })
-	print response, len(results)
+	print "SQLite responded:", response, len(results)
 
 	return response
 
