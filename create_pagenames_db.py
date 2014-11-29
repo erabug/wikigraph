@@ -9,6 +9,8 @@ with open('data/nodes.tsv', 'rb') as csv_file:
     reader = csv.reader(csv_file, delimiter='\t')
     reader.next()
     for row in reader:
-        curs.execute(sql_insert, [int(row[0]), unicode(row[1], 'utf8')])
+    	to_db = [int(row[0]), unicode(row[1].replace('_', ' '), 'utf8')]
+        curs.execute(sql_insert, to_db)
 
 conn.commit()
+conn.close()
