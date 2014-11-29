@@ -1,6 +1,5 @@
 from py2neo import neo4j
-import json
-import time
+import json, time, sys
 
 def find_shortest_path(node1, node2):
 	"""Connects to graph database, then creates and sends query to graph 
@@ -33,26 +32,22 @@ def find_shortest_path(node1, node2):
 
 	t1 = time.time()
 
-	print "Shortest Path:", path
+	print "\nShortest Path:", path
 	print "Time elapsed: %.2f seconds." % (t1 - t0)
 
 	return path
 
 def parse_node(node, in_path):
-	"""Extract name and id from a node object. Returns a dict of information."""
+	"""Extract title and code from a node object. Returns a dict of information."""
 
-	n, name = node.get_properties().values()
-	name = name.replace('_', ' ')
+	# print node.get_properties().values(), '******'
+	code, deg, title = node.get_properties().values()
+	title = title.replace('_', ' ')
 
-	# if 'US ' in name: # silly hack because DBPedia removed periods for US???
-	# 	name = name.replace('US ', 'U.S. ')
-	# 	name = name.replace('U.S. P', 'U.S. p')
-
-	node_dict = {'id': int(n), 'name': name, 'group': 'none'}
-
-	label = node.get_labels() - set(['Page']) # does it have a label other than Page?
-	if label:
-		node_dict['type'] = list(label)[0]
+	node_dict = {'code': int(code), 
+				 'title': title, 
+				 'degrees': deg, 
+				 'group': 'none'}
 
 	if in_path:
 		node_dict['group'] = 'path'
@@ -60,13 +55,15 @@ def parse_node(node, in_path):
 	return node_dict
 
 def parse_rel(rel, in_path):
-	"""Extract node id from a relationship object. Returns a dict of 
+	"""Extract node code from a relationship object. Returns a dict of 
 	information."""
 
 	start_id = rel.start_node.get_properties()['node']
 	end_id = rel.end_node.get_properties()['node']
 
-	rel_dict = {'source': int(start_id), 'target': int(end_id), 'value': 0}
+	rel_dict = {'source': int(start_id), 
+				'target': int(end_id), 
+				'value': 0}
 
 	if in_path:
 		rel_dict['value'] = 1
@@ -80,8 +77,8 @@ def parse_node_objs(node_objs_list, in_path=False):
 
 	for node in node_objs_list:
 		node_dict = parse_node(node, in_path=in_path)
-		if node_dict['id'] not in nodes:
-			nodes[node_dict['id']] = node_dict
+		if node_dict['code'] not in nodes:
+			nodes[node_dict['code']] = node_dict
 
 	return nodes
 
@@ -137,8 +134,9 @@ def parse_nodes_and_rels(path):
 	path_names = []
 	for node in path.nodes:
 		path_dict = node.get_properties().values()[0]
-		# path_names.append(path_nodes[int(path_dict)]['name'])
-		path_names.append({'name': path_nodes[int(path_dict)]['name'], 'code': path_nodes[int(path_dict)]['id']})
+		# path_names.append(path_nodes[int(path_dict)]['title'])
+		path_names.append({'title': path_nodes[int(path_dict)]['title'], 
+						   'code': path_nodes[int(path_dict)]['code']})
 
 
 	# rel dict list for secondary rels
@@ -155,7 +153,9 @@ def create_lists(node1, node2):
 	list of nodes and relationships from the path, then process	to recode their 
 	IDs. Write output to a JSON file."""
 
+	print "\nRequesting shortest path for %s -> %s" % (node1, node2)
 	path = find_shortest_path(str(node1), str(node2))
+	print "Path:", path
 
 	rels_list, nodes_list, path_names = parse_nodes_and_rels(path)
 
@@ -163,7 +163,7 @@ def create_lists(node1, node2):
 	id_counter = 0
 
 	for node in nodes_list: # create a dict to translate id codes
-		node_id = node['id']
+		node_id = node['code']
 		if node_id not in codes:
 			codes[node_id] = id_counter
 			id_counter += 1
@@ -176,3 +176,8 @@ def create_lists(node1, node2):
 	"multigraph": false }}""" % (json.dumps(path_names), json.dumps(nodes_list), json.dumps(rels_list))
 
 	return response
+
+if __name__ == "__main__":
+	print create_lists('335354', '3778612')
+
+

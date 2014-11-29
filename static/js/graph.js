@@ -55,7 +55,7 @@ function drawGraph(json) {
           .data(json.nodes)
         .enter().append("svg:g")
           .attr("class", "node")
-          .attr("id", function(d) {return d.name + '|' + d.id;})
+          .attr("id", function(d) {return d.title + '|' + d.code;})
           .call(force.drag);
 
     // select subset of nodes that are in the path
@@ -75,7 +75,7 @@ function drawGraph(json) {
     Object.keys(queryImages).forEach(function(key) {
 
         img = queryImages[key];
-        if (img.id === 0) {
+        if (img.code === 0) {
           start = key;
         }
         defs.append("clipPath")
@@ -87,7 +87,7 @@ function drawGraph(json) {
     });
 
     var startNode = pathNode.filter(function(d) {
-        return d.id == start;
+        return d.code == start;
     });
 
     pathLinks
@@ -95,22 +95,22 @@ function drawGraph(json) {
 
     nonPathNode.append("circle")
         .attr("r", 10)
-        .style("fill", function(d) { return color(d.type); });
+        .style("fill", function(d) { return color(d.degrees); });
 
     pathNode.append("image")
-        .attr("xlink:href", function(d) { return queryImages[d.id].url;})
-        .attr("x", function(d) { return -queryImages[d.id].width/2;})
+        .attr("xlink:href", function(d) { console.log(queryImages, d.code); return queryImages[d.code].url;})
+        .attr("x", function(d) { return -queryImages[d.code].width/2;})
         // this seems to help for portraits, where height > width
         .attr("y", function(d) {
-          var h = queryImages[d.id].height;
+          var h = queryImages[d.code].height;
           var x;
-          if (h > queryImages[d.id].width) { x = 15; } else { x = 0; }
+          if (h > queryImages[d.code].width) { x = 15; } else { x = 0; }
           return -(h/2)+x;
         })
-        .attr("height", function(d) { return queryImages[d.id].height;})
-        .attr("width", function(d) { return queryImages[d.id].width;})
+        .attr("height", function(d) { return queryImages[d.code].height;})
+        .attr("width", function(d) { return queryImages[d.code].width;})
         .attr("clip-path", function(d) {
-            var x = 'img'+d.id;
+            var x = 'img'+d.code;
             return "url(#"+x+")"; // unique clip path for this node
         });
 
@@ -123,7 +123,7 @@ function drawGraph(json) {
     // this appends a mouseover text field to each node with name and type
     // node.append("title")
     //     .text(function(d) {
-    //         return d.name + " (" + d.id + "), " + d.type;
+    //         return d.name + " (" + d.code + "), " + d.type;
     //     });
 
     startNode.each(function(d) {

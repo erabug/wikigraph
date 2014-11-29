@@ -33,10 +33,10 @@ def index():
 @app.route('/query')
 def get_path():
 
-	print "requesting shortest path..."
-	node1, node2, code1, code2 = request.args.values()
+	print "requesting shortest path for %s" % request.args.values()
+	node2, node1, code2, code1 = request.args.values()
 	path_query = node1.replace(' ', '_')+'|'+node2.replace(' ', '_')
-	print node1, node2, code1, code2
+	print "%s (%s) -> %s (%s)" % (node1, code1, node2, code2)
 	is_cached = check_cached(path_query) # check if cached or not
 
 	if is_cached:

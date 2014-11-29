@@ -63,6 +63,7 @@ function getThumbnail(pageObject, pageKey) {
 }
 
 function addImage(item, node) {
+    console.log('adding Image', item, node);
     queryImages[node] = {'url': item.thumbnail,
                          'title': item.title,
                          'height': item.height,
@@ -81,14 +82,10 @@ function addQueryImages(data) {
     var htmlSnippets = {};
     Object.keys(pageObject).forEach(function(pageKey) {
         item = getThumbnail(pageObject, pageKey);
-        // if (item.title == CODES.node1.title) {node = 0;} else {node = 1;}
-        // stupid solution due to mismatch between wikipedia and dbPedia
-        if (item.title.slice(0,6) == CODES.node1.title.slice(0, 6)) {
-            node = 0;
-        } else {
-            node = 1;
-        }
+        if (item.title == CODES.node1.title) {node = 0;} else {node = 1;}
+        console.log(item.title, node, '***');
         htmlSnippets[node] = makeHTMLSnippet(node, item.thumbnail, item.title);
+        console.log('^^', CODES['node'+(node+1)].code);
         addImage(item, CODES['node'+(node+1)].code);
         imageURLs[node] = {'title': item.title,
                            'thumbnail': item.thumbnail};
@@ -102,10 +99,8 @@ function addPathImages(data) {
         item = getThumbnail(pageObject, pageKey);
         var node;
         response.path.forEach(function(pathNode) {
-            // if (pathNode.name == item.title) {
-            // another stupid hack for title mismatch
-            if (pathNode.name.slice(0,6) == item.title.slice(0, 6)) {
-                node = pathNode.code;
+            if (pathNode.title == item.title) {
+               node = pathNode.code;
             }
         });
         addImage(item, node);
@@ -121,11 +116,13 @@ function makeQueryURL(numPages, pagesParams) {
 }
 
 function decodeInput(d, node) {
-    CODES[node] = {'title': d.value, 'code': d.code.toString()};
+    CODES[node] = {'title': d.value, 
+                   'code': d.code.toString()};
 }
 
 function query() {
     clear_partial();
+    console.log('CODES', CODES);
     var pagesParams = CODES.node1.title + '|' + CODES.node2.title;
     var queryURL = makeQueryURL(numPages=2, pagesParams);
     var path = $('.loading-images');
@@ -134,53 +131,62 @@ function query() {
         queryURL,
         function(data) {
             var htmlSnippets = addQueryImages(data);
+            console.log("QUERY IMAGES:", queryImages);
             Object.keys(htmlSnippets).forEach(function(node) {
                 path.append(htmlSnippets[node]);
             });
             $('#page0').after('<div class="page arrow loading" id="arrow1"></div>');
-        });
+        // });
 
-    $.get( // get the shortest path from the database
-        '/query',
-        {'node1': CODES.node1.code, 'node2': CODES.node2.code},
-        function(data) {
+        $.get( // get the shortest path from the database
+            '/query',
+            // {'node1': CODES.node1.code, 'node2': CODES.node2.code},
+            CODES,
+            function(data) {
 
-            response = JSON.parse(data); // decode the JSON
-            path.html('');
-            // $('.arrow1').removeClass('loading');
-            console.log('RETURNED PATH:', response.path);
-            var inner = response.path.slice(1, -1);
+                response = JSON.parse(data); // decode the JSON
+                path.html('');
+                // $('.arrow1').removeClass('loading');
+                console.log('RETURNED PATH:', response.path);
+                
+                var inner = response.path.slice(1, -1);
 
-            if (0 < inner.length) { // if there are intermediary nodes
+                if (0 < inner.length) { // if there are intermediary nodes
 
-                var numPages = inner.length;
-                var innerNodes = [];
-                inner.forEach(function(node) {
-                    innerNodes.push(node.name);
-                });
-                var pagesParams;
-                if (numPages > 1) {
-                    pagesParams = innerNodes.join('|');
-                } else { pagesParams = innerNodes; }
-                var queryURL = makeQueryURL(numPages, pagesParams);
-
-                $.getJSON( // get the inner node images from Wikipedia API
-                    queryURL,
-                    function(data) {
-                        addPathImages(data); //updates queryImages with inner ndoes
-                        console.log("QUERY IMAGES:", queryImages);
-                        // updates queryImages with index numbers for ordering
-                        response.path.forEach(function(node) {
-                            queryImages[node.code].id = response.path.indexOf(node);
-                        });
-                        // console.log("QUERY IMAGES:", queryImages);
-                        drawGraph(response.results); // graph the results
-                        getExtracts();
+                    var numPages = inner.length;
+                    console.log('numPages', numPages);
+                    console.log('inner', inner);
+                    var innerNodes = [];
+                    inner.forEach(function(node) {
+                        innerNodes.push(node.title);
                     });
-            } else {
-                drawGraph(response.results);
-                getExtracts();
-            }
+                    console.log('innerNodes:', innerNodes);
+                    var pagesParams;
+                    if (numPages > 1) {
+                        pagesParams = innerNodes.join('|');
+                    } else { pagesParams = innerNodes; }
+                    var queryURL = makeQueryURL(numPages, pagesParams);
+                    console.log('pagesParams:', pagesParams);
+                    $.getJSON( // get the inner node images from Wikipedia API
+                        queryURL,
+                        function(data) {
+                            console.log('data', data);
+                            addPathImages(data); //updates queryImages with inner ndoes
+                            console.log("QUERY IMAGES:", queryImages);
+                            // updates queryImages with index numbers for ordering
+                            response.path.forEach(function(node) {
+                                console.log('node.code', node.code);
+                                queryImages[node.code].code = response.path.indexOf(node);
+                            });
+                            // console.log("QUERY IMAGES:", queryImages);
+                            drawGraph(response.results); // graph the results
+                            getExtracts();
+                        });
+                } else {
+                    drawGraph(response.results);
+                    getExtracts();
+                }
+            });
         });
 }
 
@@ -207,23 +213,23 @@ function getExtracts() {
     });
 }
 
-
-
 $(document).ready(function(e) {
     clear_all();
 });
 
 $('input#random-query').click(function(e) {
-    $.get('/random',
+    $.get('/random-query',
         function(data) {
             var n1 = data.results[0];
             var n2 = data.results[1];
-            CODES.node1 = {'title': n1.title, 'code': n1.code.toString()};
-            CODES.node2 = {'title': n2.title, 'code': n2.code.toString()};
+            CODES.node1 = {'title': n1.title,
+                           'code': n1.code.toString()};
+            CODES.node2 = {'title': n2.title,
+                           'code': n2.code.toString()};
             $('input#start-node').val(n1.title);
             $('input#end-node').val(n2.title);
             console.log("CODES:", CODES);
-            // query();
+            query();
         });
 });
 
