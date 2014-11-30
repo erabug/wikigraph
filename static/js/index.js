@@ -45,7 +45,6 @@ function clear_all() {
 
 function getThumbnail(pageObject, pageKey) {
     var page = pageObject[pageKey];
-    console.log('getting info for:', page);
     var thumbnail, thWidth, thHeight;
     if ('thumbnail' in page) { // if wikipedia query returned a thumbnail
         thumbnail = page.thumbnail.source;
@@ -56,7 +55,6 @@ function getThumbnail(pageObject, pageKey) {
         thWidth = 100;
         thHeight = 100;
     }
-    console.log('found item info for:', page.title);
     var item = {'title': page.title,
                 'thumbnail': thumbnail,
                 'width': thWidth,
@@ -64,9 +62,9 @@ function getThumbnail(pageObject, pageKey) {
     return item;
 }
 
-function addImage(item, node) {
-    console.log('adding Image', item, node);
-    queryImages[node] = {'url': item.thumbnail,
+function addImage(item, code) {
+    console.log('adding Image', item.title, code);
+    queryImages[code] = {'url': item.thumbnail,
                          'title': item.title,
                          'height': item.height,
                          'width': item.width};
@@ -95,17 +93,21 @@ function addQueryImages(data) {
     return htmlSnippets;
 }
 
+function getPathCode(title) {
+    var code;
+    response.path.forEach(function(pathNode) {
+        if (pathNode.title == title) {
+           code = pathNode.code;
+        }
+    });
+    return code;
+}
+
 function addPathImages(data) {
     var pageObject = data.query.pages;
     Object.keys(pageObject).forEach(function(pageKey) {
         item = getThumbnail(pageObject, pageKey);
-        var node;
-        response.path.forEach(function(pathNode) {
-            if (pathNode.title == item.title) {
-               node = pathNode.code;
-            }
-        });
-        addImage(item, node);
+        addImage(item, getPathCode(item.title));
     });
 }
 
@@ -135,7 +137,6 @@ function query() {
             queryURL,
             function(data) {
                 var htmlSnippets = addQueryImages(data);
-                console.log("QUERY IMAGES:", queryImages);
                 Object.keys(htmlSnippets).forEach(function(node) {
                     path.append(htmlSnippets[node]);
                 });
@@ -146,24 +147,19 @@ function query() {
             '/query',
             CODES,
             function(data) {
-                console.log("GOT THE CODES");
                 response = JSON.parse(data); // decode the JSON
-                // path.html('');
-                // path.empty();
                 console.log('RETURNED PATH:', response.path);
             })
 
     ).then(function(data) {
 
         var inner = response.path.slice(1, -1);
-        console.log('inner:', inner);
         var numPages = inner.length;
 
         var innerNodes = [];
         inner.forEach(function(node) {
             innerNodes.push(node.title);
         });
-        console.log('innerNodes:', innerNodes);
 
         var pagesParams;
         if (numPages > 1) {
@@ -182,7 +178,6 @@ function query() {
                     console.log("QUERY IMAGES:", queryImages);
                     // updates queryImages with index numbers for ordering
                     response.path.forEach(function(node) {
-                        // console.log('node.code', node.code);
                         queryImages[node.code].code = response.path.indexOf(node);
                     });
                 });
@@ -194,6 +189,23 @@ function query() {
     });
 }
 
+function getSummaryImages(numPages, pageParams) {
+    queryURL = makeQueryURL(size=60, numPages, pageParams);
+    $.getJSON(
+        queryURL,
+        function(data) {
+            var pageObject = data.query.pages;
+            Object.keys(pageObject).forEach(function(pageKey) {
+                item = getThumbnail(pageObject, pageKey);
+                code = getPathCode(item.title);
+                queryImages[code].tinyurl = item.thumbnail;
+                queryImages[code].tinyHeight = item.height;
+                queryImages[code].tinyWidth = item.width;
+            });
+            displaySummary(response.path);
+        });
+}
+
 function sideBar() {
 
     // get tiny images for the path nodes
@@ -201,51 +213,26 @@ function sideBar() {
     response.path.forEach(function(node) {
         pathNodes.push(node.title);
     });
-    console.log('queryURL:', pathNodes.join('|'));
+    var pageParams = pathNodes.join('|');
+    var numPages = pathNodes.length;
 
-    queryURL = makeQueryURL(size=60, pathNodes.length, pathNodes.join('|'));
-    $.getJSON(
-        queryURL,
-        function(data) {
-            // console.log('TINY IMAGES RETURNED', data);
-            var pageObject = data.query.pages;
-            Object.keys(pageObject).forEach(function(pageKey) {
-                item = getThumbnail(pageObject, pageKey);
-                response.path.forEach(function(pathNode) {
-                    if (pathNode.title == item.title) {
-                        node = pathNode.code;
-                    }
-                });
-                queryImages[node].tinyurl = item.thumbnail;
-                queryImages[node].tinyHeight = item.height;
-                queryImages[node].tinyWidth = item.width;
-            });
-            console.log('queryImages with tiny images:', queryImages);
-            displaySummary(response.path);
-        });
+    getSummaryImages(numPages, pageParams); // get thumbnails for summary
+    getPathExtracts(numPages, pageParams); // get extracts for path nodes
 
-    
     $('.node').mouseover(function(e) {
         $('.details').toggleClass('hidden');
         var info = this.id.split('|');
-        $('.page-title').html(info[0]);
-        if (info[1] in queryImages) {
-            console.log('already have this image in queryImages:', info[1], queryImages);
-            $('.page-image').html('<img src='+queryImages[info[1]].url+' style="border:solid 2px #666; background-color: #fff">');
+        var title = info[0];
+        var code = info[1];
+        $('.page-title').html(title);
+        if (code in queryImages) {
+            console.log('already have this image in queryImages:', code, queryImages);
+            $('.page-image').html('<img src=' + queryImages[code].url +
+                ' style="border:solid 2px #666; background-color: #fff">');
         } else {
-            var queryURL = makeQueryURL(size=150, numPages=2, info[0]);
-            $.getJSON(
-                queryURL,
-                function(data) {
-                    var pageObject = data.query.pages;
-                    Object.keys(pageObject).forEach(function(pageKey) {
-                        item = getThumbnail(pageObject, pageKey);
-                        addImage(item, info[1]);
-                    });
-                    console.log('UPDATED QUERY IMAGES:', queryImages);
-                    $('.page-image').html('<img src='+queryImages[info[1]].url+' style="border:solid 2px #666; background-color: #fff">');
-                });
+            getImageAndExtract(title, code);
         }
+        
     });
 
     $('.node').mouseout(function(e) {
@@ -256,6 +243,58 @@ function sideBar() {
     });
 }
 
+function getImageAndExtract(title, code) {
+    
+    var queryURL = makeQueryURL(150, 1, title);
+    var extractURL = makeExtractURL(1, title);
+    $.when(
+        $.getJSON( // get image for moused over node
+        queryURL,
+        function(data) {
+            var pageObject = data.query.pages;
+            Object.keys(pageObject).forEach(function(pageKey) {
+                item = getThumbnail(pageObject, pageKey);
+                addImage(item, code); // this updates queryImages
+            });
+        })
+        ).then(function(data) {
+            return $.getJSON(
+                extractURL,
+                function(data) {
+                    var thing = data.query.pages;
+                    var page = thing[Object.keys(thing)[0]];
+                    var text = page.extract;
+                    queryImages[code].extract = text;
+            });
+        }).then(function(data) {
+            $('.page-image').html('<img src=' + queryImages[code].url +
+                ' style="border:solid 2px #666; background-color: #fff">');
+            $('.page-extract').html(queryImages[code].extract);
+        });
+
+}
+
+function makeExtractURL(numPages, pageParams) {
+    var extractURL = 'http://en.wikipedia.org/w/api.php' +
+                     '?action=query&prop=extracts&format=json&' +
+                     'exintro=&exlimit='+ numPages + '&titles=' +
+                     pageParams + '&callback=?';
+    return extractURL;
+}
+
+function getPathExtracts(numPages, pageParams) {
+    var extractURL = makeExtractURL(numPages, pageParams);
+    $.getJSON(
+        extractURL,
+        function(data) {
+            var extracts = data.query.pages;
+            Object.keys(extracts).forEach(function(key) {
+                var text = extracts[key].extract;
+                var code = getPathCode(extracts[key].title);
+                queryImages[code].extract = text; // add it to queryImages
+            });
+        });
+}
 
 function feelingLucky(inputField, node) {
     $.get(
@@ -283,7 +322,7 @@ $('input#random-query').click(function(e) {
                            'code': n2.code.toString()};
             $('input#start-node').val(n1.title); // fill in the search fields
             $('input#end-node').val(n2.title);
-            console.log("CODES:", CODES);
+            // console.log("CODES:", CODES);
         });
 });
 
@@ -291,17 +330,17 @@ $('input#random-query').click(function(e) {
 // event handler for the query submission
 $('input#submit-query').click(function() {
     clear_partial();
-    console.log('CODES', CODES);
+    // console.log('CODES', CODES);
 
     var inputField;
     if (!(CODES.node1) || $('#start-node').val() != CODES.node1.title) { // if either/both fields not chosen
-        console.log("CODE1 missing");
+        // console.log("CODE1 missing");
         inputField = $('#start-node');
         feelingLucky(inputField, 'node1');
     }
 
     if (!(CODES.node2) || $('#end-node').val() != CODES.node2.title) { // if either/both fields not chosen
-        console.log("CODE2 missing");
+        // console.log("CODE2 missing");
         inputField = $('#end-node');
         feelingLucky(inputField, 'node2');
     }

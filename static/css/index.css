@@ -163,6 +163,10 @@ svg {
     margin-top: 10px;
 }
 
+.page-extract {
+    font-size: 10px;
+}
+
 .page {
     display: inline-block;
     vertical-align: top;
