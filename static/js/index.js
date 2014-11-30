@@ -81,9 +81,9 @@ function addQueryImages(data) {
     Object.keys(pageObject).forEach(function(pageKey) {
         item = getThumbnail(pageObject, pageKey);
         if (item.title == CODES.node1.title) {node = 0;} else {node = 1;}
-        console.log(item.title, node, '***');
+
         htmlSnippets[node] = makeHTMLSnippet(node, item.thumbnail, item.title);
-        console.log('^^', CODES['node'+(node+1)].code);
+
         addImage(item, CODES['node'+(node+1)].code);
         imageURLs[node] = {'title': item.title,
                            'thumbnail': item.thumbnail};
@@ -114,79 +114,146 @@ function makeQueryURL(numPages, pagesParams) {
 }
 
 function decodeInput(d, node) {
-    CODES[node] = {'title': d.value, 
+    CODES[node] = {'title': d.value,
                    'code': d.code.toString()};
+    
 }
 
 function query() {
-    clear_partial();
-    console.log('CODES', CODES);
+
+
     var pagesParams = CODES.node1.title + '|' + CODES.node2.title;
     var queryURL = makeQueryURL(numPages=2, pagesParams);
     var path = $('.loading-images');
 
-    $.getJSON( // get the start/end images from Wikipedia API
-        queryURL,
-        function(data) {
-            var htmlSnippets = addQueryImages(data);
-            console.log("QUERY IMAGES:", queryImages);
-            Object.keys(htmlSnippets).forEach(function(node) {
-                path.append(htmlSnippets[node]);
-            });
-            $('#page0').after('<div class="page loading"></div>');
-        // });
+
+    // $.getJSON( // get the start/end images from Wikipedia API
+    //     queryURL,
+    //     function(data) {
+    //         var htmlSnippets = addQueryImages(data);
+    //         console.log("QUERY IMAGES:", queryImages);
+    //         Object.keys(htmlSnippets).forEach(function(node) {
+    //             path.append(htmlSnippets[node]);
+    //         });
+    //         $('#page0').after('<div class="page loading"></div>');
+    //     // });
+
+    //     $.get( // get the shortest path from the database
+    //         '/query',
+    //         CODES,
+    //         function(data) {
+
+    //             response = JSON.parse(data); // decode the JSON
+    //             // path.html('');
+    //             console.log('RETURNED PATH:', response.path);
+                
+    //             var inner = response.path.slice(1, -1);
+
+    //             if (0 < inner.length) { // if there are intermediary nodes
+
+    //                 var numPages = inner.length;
+    //                 console.log('numPages', numPages);
+    //                 console.log('inner', inner);
+    //                 var innerNodes = [];
+    //                 inner.forEach(function(node) {
+    //                     innerNodes.push(node.title);
+    //                 });
+    //                 console.log('innerNodes:', innerNodes);
+    //                 var pagesParams;
+    //                 if (numPages > 1) {
+    //                     pagesParams = innerNodes.join('|');
+    //                 } else { pagesParams = innerNodes; }
+    //                 var queryURL = makeQueryURL(numPages, pagesParams);
+    //                 console.log('pagesParams:', pagesParams);
+    //                 $.getJSON( // get the inner node images from Wikipedia API
+    //                     queryURL,
+    //                     function(data) {
+    //                         console.log('data', data);
+    //                         addPathImages(data); //updates queryImages with inner ndoes
+    //                         console.log("QUERY IMAGES:", queryImages);
+    //                         // updates queryImages with index numbers for ordering
+    //                         response.path.forEach(function(node) {
+    //                             console.log('node.code', node.code);
+    //                             queryImages[node.code].code = response.path.indexOf(node);
+    //                         });
+    //                         // console.log("QUERY IMAGES:", queryImages);
+    //                         drawGraph(response.results); // graph the results
+    //                         createSideBar();
+    //                     });
+    //             } else {
+    //                 drawGraph(response.results);
+    //                 createSideBar();
+    //             }
+    //         });
+    //     });
+
+    $.when(
+        $.getJSON( // get the start/end images from Wikipedia API
+            queryURL,
+            function(data) {
+                var htmlSnippets = addQueryImages(data);
+                console.log("QUERY IMAGES:", queryImages);
+                Object.keys(htmlSnippets).forEach(function(node) {
+                    path.append(htmlSnippets[node]);
+                });
+                $('#page0').after('<div class="page loading"></div>');
+        }),
 
         $.get( // get the shortest path from the database
             '/query',
             CODES,
             function(data) {
-
+                console.log("GOT THE CODES");
                 response = JSON.parse(data); // decode the JSON
                 path.html('');
                 console.log('RETURNED PATH:', response.path);
-                
-                var inner = response.path.slice(1, -1);
+            })
+        ).then(function(inner) {
+            var inner = response.path.slice(1, -1);
+            console.log('inner:', inner);
+            var numPages = inner.length;
 
-                if (0 < inner.length) { // if there are intermediary nodes
+            var innerNodes = [];
+            inner.forEach(function(node) {
 
-                    var numPages = inner.length;
-                    console.log('numPages', numPages);
-                    console.log('inner', inner);
-                    var innerNodes = [];
-                    inner.forEach(function(node) {
-                        innerNodes.push(node.title);
-                    });
-                    console.log('innerNodes:', innerNodes);
-                    var pagesParams;
-                    if (numPages > 1) {
-                        pagesParams = innerNodes.join('|');
-                    } else { pagesParams = innerNodes; }
-                    var queryURL = makeQueryURL(numPages, pagesParams);
-                    console.log('pagesParams:', pagesParams);
-                    $.getJSON( // get the inner node images from Wikipedia API
-                        queryURL,
-                        function(data) {
-                            console.log('data', data);
-                            addPathImages(data); //updates queryImages with inner ndoes
-                            console.log("QUERY IMAGES:", queryImages);
-                            // updates queryImages with index numbers for ordering
-                            response.path.forEach(function(node) {
-                                console.log('node.code', node.code);
-                                queryImages[node.code].code = response.path.indexOf(node);
-                            });
-                            // console.log("QUERY IMAGES:", queryImages);
-                            drawGraph(response.results); // graph the results
-                            getExtracts();
-                        });
-                } else {
-                    drawGraph(response.results);
-                    getExtracts();
-                }
+                innerNodes.push(node.title);
             });
+            console.log('innerNodes:', innerNodes);
+            var pagesParams;
+
+            if (numPages > 1) {
+                pagesParams = innerNodes.join('|');
+            } else { pagesParams = innerNodes; }
+
+            var queryURL = makeQueryURL(numPages, pagesParams);
+
+            if (inner.length === 0) {
+                return false;
+            } else { // if there are intermediary nodes
+                return $.getJSON( // get the inner node images from Wikipedia API
+                    queryURL,
+                    function(data) {
+                        console.log('GOT INNER NODE IMAGES');
+                        addPathImages(data); //updates queryImages with inner ndoes
+                        console.log("QUERY IMAGES:", queryImages);
+                        // updates queryImages with index numbers for ordering
+                        response.path.forEach(function(node) {
+                            console.log('node.code', node.code);
+                            queryImages[node.code].code = response.path.indexOf(node);
+                        });
+                        // console.log("QUERY IMAGES:", queryImages);
+                    });
+                }
+            }).then(function() {
+        
+            console.log("GRAPH DRAW!");
+            drawGraph(response.results);
+            createSideBar();
         });
+        // });
 }
 
-function getExtracts() {
+function createSideBar() {
     $('.node').mouseover(function(e) {
         var info = this.id.split('|');
         $('.page-title').html(info[0]);
@@ -222,17 +289,56 @@ $('input#random-query').click(function(e) {
                            'code': n1.code.toString()};
             CODES.node2 = {'title': n2.title,
                            'code': n2.code.toString()};
-            $('input#start-node').val(n1.title);
+            $('input#start-node').val(n1.title); // fill in the search fields
             $('input#end-node').val(n2.title);
             console.log("CODES:", CODES);
-            query();
+            // query();
         });
 });
 
+function feelingLucky(inputField, node) {
+    $.get(
+        '/page-names',
+        'query='+inputField.val(),
+        function(data) {
+            result = data.results[0];
+            console.log('returned data:', result);
+            inputField.val(result.title);
+            CODES[node] = {'title': result.title,
+                           'code': result.code.toString()};
+            $.data(inputField, 'code', result.code.toString());
+            console.log($.hasData(inputField));
+    });
+}
+
 // event handler for the query submission
 $('input#submit-query').click(function(e) {
-	query();
+    clear_partial();
+    console.log('CODES', CODES);
+
+    // if (!(CODES.node1) | (!(CODES.node1)) {
+
+    // }
+    var inputField;
+    if (!(CODES.node1)) { // if either/both fields not chosen
+        inputField = $('#start-node');
+        feelingLucky(inputField, 'node1');
+    }
+
+    if (!(CODES.node2)) { // if either/both fields not chosen
+        inputField = $('#end-node');
+        feelingLucky(inputField, 'node2');
+    }
+    
+        // if codes isn't full, then query SQLite db
+    console.log(CODES.node1);
+    // $.when({foo: CODES.node1}).done(function(x){
+    //     console.log(x.foo);
+    //     query();
+    // });
+    query();
 });
+
 
 // sets up the typeahead on the two input fields
 $('.scrollable-dropdown-menu .typeahead').typeahead(null, {

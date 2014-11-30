@@ -165,7 +165,6 @@ function drawGraph(json) {
             .attr("y2", function(d) { return d.target.y; });
 
         link.attr("d", function(d) {
-            console.log(d);
             // Total difference in x and y from source to target
             diffX = d.target.x - d.source.x;
             diffY = d.target.y - d.source.y;
