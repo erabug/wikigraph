@@ -45,6 +45,7 @@ function clear_all() {
 
 function getThumbnail(pageObject, pageKey) {
     var page = pageObject[pageKey];
+    console.log('getting info for:', page);
     var thumbnail, thWidth, thHeight;
     if ('thumbnail' in page) { // if wikipedia query returned a thumbnail
         thumbnail = page.thumbnail.source;
@@ -55,6 +56,7 @@ function getThumbnail(pageObject, pageKey) {
         thWidth = 100;
         thHeight = 100;
     }
+    console.log('found item info for:', page.title);
     var item = {'title': page.title,
                 'thumbnail': thumbnail,
                 'width': thWidth,
@@ -107,10 +109,10 @@ function addPathImages(data) {
     });
 }
 
-function makeQueryURL(numPages, pagesParams) {
+function makeQueryURL(size, numPages, pagesParams) {
     var queryURL = 'http://en.wikipedia.org/w/api.php' +
                    '?action=query&format=json&redirects&prop=pageimages&' +
-                   'pithumbsize=150px&pilimit=' + numPages + '&titles=' +
+                   'pithumbsize='+size+'px&pilimit=' + numPages + '&titles=' +
                    pagesParams + '&callback=?';
     return queryURL;
 }
@@ -124,7 +126,7 @@ function decodeInput(d, node) {
 function query() {
 
     var pagesParams = CODES.node1.title + '|' + CODES.node2.title;
-    var queryURL = makeQueryURL(numPages=2, pagesParams);
+    var queryURL = makeQueryURL(size=150, numPages=2, pagesParams);
     var path = $('.loading-images');
 
     $.when(
@@ -147,7 +149,7 @@ function query() {
                 console.log("GOT THE CODES");
                 response = JSON.parse(data); // decode the JSON
                 // path.html('');
-                path.empty();
+                // path.empty();
                 console.log('RETURNED PATH:', response.path);
             })
 
@@ -168,7 +170,7 @@ function query() {
             pagesParams = innerNodes.join('|');
         } else { pagesParams = innerNodes; }
 
-        var queryURL = makeQueryURL(numPages, pagesParams);
+        var queryURL = makeQueryURL(size=150, numPages, pagesParams);
 
         if (inner.length === 0) {
             return false;
@@ -180,25 +182,57 @@ function query() {
                     console.log("QUERY IMAGES:", queryImages);
                     // updates queryImages with index numbers for ordering
                     response.path.forEach(function(node) {
-                        console.log('node.code', node.code);
+                        // console.log('node.code', node.code);
                         queryImages[node.code].code = response.path.indexOf(node);
                     });
                 });
         }
     }).then(function() {
+        path.empty();
         drawGraph(response.results);
         sideBar();
     });
 }
 
 function sideBar() {
+
+    // get tiny images for the path nodes
+    var pathNodes = [];
+    response.path.forEach(function(node) {
+        pathNodes.push(node.title);
+    });
+    console.log('queryURL:', pathNodes.join('|'));
+
+    queryURL = makeQueryURL(size=60, pathNodes.length, pathNodes.join('|'));
+    $.getJSON(
+        queryURL,
+        function(data) {
+            // console.log('TINY IMAGES RETURNED', data);
+            var pageObject = data.query.pages;
+            Object.keys(pageObject).forEach(function(pageKey) {
+                item = getThumbnail(pageObject, pageKey);
+                response.path.forEach(function(pathNode) {
+                    if (pathNode.title == item.title) {
+                        node = pathNode.code;
+                    }
+                });
+                queryImages[node].tinyurl = item.thumbnail;
+                queryImages[node].tinyHeight = item.height;
+                queryImages[node].tinyWidth = item.width;
+            });
+            console.log('queryImages with tiny images:', queryImages);
+            displaySummary(response.path);
+        });
+
+    
     $('.node').mouseover(function(e) {
         var info = this.id.split('|');
         $('.page-title').html(info[0]);
         if (info[1] in queryImages) {
+            console.log('already have this image in queryImages:', info[1], queryImages);
             $('.page-image').html('<img src='+queryImages[info[1]].url+' style="border:solid 2px #666; background-color: #fff">');
         } else {
-            var queryURL = makeQueryURL(2, info[0]);
+            var queryURL = makeQueryURL(size=150, numPages=2, info[0]);
             $.getJSON(
                 queryURL,
                 function(data) {
@@ -212,8 +246,29 @@ function sideBar() {
                 });
         }
     });
+
+    $('.node').mouseout(function(e) {
+        $('.page-image').empty();
+        $('.page-title').empty();
+        $('.page-extract').empty();
+    });
 }
 
+
+function feelingLucky(inputField, node) {
+    $.get(
+        '/page-names',
+        'query='+inputField.val(),
+        function(data) {
+            result = data.results[0]; // uses the first result
+            inputField.val(result.title);
+            CODES[node] = {'title': result.title,
+                           'code': result.code.toString()};
+            if (CODES.node1 !== undefined & CODES.node2 !== undefined) {
+                query();
+            }
+    });
+}
 
 $('input#random-query').click(function(e) {
     $.get('/random-query',
@@ -230,20 +285,6 @@ $('input#random-query').click(function(e) {
         });
 });
 
-function feelingLucky(inputField, node) {
-    $.get(
-        '/page-names',
-        'query='+inputField.val(),
-        function(data) {
-            result = data.results[0]; // uses the first result
-            inputField.val(result.title);
-            CODES[node] = {'title': result.title,
-                           'code': result.code.toString()};
-            if (CODES.node1 !== undefined & CODES.node2 !== undefined) {
-                query();
-            }
-    });
-}
 
 // event handler for the query submission
 $('input#submit-query').click(function() {

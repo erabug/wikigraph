@@ -20,7 +20,8 @@
     <input class="typeahead" id="start-node" type="text" placeholder="Start page">&#8594;<!-- 
      --><input class="typeahead" id="end-node" type="text" placeholder="End page">
     <input type="submit" class="button" id="submit-query" value="Go">
-    <input type="submit" class="button" id="random-query" value="Random">
+    <input type="submit" class="button" id="random-query" value="&#9860;">
+    <input type="submit" class="button" id="reverse-query" value="&#8596;">
 
   </div>
   
@@ -28,10 +29,13 @@
 
   <div class="results">
     <div class="graph"></div>
-    <div class="details">
-          <div class="page-image"></div>
-          <div class="page-title"></div>
-          <div class="page-extract"></div>
+    <div class="sidebar">
+      <div class="summary"></div>
+      <div class="details">
+            <div class="page-image"></div>
+            <div class="page-title"></div>
+            <div class="page-extract"></div>
+      </div>
     </div>
   </div>
 
@@ -43,6 +47,7 @@
   <script src="../static/js/typeahead.js"></script>
 
   <script src="../static/js/graph.js"></script>
+  <script src="../static/js/summary.js"></script>
   <script src="../static/js/index.js"></script>
 
 </body>

@@ -77,13 +77,6 @@ input {
   border: solid 1px #666;
 }
 
-
-
-/******GRAPH STUFF******/
-svg {
-  /*border: solid 1px #666;*/
-}
-
 /*TYPEAHEAD STUFF*/
 .tt-query {
     box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
@@ -122,6 +115,13 @@ svg {
     margin: 0;
 }
 
+
+
+/******GRAPH STUFF******/
+svg {
+  border: solid 1px #666;
+}
+
 /*RESULTS STUFF*/
 .results {
     width: 100%;
@@ -130,6 +130,17 @@ svg {
 
 .graph {
     display: inline-block;
+}
+
+.sidebar {
+    display: inline-block;
+    vertical-align: top;
+}
+
+.summary {
+    /*display: inline-block;*/
+    /*vertical-align: top;*/
+    /*background-color: #999;*/
 }
 
 .details {

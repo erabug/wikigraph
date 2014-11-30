@@ -97,11 +97,11 @@ def find_secondary_rels_and_nodes(node_objs_list):
 
 	for node in node_objs_list:
 
-		for rel in node.match_incoming(limit=10):
+		for rel in node.match_incoming(limit=1):
 			rels.append(rel)
 			nodes.append(rel.start_node)
 
-		for rel in node.match_outgoing(limit=10):
+		for rel in node.match_outgoing(limit=1):
 			rels.append(rel)
 			nodes.append(rel.end_node)
 

@@ -4,8 +4,8 @@ function drawGraph(json) {
 
 
     // establish width and height of the svg
-    var width = 700,
-        height = 550;
+    var width = 600,
+        height = 500;
 
     // color established as a scale
     var color = d3.scale.category20();
@@ -17,10 +17,10 @@ function drawGraph(json) {
 
     // this function handles the parameters of the force-directed layout
     var force = d3.layout.force()
-        .gravity(0.08)
+        .gravity(0.1)
         .distance(function(d) {
           if (d.value == 1) {
-            return 110;
+            return 150;
           } else {
             return Math.floor(Math.random() * (90 - 70)) + 70;
         }
@@ -59,12 +59,12 @@ function drawGraph(json) {
 
     // select subset of g that are nodes
     var node = svg.selectAll("g.node")
-          .data(json.nodes)
+            .data(json.nodes)
         .enter().append("svg:g")
-          .attr("class", "node")
-          .attr("id", function(d) {return d.title + '|' + d.code;})
-          .call(force.drag);
-
+            .attr("class", "node")
+            .attr("id", function(d) {return d.title + '|' + d.code;})
+            .call(force.drag);
+    // console.log(json.nodes);
     // select subset of nodes that are in the path
     var pathNode = node.filter(function(d) {
         return d.group == "path";
@@ -147,7 +147,7 @@ function drawGraph(json) {
         var numNodes = Object.keys(queryImages).length;
         d.fixed = true;
         d.x = width/numNodes;
-        d.y = height/3;
+        d.y = height/6;
     });
 
     // this calls the function force on the nodes and links
