@@ -227,7 +227,6 @@ $('input#random-query').click(function(e) {
             $('input#start-node').val(n1.title); // fill in the search fields
             $('input#end-node').val(n2.title);
             console.log("CODES:", CODES);
-            // query();
         });
 });
 
@@ -240,9 +239,9 @@ function feelingLucky(inputField, node) {
             inputField.val(result.title);
             CODES[node] = {'title': result.title,
                            'code': result.code.toString()};
-            // $.data(inputField, 'code', result.code.toString());
-            // console.log($.hasData(inputField));
-            query();
+            if (CODES.node1 !== undefined & CODES.node2 !== undefined) {
+                query();
+            }
     });
 }
 
@@ -252,32 +251,27 @@ $('input#submit-query').click(function() {
     console.log('CODES', CODES);
 
     var inputField;
-    if (!(CODES.node1)) { // if either/both fields not chosen
+    if (!(CODES.node1) || $('#start-node').val() != CODES.node1.title) { // if either/both fields not chosen
+        console.log("CODE1 missing");
         inputField = $('#start-node');
         feelingLucky(inputField, 'node1');
-        // query();
     }
 
-    if (!(CODES.node2)) { // if either/both fields not chosen
+    if (!(CODES.node2) || $('#end-node').val() != CODES.node2.title) { // if either/both fields not chosen
+        console.log("CODE2 missing");
         inputField = $('#end-node');
         feelingLucky(inputField, 'node2');
-        // query();
     }
 
-    
-
-    // query();
+    query();
 });
-
 
 // sets up the typeahead on the two input fields
 $('.scrollable-dropdown-menu .typeahead').typeahead(null, {
-    // minLength: 3,
     name: 'pageNames',
     displayKey: 'value',
     source: pageNames.ttAdapter()
 });
-
 
 // records the values chosen for each field as a global var
 $('#start-node').on('typeahead:selected typeahead:autocompleted', function (e, d) {

@@ -40,7 +40,6 @@ def find_shortest_path(node1, node2):
 def parse_node(node, in_path):
 	"""Extract title and code from a node object. Returns a dict of information."""
 
-	# print node.get_properties().values(), '******'
 	code, deg, title = node.get_properties().values()
 	title = title.replace('_', ' ')
 
@@ -98,11 +97,11 @@ def find_secondary_rels_and_nodes(node_objs_list):
 
 	for node in node_objs_list:
 
-		for rel in node.match_incoming(limit=8):
+		for rel in node.match_incoming(limit=10):
 			rels.append(rel)
 			nodes.append(rel.start_node)
 
-		for rel in node.match_outgoing(limit=8):
+		for rel in node.match_outgoing(limit=10):
 			rels.append(rel)
 			nodes.append(rel.end_node)
 
@@ -134,13 +133,20 @@ def parse_nodes_and_rels(path):
 	path_names = []
 	for node in path.nodes:
 		path_dict = node.get_properties().values()[0]
-		# path_names.append(path_nodes[int(path_dict)]['title'])
 		path_names.append({'title': path_nodes[int(path_dict)]['title'], 
 						   'code': path_nodes[int(path_dict)]['code']})
 
 
 	# rel dict list for secondary rels
 	non_path_rels, non_path_nodes = find_secondary_rels_and_nodes(node_objs_list=path.nodes)
+
+	# filter out reversed or duplicate paths in the path rels
+	for rel in non_path_rels:
+		for path in path_rels:
+			if rel['source'] == path['target'] and rel['target'] == path['source']:
+				rel['value'] = 1 # include it in the path
+			if rel['source'] == path['source'] and rel['target'] == path['target']:
+				non_path_rels.remove(rel) # remove duplicates
 
 	# combine the two lists for nodes and rels
 	rels_list = path_rels + non_path_rels

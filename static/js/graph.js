@@ -22,7 +22,7 @@ function drawGraph(json) {
           if (d.value == 1) {
             return 110;
           } else {
-            return Math.floor(Math.random() * (110 - 70)) + 70;
+            return Math.floor(Math.random() * (90 - 70)) + 70;
         }
         })
         .charge(-200)
@@ -37,7 +37,7 @@ function drawGraph(json) {
         .enter().append("svg:marker")
             .attr("id", String)
             .attr("viewBox", "0 -5 10 10")
-            .attr("refX", 10)
+            .attr("refX", 9)
             .attr("markerWidth", 7)
             .attr("markerHeight", 7)
             .attr("orient", "auto")
@@ -53,6 +53,7 @@ function drawGraph(json) {
         .enter().append("path")
             .attr("class", "link")
             .style("stroke", "#666")
+            .style("opacity", 0.6)
             .attr("marker-end", "url(#arrow)")
             .attr("d", diagonal);
 
@@ -96,6 +97,7 @@ function drawGraph(json) {
 
     pathLink
         .style("stroke-width", "3px")
+        .style("opacity", 0.6)
         .attr("marker-end", "url(#arrow)");
 
 
