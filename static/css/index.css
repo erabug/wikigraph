@@ -137,12 +137,6 @@ svg {
     vertical-align: top;
 }
 
-.summary {
-    /*display: inline-block;*/
-    /*vertical-align: top;*/
-    /*background-color: #999;*/
-}
-
 .details {
     width: 175px;
     margin: auto;
@@ -156,6 +150,11 @@ svg {
     padding: 5px;
     background-color: #E5E5E5;
 }
+
+.hidden {
+    display: none;
+}
+
 .page-image {
     margin-top: 5px;
 }

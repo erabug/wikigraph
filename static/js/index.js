@@ -226,6 +226,7 @@ function sideBar() {
 
     
     $('.node').mouseover(function(e) {
+        $('.details').toggleClass('hidden');
         var info = this.id.split('|');
         $('.page-title').html(info[0]);
         if (info[1] in queryImages) {
@@ -248,6 +249,7 @@ function sideBar() {
     });
 
     $('.node').mouseout(function(e) {
+        $('.details').toggleClass('hidden');
         $('.page-image').empty();
         $('.page-title').empty();
         $('.page-extract').empty();
