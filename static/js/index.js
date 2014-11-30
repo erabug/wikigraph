@@ -1,7 +1,8 @@
-CODES = {}; // this object will be populated once the user inputs two pages
+var CODES; // this object will be populated once the user inputs two pages
 var response; // global variable for the graph db response
-var queryImages = {}; // an object to pass information to the graph
-var imageURLs = []; // an array so it will retain order
+var queryImages; // an object to pass information to the graph
+var imageURLs; // an array so it will retain order
+clear_all();
 
 // tells typeahead how to handle the user input (e.g. the get request params)
 var pageNames = new Bloodhound({
@@ -32,6 +33,7 @@ function clear_partial() {
     $('.loading-images').empty();
     $('svg').remove();
     queryImages = {};
+    imageURLs = [];
 }
 
 function clear_all() {
@@ -121,73 +123,12 @@ function decodeInput(d, node) {
 
 function query() {
 
-
     var pagesParams = CODES.node1.title + '|' + CODES.node2.title;
     var queryURL = makeQueryURL(numPages=2, pagesParams);
     var path = $('.loading-images');
 
-
-    // $.getJSON( // get the start/end images from Wikipedia API
-    //     queryURL,
-    //     function(data) {
-    //         var htmlSnippets = addQueryImages(data);
-    //         console.log("QUERY IMAGES:", queryImages);
-    //         Object.keys(htmlSnippets).forEach(function(node) {
-    //             path.append(htmlSnippets[node]);
-    //         });
-    //         $('#page0').after('<div class="page loading"></div>');
-    //     // });
-
-    //     $.get( // get the shortest path from the database
-    //         '/query',
-    //         CODES,
-    //         function(data) {
-
-    //             response = JSON.parse(data); // decode the JSON
-    //             // path.html('');
-    //             console.log('RETURNED PATH:', response.path);
-                
-    //             var inner = response.path.slice(1, -1);
-
-    //             if (0 < inner.length) { // if there are intermediary nodes
-
-    //                 var numPages = inner.length;
-    //                 console.log('numPages', numPages);
-    //                 console.log('inner', inner);
-    //                 var innerNodes = [];
-    //                 inner.forEach(function(node) {
-    //                     innerNodes.push(node.title);
-    //                 });
-    //                 console.log('innerNodes:', innerNodes);
-    //                 var pagesParams;
-    //                 if (numPages > 1) {
-    //                     pagesParams = innerNodes.join('|');
-    //                 } else { pagesParams = innerNodes; }
-    //                 var queryURL = makeQueryURL(numPages, pagesParams);
-    //                 console.log('pagesParams:', pagesParams);
-    //                 $.getJSON( // get the inner node images from Wikipedia API
-    //                     queryURL,
-    //                     function(data) {
-    //                         console.log('data', data);
-    //                         addPathImages(data); //updates queryImages with inner ndoes
-    //                         console.log("QUERY IMAGES:", queryImages);
-    //                         // updates queryImages with index numbers for ordering
-    //                         response.path.forEach(function(node) {
-    //                             console.log('node.code', node.code);
-    //                             queryImages[node.code].code = response.path.indexOf(node);
-    //                         });
-    //                         // console.log("QUERY IMAGES:", queryImages);
-    //                         drawGraph(response.results); // graph the results
-    //                         createSideBar();
-    //                     });
-    //             } else {
-    //                 drawGraph(response.results);
-    //                 createSideBar();
-    //             }
-    //         });
-    //     });
-
     $.when(
+
         $.getJSON( // get the start/end images from Wikipedia API
             queryURL,
             function(data) {
@@ -205,55 +146,52 @@ function query() {
             function(data) {
                 console.log("GOT THE CODES");
                 response = JSON.parse(data); // decode the JSON
-                path.html('');
+                // path.html('');
+                path.empty();
                 console.log('RETURNED PATH:', response.path);
             })
-        ).then(function(inner) {
-            var inner = response.path.slice(1, -1);
-            console.log('inner:', inner);
-            var numPages = inner.length;
 
-            var innerNodes = [];
-            inner.forEach(function(node) {
+    ).then(function(data) {
 
-                innerNodes.push(node.title);
-            });
-            console.log('innerNodes:', innerNodes);
-            var pagesParams;
+        var inner = response.path.slice(1, -1);
+        console.log('inner:', inner);
+        var numPages = inner.length;
 
-            if (numPages > 1) {
-                pagesParams = innerNodes.join('|');
-            } else { pagesParams = innerNodes; }
-
-            var queryURL = makeQueryURL(numPages, pagesParams);
-
-            if (inner.length === 0) {
-                return false;
-            } else { // if there are intermediary nodes
-                return $.getJSON( // get the inner node images from Wikipedia API
-                    queryURL,
-                    function(data) {
-                        console.log('GOT INNER NODE IMAGES');
-                        addPathImages(data); //updates queryImages with inner ndoes
-                        console.log("QUERY IMAGES:", queryImages);
-                        // updates queryImages with index numbers for ordering
-                        response.path.forEach(function(node) {
-                            console.log('node.code', node.code);
-                            queryImages[node.code].code = response.path.indexOf(node);
-                        });
-                        // console.log("QUERY IMAGES:", queryImages);
-                    });
-                }
-            }).then(function() {
-        
-            console.log("GRAPH DRAW!");
-            drawGraph(response.results);
-            createSideBar();
+        var innerNodes = [];
+        inner.forEach(function(node) {
+            innerNodes.push(node.title);
         });
-        // });
+        console.log('innerNodes:', innerNodes);
+
+        var pagesParams;
+        if (numPages > 1) {
+            pagesParams = innerNodes.join('|');
+        } else { pagesParams = innerNodes; }
+
+        var queryURL = makeQueryURL(numPages, pagesParams);
+
+        if (inner.length === 0) {
+            return false;
+        } else { // if there are intermediary nodes
+            return $.getJSON( // get the inner node images from Wikipedia API
+                queryURL,
+                function(data) {
+                    addPathImages(data); //updates queryImages with inner ndoes
+                    console.log("QUERY IMAGES:", queryImages);
+                    // updates queryImages with index numbers for ordering
+                    response.path.forEach(function(node) {
+                        console.log('node.code', node.code);
+                        queryImages[node.code].code = response.path.indexOf(node);
+                    });
+                });
+        }
+    }).then(function() {
+        drawGraph(response.results);
+        sideBar();
+    });
 }
 
-function createSideBar() {
+function sideBar() {
     $('.node').mouseover(function(e) {
         var info = this.id.split('|');
         $('.page-title').html(info[0]);
@@ -276,9 +214,6 @@ function createSideBar() {
     });
 }
 
-$(document).ready(function(e) {
-    clear_all();
-});
 
 $('input#random-query').click(function(e) {
     $.get('/random-query',
@@ -301,42 +236,37 @@ function feelingLucky(inputField, node) {
         '/page-names',
         'query='+inputField.val(),
         function(data) {
-            result = data.results[0];
-            console.log('returned data:', result);
+            result = data.results[0]; // uses the first result
             inputField.val(result.title);
             CODES[node] = {'title': result.title,
                            'code': result.code.toString()};
-            $.data(inputField, 'code', result.code.toString());
-            console.log($.hasData(inputField));
+            // $.data(inputField, 'code', result.code.toString());
+            // console.log($.hasData(inputField));
+            query();
     });
 }
 
 // event handler for the query submission
-$('input#submit-query').click(function(e) {
+$('input#submit-query').click(function() {
     clear_partial();
     console.log('CODES', CODES);
 
-    // if (!(CODES.node1) | (!(CODES.node1)) {
-
-    // }
     var inputField;
     if (!(CODES.node1)) { // if either/both fields not chosen
         inputField = $('#start-node');
         feelingLucky(inputField, 'node1');
+        // query();
     }
 
     if (!(CODES.node2)) { // if either/both fields not chosen
         inputField = $('#end-node');
         feelingLucky(inputField, 'node2');
+        // query();
     }
+
     
-        // if codes isn't full, then query SQLite db
-    console.log(CODES.node1);
-    // $.when({foo: CODES.node1}).done(function(x){
-    //     console.log(x.foo);
-    //     query();
-    // });
-    query();
+
+    // query();
 });
 
 
@@ -348,13 +278,6 @@ $('.scrollable-dropdown-menu .typeahead').typeahead(null, {
     source: pageNames.ttAdapter()
 });
 
-// experimental
-// $('.scrollable-dropdown-menu .typeahead').typeahead({
-//     name: 'pageNames',
-//     remote: '/page-names?query=%QUERY',
-//     minLength: 3, // send AJAX request only after user type in at least 3 characters
-//     limit: 10 // limit to show only 10 results
-// });
 
 // records the values chosen for each field as a global var
 $('#start-node').on('typeahead:selected typeahead:autocompleted', function (e, d) {
@@ -365,7 +288,7 @@ $('#end-node').on('typeahead:selected typeahead:autocompleted', function (e, d) 
     decodeInput(d, 'node2');
 });
 
-$('input[type=text]').focus(function(){
+$('input[type=text]').focus(function(){ // click into the text field, select all
     this.select();
 });
 
