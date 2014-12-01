@@ -274,6 +274,7 @@ function getImageAndExtract(title, code) {
 function makeExtractURL(numPages, pageParams) {
     var extractURL = 'http://en.wikipedia.org/w/api.php' +
                      '?action=query&prop=extracts&format=json&' +
+                     'exsentences=3&' +
                      'exintro=&exlimit='+ numPages + '&titles=' +
                      pageParams + '&callback=?';
     return extractURL;

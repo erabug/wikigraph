@@ -1,5 +1,3 @@
-
-
 /******HTML STUFF******/
 :focus {
   outline:none; 
@@ -119,7 +117,7 @@ input {
 
 /******GRAPH STUFF******/
 svg {
-  border: solid 1px #666;
+  /*border: solid 1px #666;*/
 }
 
 /*RESULTS STUFF*/
@@ -138,14 +136,12 @@ svg {
 }
 
 .details {
-    width: 175px;
+    width: 200px;
     margin: auto;
     border-radius: 5px;
-/*    position: relative;
-    top: -400px;
-    left: 250px;*/
-    vertical-align: top;
-    display: inline-block;
+    position: absolute;
+    top: 172px;
+    min-height: 200px;
     border: solid 2px;
     padding: 5px;
     background-color: #E5E5E5;
@@ -164,7 +160,7 @@ svg {
 }
 
 .page-extract {
-    font-size: 10px;
+    font-size: 12px;
 }
 
 .page {
