@@ -4,7 +4,7 @@ What connects two topics on Wikipedia? For example how many links do you have to
 
 You can check out the project [here](http://ec2-54-148-235-143.us-west-2.compute.amazonaws.com/).
 
-*It takes 3 clicks: Harry Potter -> British literature -> the spread of the printing press -> the Spanish Inquisition
+*It takes 3 clicks. One path: Harry Potter -> British literature -> the spread of the printing press -> the Spanish Inquisition
 
 ###Contents
 - [Features](#features)
@@ -64,9 +64,9 @@ def clean_data():
     write_rels(data, 'data/rels.tsv')
     write_nodes(data, 'data/nodes.tsv')
 ```
-I wanted the codes that I gave each page to be continuous (for the next step, batch importing) so the script recodes pages after the dictionary is pruned. I wrote <kbd>test_continuity.py</kbd> to test whether or not the nodes.tsv file produced has continuous codes. 
+I wanted the codes that I gave each page to be continuous (for the next step, batch importing) so the script assigns codes to pages after the dictionary is pruned. I wrote <kbd>test_continuity.py</kbd> to test whether or not the nodes.tsv file produced has continuous codes. 
 
-This was quite a memory-intensive script so I ended up using my 15G RAM Amazon EC2 to do the crunching, and even there it took about 30 minutes.
+It is quite a memory-intensive script so I ended up running it on my Amazon EC2 instance (15G RAM), and even there it took about 30 minutes.
 
 After cleaning, the complete graph has about 4.5 million nodes and 110 million edges. The data are stored in two tsv files: a list of all relationships and a list of all nodes.
 
