@@ -63,7 +63,6 @@ function getThumbnail(pageObject, pageKey) {
 }
 
 function addImage(item, code) {
-    console.log('adding Image', item.title, code);
     queryImages[code] = {'url': item.thumbnail,
                          'title': item.title,
                          'height': item.height,
@@ -175,14 +174,13 @@ function query() {
                 queryURL,
                 function(data) {
                     addPathImages(data); //updates queryImages with inner ndoes
-                    console.log("QUERY IMAGES:", queryImages);
                     // updates queryImages with index numbers for ordering
                     response.path.forEach(function(node) {
                         queryImages[node.code].code = response.path.indexOf(node);
                     });
                 });
         }
-    }).then(function() {
+    }).done(function() {
         path.empty();
         drawGraph(response.results);
         sideBar();
@@ -226,9 +224,9 @@ function sideBar() {
         var code = info[1];
         $('.page-title').html(title);
         if (code in queryImages) {
-            console.log('already have this image in queryImages:', code, queryImages);
             $('.page-image').html('<img src=' + queryImages[code].url +
                 ' style="border:solid 2px #666; background-color: #fff">');
+            $('.page-extract').html(queryImages[code].extract);
         } else {
             getImageAndExtract(title, code);
         }
@@ -266,12 +264,11 @@ function getImageAndExtract(title, code) {
                     var text = page.extract;
                     queryImages[code].extract = text;
             });
-        }).then(function(data) {
+        }).done(function(data) {
             $('.page-image').html('<img src=' + queryImages[code].url +
                 ' style="border:solid 2px #666; background-color: #fff">');
             $('.page-extract').html(queryImages[code].extract);
         });
-
 }
 
 function makeExtractURL(numPages, pageParams) {
@@ -322,7 +319,6 @@ $('input#random-query').click(function(e) {
                            'code': n2.code.toString()};
             $('input#start-node').val(n1.title); // fill in the search fields
             $('input#end-node').val(n2.title);
-            // console.log("CODES:", CODES);
         });
 });
 
@@ -330,22 +326,36 @@ $('input#random-query').click(function(e) {
 // event handler for the query submission
 $('input#submit-query').click(function() {
     clear_partial();
-    // console.log('CODES', CODES);
 
-    var inputField;
-    if (!(CODES.node1) || $('#start-node').val() != CODES.node1.title) { // if either/both fields not chosen
-        // console.log("CODE1 missing");
-        inputField = $('#start-node');
-        feelingLucky(inputField, 'node1');
+    var startField = $('#start-node');
+    var endField = $('#end-node');
+
+    if (CODES.node1 !== undefined) {
+        console.log('what is in CODES', CODES.node1.title);
+        if (startField.val() != CODES.node1.title) {
+            feelingLucky(startField, 'node1');
+        }
     }
 
-    if (!(CODES.node2) || $('#end-node').val() != CODES.node2.title) { // if either/both fields not chosen
-        // console.log("CODE2 missing");
-        inputField = $('#end-node');
-        feelingLucky(inputField, 'node2');
+    if (CODES.node2 !== undefined) {
+        console.log('what is in CODES', CODES.node2.title);
+        if (endField.val() != CODES.node2.title) {
+            feelingLucky(endField, 'node2');
+        }
     }
 
-    query();
+    try {
+        query();
+    } catch (e) {
+
+        if (!(CODES.node1)) { // if either/both fields not chosen
+            feelingLucky(startField, 'node1');
+        }
+
+        if (!(CODES.node2)) { // if either/both fields not chosen
+            feelingLucky(endField, 'node2');
+        }
+    }
 });
 
 // sets up the typeahead on the two input fields
