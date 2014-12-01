@@ -1,5 +1,5 @@
 from py2neo import neo4j
-import json, time, sys
+import json, time
 
 def find_shortest_path(node1, node2):
 	"""Connects to graph database, then creates and sends query to graph 
@@ -42,6 +42,9 @@ def parse_node(node, in_path):
 
 	code, deg, title = node.get_properties().values()
 	title = title.replace('_', ' ')
+
+	if title == "Basque people": # special exception for a changed redirect
+		title = "Basques"
 
 	node_dict = {'code': int(code), 
 				 'title': title, 
@@ -97,11 +100,11 @@ def find_secondary_rels_and_nodes(node_objs_list):
 
 	for node in node_objs_list:
 
-		for rel in node.match_incoming(limit=10):
+		for rel in node.match_incoming(limit=8):
 			rels.append(rel)
 			nodes.append(rel.start_node)
 
-		for rel in node.match_outgoing(limit=10):
+		for rel in node.match_outgoing(limit=8):
 			rels.append(rel)
 			nodes.append(rel.end_node)
 

@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8">
     <title>wikiGraph</title>
-    <link href='http://fonts.googleapis.com/css?family=Signika|Dosis' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Signika|Nothing+You+Could+Do' rel='stylesheet' type='text/css'>
     <link href="../static/css/index.css" rel="stylesheet" type="text/css">
   </head>
 
@@ -12,16 +12,18 @@
 
   <div class="border logo"></div>
   <div class="background logo">
-    <div class="title">wikiGraph</div><div class="info">About</div>
+    <div class="title">wikiGraph</div>
+    <div class="blurb">Wikipedia from a graph perspective</div>
+    <div class="info">About</div>
   </div>
 
   <div class="query-form scrollable-dropdown-menu">
-    
+        <input type="submit" class="button" id="random-query" value="Random">
+    <input type="submit" class="button" id="reverse-query" value="Reverse">
     <input class="typeahead" id="start-node" type="text" placeholder="Start page">&#8594;<!-- 
      --><input class="typeahead" id="end-node" type="text" placeholder="End page">
     <input type="submit" class="button" id="submit-query" value="Go">
-    <input type="submit" class="button" id="random-query" value="&#9860;">
-    <input type="submit" class="button" id="reverse-query" value="&#8596;">
+
 
   </div>
   

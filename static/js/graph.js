@@ -17,15 +17,16 @@ function drawGraph(json) {
 
     // this function handles the parameters of the force-directed layout
     var force = d3.layout.force()
-        .gravity(0.1)
-        .distance(function(d) {
+        .gravity(0.04)
+        .linkDistance(function(d) {
           if (d.value == 1) {
-            return 150;
+            return 130;
           } else {
-            return Math.floor(Math.random() * (90 - 70)) + 70;
+            return Math.floor(Math.random() * (100 - 70)) + 70;
         }
         })
-        .charge(-200)
+        .charge(-75)
+        // .chargeDistance(100)
         .size([width, height]);
 
     var defs = svg.append("defs");
@@ -104,8 +105,8 @@ function drawGraph(json) {
     nonPathNode.append("circle")
         .attr("r", function(d) {
             var size;
-            if (d.degrees > 300) {
-                d.radius = 20;
+            if (d.degrees > 600) {
+                d.radius = 18;
             } else {
                 d.radius = d.degrees*0.02+7;
             }

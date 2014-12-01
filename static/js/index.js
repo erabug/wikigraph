@@ -170,21 +170,25 @@ function query() {
         if (inner.length === 0) {
             return false;
         } else { // if there are intermediary nodes
-            return $.getJSON( // get the inner node images from Wikipedia API
-                queryURL,
-                function(data) {
-                    addPathImages(data); //updates queryImages with inner ndoes
-                    // updates queryImages with index numbers for ordering
-                    response.path.forEach(function(node) {
-                        queryImages[node.code].code = response.path.indexOf(node);
-                    });
-                });
+            return getPathImages(queryURL);
         }
     }).done(function() {
         path.empty();
         drawGraph(response.results);
         sideBar();
     });
+}
+
+function getPathImages(queryURL) {
+    return $.getJSON( // get the inner node images from Wikipedia API
+        queryURL,
+        function(data) {
+            addPathImages(data); //updates queryImages with inner ndoes
+            // updates queryImages with index numbers for ordering
+            response.path.forEach(function(node) {
+                queryImages[node.code].code = response.path.indexOf(node);
+            });
+        });
 }
 
 function getSummaryImages(numPages, pageParams) {
@@ -204,41 +208,27 @@ function getSummaryImages(numPages, pageParams) {
         });
 }
 
-function sideBar() {
+function makeExtractURL(numPages, pageParams) {
+    var extractURL = 'http://en.wikipedia.org/w/api.php' +
+                     '?action=query&prop=extracts&format=json&' +
+                     'exsentences=3&' +
+                     'exintro=&exlimit='+ numPages + '&titles=' +
+                     pageParams + '&callback=?';
+    return extractURL;
+}
 
-    // get tiny images for the path nodes
-    var pathNodes = [];
-    response.path.forEach(function(node) {
-        pathNodes.push(node.title);
-    });
-    var pageParams = pathNodes.join('|');
-    var numPages = pathNodes.length;
-
-    getSummaryImages(numPages, pageParams); // get thumbnails for summary
-    getPathExtracts(numPages, pageParams); // get extracts for path nodes
-
-    $('.node').mouseover(function(e) {
-        $('.details').toggleClass('hidden');
-        var info = this.id.split('|');
-        var title = info[0];
-        var code = info[1];
-        $('.page-title').html(title);
-        if (code in queryImages) {
-            $('.page-image').html('<img src=' + queryImages[code].url +
-                ' style="border:solid 2px #666; background-color: #fff">');
-            $('.page-extract').html(queryImages[code].extract);
-        } else {
-            getImageAndExtract(title, code);
-        }
-        
-    });
-
-    $('.node').mouseout(function(e) {
-        $('.details').toggleClass('hidden');
-        $('.page-image').empty();
-        $('.page-title').empty();
-        $('.page-extract').empty();
-    });
+function getPathExtracts(numPages, pageParams) {
+    var extractURL = makeExtractURL(numPages, pageParams);
+    $.getJSON(
+        extractURL,
+        function(data) {
+            var extracts = data.query.pages;
+            Object.keys(extracts).forEach(function(key) {
+                var text = extracts[key].extract;
+                var code = getPathCode(extracts[key].title);
+                queryImages[code].extract = text; // add it to queryImages
+            });
+        });
 }
 
 function getImageAndExtract(title, code) {
@@ -271,28 +261,49 @@ function getImageAndExtract(title, code) {
         });
 }
 
-function makeExtractURL(numPages, pageParams) {
-    var extractURL = 'http://en.wikipedia.org/w/api.php' +
-                     '?action=query&prop=extracts&format=json&' +
-                     'exsentences=3&' +
-                     'exintro=&exlimit='+ numPages + '&titles=' +
-                     pageParams + '&callback=?';
-    return extractURL;
+function sideBar() {
+
+    // get tiny images for the path nodes
+    var pathNodes = [];
+    response.path.forEach(function(node) {
+        pathNodes.push(node.title);
+    });
+    var pageParams = pathNodes.join('|');
+    var numPages = pathNodes.length;
+
+    getSummaryImages(numPages, pageParams); // get thumbnails for summary
+    getPathExtracts(numPages, pageParams); // get extracts for path nodes
+
+    $('.node').mouseover(function(e) {
+        $('.details').toggleClass('hidden');
+        var info = this.id.split('|');
+        var title = info[0];
+        var code = info[1];
+        $('.page-title').html(title);
+        if (code in queryImages) {
+            $('.page-image').html('<img src=' + queryImages[code].url +
+                ' style="border:solid 2px #666; background-color: #fff">');
+            $('.page-extract').html(queryImages[code].extract);
+        } else {
+            getImageAndExtract(title, code);
+        }
+    });
+
+    $('.node').mouseout(function(e) {
+        $('.details').toggleClass('hidden');
+        $('.page-image').empty();
+        $('.page-title').empty();
+        $('.page-extract').empty();
+    });
 }
 
-function getPathExtracts(numPages, pageParams) {
-    var extractURL = makeExtractURL(numPages, pageParams);
-    $.getJSON(
-        extractURL,
-        function(data) {
-            var extracts = data.query.pages;
-            Object.keys(extracts).forEach(function(key) {
-                var text = extracts[key].extract;
-                var code = getPathCode(extracts[key].title);
-                queryImages[code].extract = text; // add it to queryImages
-            });
-        });
+function externalLink() {
+    $('.node').click(function() {
+        var title = this.id.split('|')[0];
+        console.log(title);
+    });
 }
+
 
 function feelingLucky(inputField, node) {
     $.get(
@@ -309,7 +320,7 @@ function feelingLucky(inputField, node) {
     });
 }
 
-$('input#random-query').click(function(e) {
+function getRandomPages() {
     $.get('/random-query',
         function(data) {
             var n1 = data.results[0];
@@ -321,8 +332,7 @@ $('input#random-query').click(function(e) {
             $('input#start-node').val(n1.title); // fill in the search fields
             $('input#end-node').val(n2.title);
         });
-});
-
+}
 
 // event handler for the query submission
 $('input#submit-query').click(function() {
@@ -332,14 +342,12 @@ $('input#submit-query').click(function() {
     var endField = $('#end-node');
 
     if (CODES.node1 !== undefined) {
-        console.log('what is in CODES', CODES.node1.title);
         if (startField.val() != CODES.node1.title) {
             feelingLucky(startField, 'node1');
         }
     }
 
     if (CODES.node2 !== undefined) {
-        console.log('what is in CODES', CODES.node2.title);
         if (endField.val() != CODES.node2.title) {
             feelingLucky(endField, 'node2');
         }
@@ -357,6 +365,10 @@ $('input#submit-query').click(function() {
             feelingLucky(endField, 'node2');
         }
     }
+});
+
+$('input#random-query').click(function() {
+    getRandomPages();
 });
 
 // sets up the typeahead on the two input fields
