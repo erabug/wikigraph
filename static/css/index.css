@@ -12,7 +12,7 @@ body {
   font-weight: 100;
   font-size: 18px;
   text-align: center;
-  font-family: "Signika", sans-serif;
+
 }
 
 .logo {
@@ -32,7 +32,7 @@ body {
 }
 
 .title {
-  /*font-family: "Signika", sans-serif;*/
+  font-family: "Signika", sans-serif;
   color: #fff;
   font-size: 40px;
   display: inline-block;
@@ -82,7 +82,7 @@ input {
   border: solid 1px #999;
   border-radius: 10px;
   position: relative;
-  
+  font-family: "Signika", sans-serif;
 }
 
 .button:hover {

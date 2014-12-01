@@ -295,15 +295,17 @@ function sideBar() {
         $('.page-title').empty();
         $('.page-extract').empty();
     });
+
+    externalLink();
 }
 
 function externalLink() {
     $('.node').click(function() {
         var title = this.id.split('|')[0];
         console.log(title);
+        window.open('http://en.wikipedia.org/wiki/' + title);
     });
 }
-
 
 function feelingLucky(inputField, node) {
     $.get(
