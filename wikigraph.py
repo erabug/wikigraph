@@ -84,8 +84,13 @@ def get_random_names():
 	node2 = str(random.randrange(4578730))
 
 	cursor = connect()
-	query = 'SELECT code, title FROM pagenames WHERE code = ? OR code = ?'
-	rows = cursor.execute(query, (node1, node2, )).fetchall()
+	# query = 'SELECT code, title FROM pagenames WHERE code = ? OR code = ?'
+	# rows = cursor.execute(query, (node1, node2, )).fetchall()
+
+	query = '''SELECT code, title FROM pagenames 
+			WHERE degrees > 150 ORDER BY RANDOM() LIMIT 2'''
+
+	rows = cursor.execute(query).fetchall()
 	results = [{ 'title': row[1].replace('_', ' '), 'code': row[0] } for row in rows]
 	print 'results:', results
 	response = jsonify(**{ 'results': results })

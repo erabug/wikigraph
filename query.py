@@ -97,17 +97,34 @@ def find_secondary_rels_and_nodes(node_objs_list):
 
 	for node in node_objs_list:
 
-		for rel in node.match_incoming(limit=1):
+		for rel in node.match_incoming(limit=10):
 			rels.append(rel)
 			nodes.append(rel.start_node)
 
-		for rel in node.match_outgoing(limit=1):
+		for rel in node.match_outgoing(limit=10):
 			rels.append(rel)
 			nodes.append(rel.end_node)
 
 	rel_dict_list = parse_rel_objs(rels)
 	node_dict_list = parse_node_objs(nodes)
 
+	# nodes = []
+
+	# for node in node_objs_list:
+
+	# 	node_set = set()
+	# 	for rel in node.match_incoming():
+	# 		node_set.add(int(rel.start_node.get_properties().values()[0]))
+	# 	nodes.append(node_set)
+
+	# # matches = []
+
+	# print len(nodes)
+	# print nodes[1]
+	# print reduce(lambda x, y: x & y, nodes[:2])
+	# print reduce(lambda x, y: x & y, nodes[1:])
+	# print reduce(lambda x, y: x & y, [nodes[0], nodes[2]])
+	
 	return rel_dict_list, node_dict_list
 
 def merge_node_dicts(path_nodes, non_path_nodes):
