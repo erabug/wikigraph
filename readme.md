@@ -24,10 +24,11 @@ You can check out the project [here](http://ec2-54-148-235-143.us-west-2.compute
 - [x] Search suggest for page titles (typeahead.js, SQLite)
 - [x] Embed page images on nodes within the rendered graph (Wikipedia API)
 - [x] Option to generate a random search query
+- [x] Nodes are sized/colored based on the number of links to other nodes
+- [x] Incorporate summary of path pages as mouseover tooltips (Wikipedia API)
 
 *Future*
-- [ ] Nodes are sized/colored based on the number of links to other nodes
-- [ ] Incorporate summary of path pages as mouseover tooltips (Wikipedia API)
+
 - [ ] Path responses cached (CouchDB)
 
 #### Data cleaning
@@ -63,13 +64,15 @@ def clean_data():
     write_rels(data, 'data/rels.tsv')
     write_nodes(data, 'data/nodes.tsv')
 ```
-I wanted the codes that I gave each page to be continuous (for the next step, batch importing) so the script recodes pages after the dictionary is pruned. I wrote <kbd>test_continuity.py</kbd> to test whether or not the nodes.tsv file produced has continuous codes.
+I wanted the codes that I gave each page to be continuous (for the next step, batch importing) so the script recodes pages after the dictionary is pruned. I wrote <kbd>test_continuity.py</kbd> to test whether or not the nodes.tsv file produced has continuous codes. 
+
+This was quite a memory-intensive script so I ended up using my 15G RAM Amazon EC2 to do the crunching, and even there it took about 30 minutes.
 
 After cleaning, the complete graph has about 4.5 million nodes and 110 million edges. The data are stored in two tsv files: a list of all relationships and a list of all nodes.
 
 __nodes.tsv__(160MB)
 ```
-node    name            l:label    degrees
+node    title            l:label    degrees
 0       Alabama         Pages      83
 1       Andrew Jackson  Pages      51
 ```
@@ -79,18 +82,15 @@ start   end type
 0       1   LINKS_TO
 2       3   LINKS_TO
 ```
-I used Michael Hunger's [batch import tool](https://github.com/jexp/batch-import/tree/20) to insert the data into a [Neo4j](http://neo4j.com/) graph database. Then, I applied a constraint on all nodes that their id ('node') was unique (using Neo4j's browser interface).
+I used Michael Hunger's [batch import tool](https://github.com/jexp/batch-import/tree/20) to insert the data into a [Neo4j](http://neo4j.com/) graph database. Also, after much research and many failed batch imports, I appended ```batch_import.csv.quotes=false``` to **batch.properties** because double quotes in the page titles cause a lookup failure when importing relationships. 
+
+#####Database and model
+Within the database, the data model is quite simple: (Page) -[:LINKS_TO]-> (Page). All nodes have a label (Page) and three properties (node, title, degrees). All relationships are identical and hold no properties.
+
+After importing the data, I applied a constraint on all nodes indicating that their id ('node') was unique:
 ```
 CREATE CONSTRAINT ON (p:Page) ASSERT p.node IS UNIQUE;
 ```
-As I played around with the database, I realized that a responsive shortest-path query of such a large database would take some refinement (see [Improving query response time](#improving-query-response-time)) and I first wanted to figure out how to display my data, deploy the application, etc. I needed a smaller subgraph to play with until my query time improved.
-
-I wrote <kbd>pres_clean.py</kbd> to sample the pagelinks file for only those pages and links that include the names of U.S. Presidents. After cleaning, this graph had 77 thousand nodes and 140 thousand relationships. All of my initial testing and design used this subgraph until I sufficiently decreased the query time.
-
-Complete graph | Subgraph
--------------- | -----------
-4.5m nodes | 77k nodes 
-110m links | 140k links
 
 #### Queries
 I used Nigel Small's Python library [py2neo](http://nigelsmall.com/py2neo/1.6/) to interact with Neo4j's RESTful web service interface. <kbd>query.py</kbd> translates my shortest-path request into a CypherQuery object, queries the database, and returns the results as a Path object. 
@@ -110,19 +110,19 @@ The script then traverses this path object, pulling out and deduping nodes and r
         {
             "degrees": 22,
             "node": 0,
-            "name": "William Persse",
+            "title": "William Persse",
             "group": "path"
         },
         {
             "degrees": 102,
             "node": 1,
-            "name": "George Washington",
+            "title": "George Washington",
             "group": "path"
         },
         {
             "degrees": 35,
             "node": 2,
-            "name": "American Presidents: Life Portraits",
+            "title": "American Presidents: Life Portraits",
             "group": "none"
         }
     ],
@@ -143,14 +143,27 @@ The script then traverses this path object, pulling out and deduping nodes and r
 ```
 
 #### Data visualization
+When planning this project, I envisioned the result of a query as an interactive graph. I wanted to not only see the shortest path between two pages but also explore the pages' context and connections.
+
 <kbd>wikigraph.py</kbd> is a small [Flask](http://flask.pocoo.org/) app that handles AJAX requests to the databases. <kbd>graph.js</kbd> implements the graph visualization with the d3 library while <kbd>index.js</kbd> handles everything else.
 
-Wikipedia page images are sourced from Wikipedia via the [Wikimedia API](http://www.mediawiki.org/wiki/API:Main_page). The first AJAX request occurs upon the query request (for the start and end nodes) and then again once the result is received (for the inner path nodes). Image URLs are stores in a global variable (*queryImages*). There are further requests when the user mouses over non-path nodes.
+The returned path is displayed in two ways: as a force-directed graph layout, and as a simple list of page titles. Both are rendered as SVG images with d3. Page images are displayed in the nodes via clipped-path, as patterning the image over a circle decreased performance during movement.
+
+Wikipedia page images and extracts are sourced from Wikipedia via the [Wikimedia API](http://www.mediawiki.org/wiki/API:Main_page). The first AJAX request occurs upon the query request (for the start and end nodes), then again once the result is received (for the inner path nodes). URLs and extracts are stored in a global variable (*queryImages*). There are further requests when the user mouses over non-path nodes.
 
 ##### User input
 To help users input page names correctly (as well as to suggest possible queries) I implemented a predictive seach tool with [typeahead.js](https://twitter.github.io/typeahead.js/). It uses AJAX requests to query an indexed [SQLite](http://www.sqlite.org/) database that holds the page titles and their codes.
 
 #### Improving query response time
+As I played around with the database, I realized that a responsive shortest-path query of such a large database would take some refinement and I first wanted to figure out how to display my data, deploy the application, etc. I needed a smaller subgraph to play with until my query time improved.
+
+I wrote <kbd>pres_clean.py</kbd> to sample the pagelinks file for only those pages and links that include the names of U.S. Presidents. After cleaning, this graph had 77 thousand nodes and 140 thousand relationships. I built most of my application using this database, then I scaled everything to use the full database. 
+
+Complete graph | Subgraph
+-------------- | -----------
+4.5m nodes | 77k nodes 
+110m links | 140k links
+
 At the start of the project, I decided there were at least four possible approaches to improve response time. I've tackled three of them so far and I've seen improvements with each:
 - [x] Scale vertically (tweak memory allocation, use larger machine)
 - [x] More efficient query (change query parameters, possibly rewrite algorithm)
@@ -167,7 +180,7 @@ Each time I increased both init and max memory, I ran the same query three times
 Then, I deployed the database to a larger machine (see [Deployment](#deployment) below). I scaled the java memory settings to the new specs, but the query time only halved (60 sec to 30 sec) despite the four-fold increase in RAM.
 
 #####Query efficiency
-I chose to use the built-in shortest-path algorithm for Neo4j, even though I've been unable to find out exactly what the algorithm is. [Here](https://groups.google.com/forum/#!topic/neo4j/GiQPwQC_rII) is the closest description I've found:
+I chose to use the built-in shortest-path algorithm for Neo4j, even though I've been unable to find out exactly what the algorithm is. It does use a breadth-first approach, which seems like a good option. [Here](https://groups.google.com/forum/#!topic/neo4j/GiQPwQC_rII) is the closest description I've found:
 
 >The shortest path algorithm (i.e. paths with as few relationships as possible) uses breadth first, alternating sides between each visited relationship, not between each fully expanded depth. So if one side expands into fewer relationships than the other, that side can continue to new depths and find candidates even if the other side doesn't advance. When candidates are found the current depths will be fully expanded and shortest candidates will be selected and returned.
 
@@ -180,11 +193,7 @@ query = neo4j.CypherQuery(
 )
 query.execute_one()
 ```
-I added a constraint in the database for the Page label (all nodes are Pages) to express that node id is unique:
-```
-CREATE CONSTRAINT ON (p:Page) ASSERT p.node IS UNIQUE;
-```
-And then I modified my query to use the Page label in the node lookup, as well as pass the nodes as arguments (instead of via string substitution). Here's the modified query:
+I then added a [constraint](#database-and-model) in the database for the Page label (all nodes are Pages) to express that node id is unique. I modified my query to use the Page label in the node lookup, as well as pass the nodes as arguments (instead of via string substitution). Here's the final query:
 ```python
 query = neo4j.CypherQuery(
     graph_db, 
@@ -193,7 +202,7 @@ query = neo4j.CypherQuery(
 )
 query.execute(n1=node1, n2=node2)
 ```
-According to the [Neo4j manual](http://neo4j.com/docs/stable/query-constraints.html), unique constraints ensure that property values are unique for all nodes with a specific label. Additionally, unique constraints also add an index on the value--and this is the index used for lookups. It's interesting that the auto-indexing (on the 'node' property) hadn't had a similar effect.
+According to the [Neo4j manual](http://neo4j.com/docs/stable/query-constraints.html), unique constraints ensure that property values are unique for all nodes with a specific label. Additionally, unique constraints also add an index on the value--and this is the index used for lookups. *(Sidenote: It's interesting that the auto-indexing (on the 'node' property) hadn't had a similar effect.)*
 
 ##### Pruning the graph
 I was very surprised to find that over half of the links in the page links dataset had no outgoing links. After some poking around on Wikipedia, I learned that most of the dead-ends are [red links](http://en.wikipedia.org/wiki/Wikipedia:Red_link), links that point to a page that does not yet exist. For some pages, when I visited the source page I could not find the link pointing to the dead-end. The DBPedia 2014 dataset is based on dumps from April/May 2014, so perhaps some dead-ends are the result of being deleted.
