@@ -1,105 +1,106 @@
 /******HTML STUFF******/
 :focus {
-  outline:none; 
-  border-bottom: solid 2px #999;
+    outline:none; 
+    border-bottom: solid 2px #999;
 } /*changes chrome's focus action*/
 
 body {
-  background-color: #fff;
-  color: #666;
-  margin: 0;
-  font-family: sans-serif;
-  font-weight: 100;
-  font-size: 18px;
-  text-align: center;
+    background-color: #fff;
+    color: #666;
+    margin: 0;
+    font-family: sans-serif;
+    font-weight: 100;
+    font-size: 18px;
+    text-align: center;
 }
 
 .logo {
-  width: 100%;
+    width: 100%;
 }
 
 .border {
-  background: url('../images/logo-background.png');
-  height: 20px;
+    background: url('../images/logo-background.png');
+    height: 20px;
 }
 
 .background {
-  background-color: #333;
-  padding: 10px 0 10px;
-  text-align: left;
-
+    background-color: #333;
+    padding: 10px 0 10px;
+    text-align: left;
 }
 
 .title {
-  font-family: "Signika", sans-serif;
-  color: #fff;
-  font-size: 40px;
-  display: inline-block;
-  margin-left: 15%;
+    font-family: "Signika", sans-serif;
+    color: #fff;
+    font-size: 40px;
+    display: inline-block;
+    margin-left: 15%;
 }
 
 .title:hover {
-  cursor: pointer;
+    cursor: pointer;
 }
 
 .blurb {
-  font-family: "Nothing You Could Do", sans-serif;
-  font-size: 20px;
-  display: inline-block;
-  color: #fff;
-  margin-left: 10px;
+    font-family: "Nothing You Could Do", sans-serif;
+    font-size: 20px;
+    display: inline-block;
+    color: #fff;
+    margin-left: 10px;
 }
 
 .info {
-  color: #999;
-  text-align: right;
-  position: absolute;
-  right: 15%;
-  top: 50px;
+    color: #999;
+    text-align: right;
+    position: absolute;
+    right: 15%;
+    top: 50px;
 }
 
 .info:hover {
-  cursor: pointer;
-  color: #fff;
+    cursor: pointer;
+    color: #fff;
 }
 
 .query-form {
-  margin: 30px;
-  text-align: center;
+    margin: 30px;
+    text-align: center;
 }
 
 input { 
-  border: none;
-  border-bottom: solid 1px #999; 
-  margin: 0 10px 0 10px;
-  font-size: 16px;
+    border: none;
+    border-bottom: solid 1px #999; 
+    margin: 0 10px 0 10px;
+    font-size: 16px;
 }
 
 .button {
-  margin-left: 5px;
-  color: #fff;
-  background-color: #999;
-  border: solid 1px #999;
-  border-radius: 10px;
-  position: relative;
-  font-family: "Signika", sans-serif;
+    margin-left: 5px;
+    color: #fff;
+    background-color: #999;
+    border: solid 1px #999;
+    border-radius: 10px;
+    position: relative;
+    font-family: "Signika", sans-serif;
 }
 
 .button:hover {
-  cursor: pointer;
-  background-color: #666;
-  border: solid 1px #666;
+    cursor: pointer;
+    background-color: #666;
+    border: solid 1px #666;
 }
 
-#wtf {
-  border: none;
-  border-radius: 16px;
-  background-color: #B85427;
-  padding: 2px 8px 2px 8px;
+.wtf {
+    border: none;
+    border-radius: 16px;
+    background-color: #B85427;
+    padding: 2px 8px 2px 8px;
 }
 
-#wtf:hover {
-  background-color: #FF7436;
+.wtf:hover {
+    background-color: #FF7436;
+    border: none;
+    cursor: auto;
 }
 
 /*TYPEAHEAD STUFF*/
@@ -130,7 +131,7 @@ input {
     line-height: 18px;
 }
 
-.tt-suggestion.tt-cursor {
+.tt-cursor {
     color: #fff;
     background-color: #0097cf;
     cursor: pointer;
@@ -144,11 +145,12 @@ input {
 /*RESULTS STUFF*/
 .results {
     width: 100%;
-    display: inline-block;
+    /*display: inline-block;*/
 }
 
 .graph {
     display: inline-block;
+    min-width: 350px;
 }
 
 .sidebar {
@@ -172,16 +174,24 @@ input {
     display: none;
 }
 
+.help {
+    /*text-align: left;*/
+    font-size: 14px;
+    padding: 5px;
+}
+
 .page-image {
     margin-top: 5px;
 }
 
 .page-title {
     margin-top: 10px;
+    padding: 5px;
 }
 
 .page-extract {
     font-size: 12px;
+    padding: 5px;
 }
 
 .page {
