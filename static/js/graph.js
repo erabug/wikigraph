@@ -1,11 +1,11 @@
 function drawGraph(json) {
 
-    // console.log("raw data:", json);
-
+    // set svg height based on path length
+    pathHeight = Object.keys(queryImages).length * 100;
 
     // establish width and height of the svg
     var width = 600,
-        height = 500;
+        height = pathHeight;
 
     // color established as a scale
     var color = d3.scale.category20();
@@ -17,20 +17,18 @@ function drawGraph(json) {
 
     // this function handles the parameters of the force-directed layout
     var force = d3.layout.force()
-        .gravity(0.04)
+        .gravity(0.05)
         .linkDistance(function(d) {
-          if (d.value == 1) {
+          if (d.value == 1) { // if in the path
             return 130;
           } else {
             return Math.floor(Math.random() * (100 - 70)) + 70;
         }
         })
         .charge(-100)
-        // .chargeDistance(100)
         .size([width, height]);
 
     var defs = svg.append("defs");
-        // .attr("id", "imgdefs");
 
     // this appends the marker tag to the svg tag, applies arrowhead attributes
     defs.selectAll("marker")
@@ -46,9 +44,11 @@ function drawGraph(json) {
             .append("svg:path")
             .attr("d", "M0,-4L10,0L0,4Z");
 
+    // this helps predict where the arrowhead should be on the link path
     var diagonal = d3.svg.diagonal()
         .projection(function(d) { return [d.y, d.x]; });
 
+    // establish links
     var link = svg.selectAll(".link")
             .data(json.links)
         .enter().append("path")
@@ -58,7 +58,7 @@ function drawGraph(json) {
             .attr("marker-end", "url(#arrow)")
             .attr("d", diagonal);
 
-    // select subset of g that are nodes
+    // establish nodes
     var node = svg.selectAll("g.node")
             .data(json.nodes)
         .enter().append("svg:g")
@@ -116,8 +116,8 @@ function drawGraph(json) {
 
     pathNode.append("circle")
         .attr("r", function(d) {
-            d.radius = 45
-            return d.radius
+            d.radius = 45;
+            return d.radius;
         })
         .style("fill", "#fff"); // white background for the .gifs
 
@@ -184,16 +184,5 @@ function drawGraph(json) {
 
       node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
     });
-    // for each tick, the distance between each pair of linked nodes is computed,
-    // the links move to converge on the desired distance
-    // force.on("tick", function() {
-    //   link.attr("x1", function(d) { return d.source.x; })
-    //       .attr("y1", function(d) { return d.source.y; })
-    //       .attr("x2", function(d) { return d.target.x; })
-    //       .attr("y2", function(d) { return d.target.y; });
-    //   node.attr("transform", function(d) {
-    //     return "translate(" + d.x + "," + d.y + ")";
-    //   });
 
-    // });
 }
