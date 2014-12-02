@@ -10,19 +10,6 @@ def find_shortest_path(node1, node2):
 
 	t0 = time.time()
 
-	# experimental
-	# query = neo4j.CypherQuery(
-	# 	graph_db, 
-	# 	"""MATCH (m:Page {node:{n1}})
-	# 	   USING INDEX m:Page(node)
-	# 	   WITH m
-	# 	   MATCH (n:Page {node:{n2}}), p = shortestPath((m)-[*..20]->(n))
-	# 	   USING INDEX n:Page(node)
-	# 	   RETURN p"""
-	# )
-	# path = query.execute_one(n1=node1, n2=node2)
-
-	# works
 	query = neo4j.CypherQuery(
 		graph_db, 
 	    """MATCH (m:Page {node:{n1}}), (n:Page {node:{n2}}), 
@@ -110,23 +97,6 @@ def find_secondary_rels_and_nodes(node_objs_list):
 
 	rel_dict_list = parse_rel_objs(rels)
 	node_dict_list = parse_node_objs(nodes)
-
-	# nodes = []
-
-	# for node in node_objs_list:
-
-	# 	node_set = set()
-	# 	for rel in node.match_incoming():
-	# 		node_set.add(int(rel.start_node.get_properties().values()[0]))
-	# 	nodes.append(node_set)
-
-	# # matches = []
-
-	# print len(nodes)
-	# print nodes[1]
-	# print reduce(lambda x, y: x & y, nodes[:2])
-	# print reduce(lambda x, y: x & y, nodes[1:])
-	# print reduce(lambda x, y: x & y, [nodes[0], nodes[2]])
 	
 	return rel_dict_list, node_dict_list
 
@@ -198,8 +168,8 @@ def create_lists(node1, node2):
 			rel['source'] = codes[rel['source']]
 			rel['target'] = codes[rel['target']]
 
-		response = """{ "path": %s, "results": { "directed": true, "nodes": %s, "links": %s, 
-		"multigraph": false }}""" % (json.dumps(path_names), json.dumps(nodes_list), json.dumps(rels_list))
+		response = """{ "path": %s, "results": { "directed": true, "nodes": %s, 
+		"links": %s, "multigraph": false }}""" % (json.dumps(path_names), json.dumps(nodes_list), json.dumps(rels_list))
 
 	else:
 		response = '{ "path": None, "results": None }'
