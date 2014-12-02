@@ -31,13 +31,11 @@ def assemble_dict(link_path, redirects):
 
     with open(link_path, 'rb') as paths:
         data = {}
-        # counter = 500000
         foo = 0
         code_counter = 0
 
         t0 = time.time()
         for line in paths:
-            # if counter > 0:
                 l = line.split('\t')
                 start = l[0]
                 end = l[1].rstrip()
@@ -75,10 +73,6 @@ def assemble_dict(link_path, redirects):
                     x = foo/1000000
                     y = (time.time() - t0)/60
                     print "%d million lines read in %.2f minutes" % (x, y)
-  
-            #     counter -= 1
-            # else: 
-            #     break
 
     return data
 
