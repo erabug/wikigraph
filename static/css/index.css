@@ -73,7 +73,7 @@ input {
   border-bottom: solid 1px #999; 
   margin: 0 10px 0 10px;
   font-size: 16px;
-} 
+}
 
 .button {
   margin-left: 5px;
@@ -89,6 +89,17 @@ input {
   cursor: pointer;
   background-color: #666;
   border: solid 1px #666;
+}
+
+#wtf {
+  border: none;
+  border-radius: 16px;
+  background-color: #B85427;
+  padding: 2px 8px 2px 8px;
+}
+
+#wtf:hover {
+  background-color: #FF7436;
 }
 
 /*TYPEAHEAD STUFF*/
@@ -129,12 +140,6 @@ input {
     margin: 0;
 }
 
-
-
-/******GRAPH STUFF******/
-svg {
-  /*border: solid 1px #666;*/
-}
 
 /*RESULTS STUFF*/
 .results {
@@ -185,13 +190,13 @@ svg {
 }
 
 .squareimg {
-    width: 80px;
-    height: 80px;
-    border-radius: 40px;
+    width: 90px;
+    height: 90px;
+    border-radius: 45px;
     overflow: hidden;
     border: solid 2px black;
     margin: 10px;
-    background-color: #333;
+    background-color: #fff;
 }
 
 .loading {
