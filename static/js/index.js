@@ -202,7 +202,7 @@ function getImageAndExtract(title, code) {
     var queryURL = makeQueryURL(150, 1, title);
     var extractURL = makeExtractURL(1, title);
     $.when(
-        $.getJSON( // get image for moused over node
+        $.getJSON( // get image for moused-over node
         queryURL,
         function(data) {
             var pageObject = data.query.pages;
@@ -212,7 +212,7 @@ function getImageAndExtract(title, code) {
             });
         })
         ).then(function(data) {
-            return $.getJSON(
+            return $.getJSON( // get extract for moused-over node
                 extractURL,
                 function(data) {
                     var thing = data.query.pages;
@@ -221,9 +221,9 @@ function getImageAndExtract(title, code) {
                     queryImages[code].extract = text;
             });
         }).done(function(data) {
-            $('.page-image').html('<img src=' + queryImages[code].url +
+            pageImage.html('<img src=' + queryImages[code].url +
                 ' style="border:solid 2px #666; background-color: #fff">');
-            $('.page-extract').html(queryImages[code].extract);
+            pageExtract.html(queryImages[code].extract);
         });
 }
 
@@ -237,24 +237,24 @@ function sideBar() {
     getSummaryImages(numPages, pageParams); // get thumbnails for summary
     getPathExtracts(numPages, pageParams); // get extracts for path nodes
     $('.node').mouseover(function(e) {
-        $('.details').toggleClass('hidden');
+        details.toggleClass('hidden');
         var info = this.id.split('|');
         var title = info[0];
         var code = info[1];
-        $('.page-title').html(title);
+        pageTitle.html(title);
         if (code in queryImages) {
-            $('.page-image').html('<img src=' + queryImages[code].url +
+            pageImage.html('<img src=' + queryImages[code].url +
                 ' style="border:solid 2px #666; background-color: #fff">');
-            $('.page-extract').html(queryImages[code].extract);
+            pageExtract.html(queryImages[code].extract);
         } else {
             getImageAndExtract(title, code);
         }
     });
     $('.node').mouseout(function(e) {
-        $('.details').toggleClass('hidden');
-        $('.page-image').empty();
-        $('.page-title').empty();
-        $('.page-extract').empty();
+        details.toggleClass('hidden');
+        pageImage.empty();
+        pageTitle.empty();
+        pageExtract.empty();
     });
     externalLink();
 }
@@ -289,8 +289,8 @@ function getRandomPages() {
                            'code': n1.code.toString()};
             CODES.node2 = {'title': n2.title,
                            'code': n2.code.toString()};
-            $('input#start-node').val(n1.title); // fill in the search fields
-            $('input#end-node').val(n2.title);
+            startField.val(n1.title); // fill in the search fields
+            endField.val(n2.title);
         });
 }
 
@@ -298,6 +298,10 @@ function reverseQuery() {
     x = startField.val();
     startField.val(endField.val());
     endField.val(x);
+}
+
+function toggleSidebar() {
+    details.toggleClass('hidden');
 }
 
 //------------ VARIABLES ------------//
@@ -309,8 +313,11 @@ var imageURLs; // an array so it will retain order
 var startField = $('#start-node');
 var endField = $('#end-node');
 var path = $('.loading-images');
-
-clear_all();
+var details = $('.details');
+var pageImage = $('.page-image');
+var pageTitle = $('.page-title');
+var pageExtract = $('.page-extract');
+var help = $('#wtf');
 
 // sets up the request parameters for Typeahead
 var pageNames = new Bloodhound({
@@ -333,6 +340,8 @@ var pageNames = new Bloodhound({
     }
 });
 
+//------------CALLS------------//
+clear_all();
 pageNames.initialize(); // initialize the bloodhound
 
 //------------EVENT HANDLERS------------//
@@ -385,4 +394,17 @@ endField.on('typeahead:selected typeahead:autocompleted', function (e, d) {
 // select all text when the user clicks into an input field
 $('input[type=text]').focus(function(){
     this.select();
+});
+
+// help button mouseover handler 
+help.mouseover(function() {
+    toggleSidebar();
+    pageImage.html("HEY GIRL");
+});
+
+help.mouseout(function() {
+    toggleSidebar();
+    pageImage.empty();
+    pageTitle.empty();
+    pageExtract.empty();
 });

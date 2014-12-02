@@ -12,7 +12,6 @@ body {
   font-weight: 100;
   font-size: 18px;
   text-align: center;
-
 }
 
 .logo {
@@ -45,6 +44,7 @@ body {
 
 .blurb {
   font-family: "Nothing You Could Do", sans-serif;
+  font-size: 20px;
   display: inline-block;
   color: #fff;
   margin-left: 10px;
