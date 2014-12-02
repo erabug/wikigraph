@@ -177,6 +177,6 @@ def create_lists(node1, node2):
     return response
 
 if __name__ == '__main__':
-    print create_lists('335354', '3778612')
+    print create_lists('335354', '3778612') # Abraham Lincoln to Astronomy
 
 
