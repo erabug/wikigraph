@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, jsonify
-import query, sqlite3, couchdb, random
+import query, sqlite3, couchdb, random, time
 
 app = Flask(__name__)
 app.secret_key = 'lisaneedsbraces'
@@ -52,27 +52,31 @@ def get_path():
 @app.route('/page-names')
 def get_page_names():
 
-	entry = request.args.get("query")
+	t0 = time.time()
+
+	entry = request.args.get("query").lower()
 	print "requesting page names for %s..." % entry
 	cursor = connect()
-	query1 = 'SELECT code, title FROM pagenames WHERE title = ? COLLATE NOCASE'
+	# query1 = 'SELECT code, title FROM pagenames WHERE title = ? COLLATE NOCASE'
+	query1 = 'SELECT code, title FROM pagenames WHERE title_lower = ?'
 	row = cursor.execute(query1, (entry,)).fetchone()
 
 	if row == None:
 		results = []
 	else:
-		results = [{ 'title': row[1], 'code': row[0]}]
+		results = [{ 'title': row[1], 'code': row[0] }]
 
-	query2 = '''SELECT code, title 
-				FROM pagenames
-				WHERE title LIKE ? 
-				OR title LIKE ?
-				LIMIT 100;'''
+	# results = [{ 'title': row[1], 'code': row[0] }] if row != None else []
 
-	rows = cursor.execute(query2, (entry + '%', '% ' + entry, )).fetchall()
+	query2 = 'SELECT code, title FROM pagenames WHERE title LIKE ? LIMIT 50;'
+
+	rows = cursor.execute(query2, (entry + '%',))
+	# rows = cursor.execute(query2, (entry + '%', '% ' + entry, )).fetchall()
 	results.extend([{ 'title': row[1], 'code': row[0] } for row in rows])
 	response = jsonify(**{ 'results': results })
-	print "SQLite responded:", response, len(results)
+	t1 = time.time()
+
+	print "DB responded with %d results in %0.2f seconds" % (len(results), t1- t0)
 
 	return response
 
@@ -87,8 +91,11 @@ def get_random_names():
 	# query = 'SELECT code, title FROM pagenames WHERE code = ? OR code = ?'
 	# rows = cursor.execute(query, (node1, node2, )).fetchall()
 
-	query = '''SELECT code, title FROM pagenames 
-			WHERE degrees > 150 ORDER BY RANDOM() LIMIT 2'''
+	query = '''SELECT code, title 
+			   FROM pagenames 
+			   WHERE degrees > 150 
+			   ORDER BY RANDOM() 
+			   LIMIT 2'''
 
 	rows = cursor.execute(query).fetchall()
 	results = [{ 'title': row[1].replace('_', ' '), 'code': row[0] } for row in rows]
