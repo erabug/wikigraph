@@ -1,64 +1,34 @@
-var CODES; // this object will be populated once the user inputs two pages
-var response; // global variable for the graph db response
-var queryImages; // an object to pass information to the graph
-var imageURLs; // an array so it will retain order
-clear_all();
-
-// tells typeahead how to handle the user input (e.g. the get request params)
-var pageNames = new Bloodhound({
-    datumTokenizer: function(d) {
-        return Bloodhound.tokenizers.whitespace(d.value);
-    },
-    queryTokenizer: Bloodhound.tokenizers.whitespace,
-    limit: 50,
-    remote: {
-        url: '/page-names?query=%QUERY',
-        // rateLimitBy: 'throttle',
-        // rateLimitWait: 100,
-        filter: function(pageNames) {
-            // Map the remote source JSON array to a JavaScript array
-            return $.map(pageNames.results, function(page) {
-                return {
-                    value: page.title,
-                    code: page.code
-                };
-            });
-        }
-    }
-});
-
-pageNames.initialize(); // initialize the bloodhound
-
+//------------ FUNCTIONS ------------//
 function clear_partial() {
-    $('.loading-images').empty();
     $('svg').remove();
+    path.empty();
     queryImages = {};
     imageURLs = [];
 }
 
 function clear_all() {
     CODES = {};
-    $('input#start-node').val('');
-    $('input#end-node').val('');
+    startField.val('');
+    endField.val('');
     clear_partial();
 }
 
 function getThumbnail(pageObject, pageKey) {
     var page = pageObject[pageKey];
-    var thumbnail, thWidth, thHeight;
+    var thumbnail, width, height;
     if ('thumbnail' in page) { // if wikipedia query returned a thumbnail
         thumbnail = page.thumbnail.source;
-        thWidth = page.thumbnail.width;
-        thHeight = page.thumbnail.height;
+        width = page.thumbnail.width;
+        height = page.thumbnail.height;
     } else { // else returns grumpycat
         thumbnail = '../static/images/cat.jpg';
-        thWidth = 100;
-        thHeight = 100;
+        width = 100;
+        height = 100;
     }
     var item = {'title': page.title,
                 'thumbnail': thumbnail,
-                'width': thWidth,
-                'height': thHeight};
+                'width': width,
+                'height': height};
     return item;
 }
 
@@ -70,9 +40,8 @@ function addImage(item, code) {
 }
 
 function makeHTMLSnippet(node, thumbnail, title) {
-    html = '<div class="page" id="page'+node.toString()+'">'+
-           '<div class="squareimg"><img src='+thumbnail+'></div>';
-           // +'<div class="page-title">'+title+'</div></div>';
+    html = '<div class="page" id="page' + node.toString() + '">' +
+           '<div class="squareimg"><img src=' + thumbnail + '></div>';
     return html;
 }
 
@@ -81,10 +50,12 @@ function addQueryImages(data) {
     var htmlSnippets = {};
     Object.keys(pageObject).forEach(function(pageKey) {
         item = getThumbnail(pageObject, pageKey);
-        if (item.title == CODES.node1.title) {node = 0;} else {node = 1;}
-
+        if (item.title == CODES.node1.title) {
+            node = 0;
+        } else {
+            node = 1;
+        }
         htmlSnippets[node] = makeHTMLSnippet(node, item.thumbnail, item.title);
-
         addImage(item, CODES['node'+(node+1)].code);
         imageURLs[node] = {'title': item.title,
                            'thumbnail': item.thumbnail};
@@ -113,7 +84,7 @@ function addPathImages(data) {
 function makeQueryURL(size, numPages, pagesParams) {
     var queryURL = 'http://en.wikipedia.org/w/api.php' +
                    '?action=query&format=json&redirects&prop=pageimages&' +
-                   'pithumbsize='+size+'px&pilimit=' + numPages + '&titles=' +
+                   'pithumbsize='+ size +'px&pilimit=' + numPages + '&titles=' +
                    pagesParams + '&callback=?';
     return queryURL;
 }
@@ -121,27 +92,22 @@ function makeQueryURL(size, numPages, pagesParams) {
 function decodeInput(d, node) {
     CODES[node] = {'title': d.value,
                    'code': d.code.toString()};
-    
 }
 
 function query() {
-
     var pagesParams = CODES.node1.title + '|' + CODES.node2.title;
     var queryURL = makeQueryURL(size=150, numPages=2, pagesParams);
-    var path = $('.loading-images');
-
     $.when(
-
         $.getJSON( // get the start/end images from Wikipedia API
             queryURL,
             function(data) {
                 var htmlSnippets = addQueryImages(data);
+                // console.log('QUERY IMAGES', queryImages);
                 Object.keys(htmlSnippets).forEach(function(node) {
                     path.append(htmlSnippets[node]);
                 });
                 $('#page0').after('<div class="page loading"></div>');
         }),
-
         $.get( // get the shortest path from the database
             '/query',
             CODES,
@@ -149,33 +115,36 @@ function query() {
                 response = JSON.parse(data); // decode the JSON
                 console.log('RETURNED PATH:', response.path);
             })
-
     ).then(function(data) {
-
         var inner = response.path.slice(1, -1);
         var numPages = inner.length;
-
         var innerNodes = [];
         inner.forEach(function(node) {
             innerNodes.push(node.title);
         });
-
         var pagesParams;
         if (numPages > 1) {
             pagesParams = innerNodes.join('|');
         } else { pagesParams = innerNodes; }
-
         var queryURL = makeQueryURL(size=150, numPages, pagesParams);
-
         if (inner.length === 0) {
             return false;
         } else { // if there are intermediary nodes
             return getPathImages(queryURL);
         }
     }).done(function() {
+
+        updateIndexCodes();
         path.empty();
         drawGraph(response.results);
         sideBar();
+    });
+}
+
+function updateIndexCodes() {
+    // updates queryImages with index numbers for ordering purposes
+    response.path.forEach(function(node) {
+        queryImages[node.code].code = response.path.indexOf(node);
     });
 }
 
@@ -184,10 +153,7 @@ function getPathImages(queryURL) {
         queryURL,
         function(data) {
             addPathImages(data); //updates queryImages with inner ndoes
-            // updates queryImages with index numbers for ordering
-            response.path.forEach(function(node) {
-                queryImages[node.code].code = response.path.indexOf(node);
-            });
+            updateIndexCodes();
         });
 }
 
@@ -262,18 +228,14 @@ function getImageAndExtract(title, code) {
 }
 
 function sideBar() {
-
-    // get tiny images for the path nodes
     var pathNodes = [];
     response.path.forEach(function(node) {
         pathNodes.push(node.title);
     });
     var pageParams = pathNodes.join('|');
     var numPages = pathNodes.length;
-
     getSummaryImages(numPages, pageParams); // get thumbnails for summary
     getPathExtracts(numPages, pageParams); // get extracts for path nodes
-
     $('.node').mouseover(function(e) {
         $('.details').toggleClass('hidden');
         var info = this.id.split('|');
@@ -288,38 +250,34 @@ function sideBar() {
             getImageAndExtract(title, code);
         }
     });
-
     $('.node').mouseout(function(e) {
         $('.details').toggleClass('hidden');
         $('.page-image').empty();
         $('.page-title').empty();
         $('.page-extract').empty();
     });
-
     externalLink();
 }
 
 function externalLink() {
-    $('.node').click(function() {
+    $('.node').dblclick(function() {
         var title = this.id.split('|')[0];
-        console.log(title);
         window.open('http://en.wikipedia.org/wiki/' + title);
     });
 }
 
 function feelingLucky(inputField, node) {
-    $.get(
-        '/page-names',
-        'query='+inputField.val(),
-        function(data) {
-            result = data.results[0]; // uses the first result
-            inputField.val(result.title);
-            CODES[node] = {'title': result.title,
-                           'code': result.code.toString()};
-            if (CODES.node1 !== undefined & CODES.node2 !== undefined) {
-                query();
-            }
-    });
+    if (!(CODES[node])) {
+        return $.get(
+            '/page-names',
+            'query='+inputField.val(),
+            function(data) {
+                result = data.results[0]; // uses the first result
+                inputField.val(result.title);
+                CODES[node] = {'title': result.title,
+                               'code': result.code.toString()};
+            });
+    }
 }
 
 function getRandomPages() {
@@ -336,41 +294,67 @@ function getRandomPages() {
         });
 }
 
-// event handler for the query submission
-$('input#submit-query').click(function() {
-    clear_partial();
+function reverseQuery() {
+    x = startField.val();
+    startField.val(endField.val());
+    endField.val(x);
+}
 
-    var startField = $('#start-node');
-    var endField = $('#end-node');
+//------------ VARIABLES ------------//
+var CODES; // this object will be populated once the user inputs two pages
+var response; // global variable for the graph db response
+var queryImages; // an object to pass information to the graph
+var imageURLs; // an array so it will retain order
 
-    if (CODES.node1 !== undefined) {
-        if (startField.val() != CODES.node1.title) {
-            feelingLucky(startField, 'node1');
-        }
-    }
+var startField = $('#start-node');
+var endField = $('#end-node');
+var path = $('.loading-images');
 
-    if (CODES.node2 !== undefined) {
-        if (endField.val() != CODES.node2.title) {
-            feelingLucky(endField, 'node2');
-        }
-    }
+clear_all();
 
-    try {
-        query();
-    } catch (e) {
-
-        if (!(CODES.node1)) { // if either/both fields not chosen
-            feelingLucky(startField, 'node1');
-        }
-
-        if (!(CODES.node2)) { // if either/both fields not chosen
-            feelingLucky(endField, 'node2');
+// sets up the request parameters for Typeahead
+var pageNames = new Bloodhound({
+    datumTokenizer: function(d) {
+        return Bloodhound.tokenizers.whitespace(d.value);
+    },
+    queryTokenizer: Bloodhound.tokenizers.whitespace,
+    limit: 50,
+    remote: {
+        url: '/page-names?query=%QUERY',
+        filter: function(pageNames) {
+            // Map the remote source JSON array to a JavaScript array
+            return $.map(pageNames.results, function(page) {
+                return {
+                    value: page.title,
+                    code: page.code
+                };
+            });
         }
     }
 });
 
+pageNames.initialize(); // initialize the bloodhound
+
+//------------EVENT HANDLERS------------//
+$('input#submit-query').click(function() {
+    clear_partial();
+    // confirm that both fields are complete
+    checkFirst = feelingLucky(startField, 'node1');
+    checkLast = feelingLucky(endField, 'node2');
+    $.when(
+        checkFirst,
+        checkLast
+        ).then(function(data) {
+            query();
+        });
+});
+
 $('input#random-query').click(function() {
     getRandomPages();
+});
+
+$('input#reverse-query').click(function() {
+    reverseQuery();
 });
 
 // sets up the typeahead on the two input fields
@@ -380,17 +364,25 @@ $('.scrollable-dropdown-menu .typeahead').typeahead(null, {
     source: pageNames.ttAdapter()
 });
 
+// delete the code value as soon as the user clicks into an input field
+startField.focus(function() {
+    delete CODES['node1'];
+});
+
+endField.focus(function() {
+    delete CODES['node2'];
+});
+
 // records the values chosen for each field as a global var
-$('#start-node').on('typeahead:selected typeahead:autocompleted', function (e, d) {
+startField.on('typeahead:selected typeahead:autocompleted', function (e, d) {
     decodeInput(d, 'node1');
 });
 
-$('#end-node').on('typeahead:selected typeahead:autocompleted', function (e, d) {
+endField.on('typeahead:selected typeahead:autocompleted', function (e, d) {
     decodeInput(d, 'node2');
 });
 
-$('input[type=text]').focus(function(){ // click into the text field, select all
+// select all text when the user clicks into an input field
+$('input[type=text]').focus(function(){
     this.select();
 });
-
-

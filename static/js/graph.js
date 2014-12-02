@@ -25,7 +25,7 @@ function drawGraph(json) {
             return Math.floor(Math.random() * (100 - 70)) + 70;
         }
         })
-        .charge(-75)
+        .charge(-100)
         // .chargeDistance(100)
         .size([width, height]);
 
@@ -65,7 +65,7 @@ function drawGraph(json) {
             .attr("class", "node")
             .attr("id", function(d) {return d.title + '|' + d.code;})
             .call(force.drag);
-    // console.log(json.nodes);
+
     // select subset of nodes that are in the path
     var pathNode = node.filter(function(d) {
         return d.group == "path";
@@ -98,7 +98,7 @@ function drawGraph(json) {
 
     pathLink
         .style("stroke-width", "3px")
-        .style("opacity", 0.6)
+        .style("opacity", 1)
         .attr("marker-end", "url(#arrow)");
 
 

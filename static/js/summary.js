@@ -2,15 +2,11 @@ function displaySummary(path) {
     // iterate through path, if item is in queryImages, grab it and make a clip-path
     var svg = d3.select(".summary").append("svg")
         .attr("width", 200)
-        // .attr("height", 400); //65 * len(path)
         .attr("height", function(d) {
-            // console.log('height:', 55 * path.length);
             return 50 * path.length;
         });
 
     var defs = svg.append("defs");
-
-    // console.log('path', path);
 
     Object.keys(queryImages).forEach(function(key) {
 
@@ -33,7 +29,6 @@ function displaySummary(path) {
             })
             .attr("id", function(d) {return d.title + '|' + d.code;});
 
-    // console.log(tinyNode);
     tinyNode.append("image")
         .attr("xlink:href", function(d) {
             return queryImages[d.code].tinyurl;
@@ -59,15 +54,6 @@ function displaySummary(path) {
         .style("stroke-width", "2px")
         .style("fill", "none");
 
-    // tinyNode.append("text")
-    //     .text(function(d) {
-    //         console.log('title:', title, 'length:', title.length);
-    //         return d.title;
-    //     })
-    //     .attr("font-size", 14)
-    //     .attr("x", 30)
-    //     .attr("y", 5);
-
     var w = 145,
         h = 45;
 
@@ -76,7 +62,6 @@ function displaySummary(path) {
         .attr({x: 30, y: function(d) {
             var yMod;
             var len = d.title.length;
-            // console.log('title length:', d.title.length);
             if (len > 42) {
                 yMod = -22;
             } else if (len > 21) {
