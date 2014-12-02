@@ -97,7 +97,7 @@ def prune_deadends(data, deadends, keys):
 
     for key in keys:
         value = data.get(key)
-        if value != None:
+        if value is not None:
             links = value['links'].copy()
             for link in links:
                 if link in deadends:
