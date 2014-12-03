@@ -1,3 +1,20 @@
+function getSummaryImages(numPages, pageParams) {
+    queryURL = makeQueryURL(size=60, numPages, pageParams);
+    $.getJSON(
+        queryURL,
+        function(data) {
+            var pageObject = data.query.pages;
+            Object.keys(pageObject).forEach(function(pageKey) {
+                item = createThumbnailObject(pageObject[pageKey]);
+                code = getPathCode(item.title);
+                queryInfo[code].tinyurl = item.thumbnail;
+                queryInfo[code].tinyHeight = item.height;
+                queryInfo[code].tinyWidth = item.width;
+            });
+            displaySummary(response.path);
+        });
+}
+
 function displaySummary(path) {
     // draw SVG based on length of path
     var svg = d3.select(".summary").append("svg")

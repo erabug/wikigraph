@@ -27,13 +27,30 @@
   </div>
   
   <div class="loading-images"></div>
+  <div class="about hidden">
+    <!-- <h3>About wikiGraph</h3> -->
+    <h3>What connects two topics on Wikipedia?</h3>
+    <p>For example, how many links do you have to click to get from Harry Potter to the Spanish Inquisition?* Combining trivia nerdery with graph theory, wikiGraph allows users to find and explore the paths within Wikipedia.</p>
+    <p>The data are sourced from <a href="http://dbpedia.org/About" target="_">DBPedia</a> and <a href="en.wikipedia.org" target="_">Wikipedia</a>, without whom this project would not be possible.</p>
+    <p>This app was created as a final project for <a href="http://hackbrightacademy.com" target="_">Hackbright Academy</a> in Fall 2014. You can read more about the implementation and details <a href="https://github.com/erabug/wikigraph" target="_">on the Github page</a>.</p>
+    <p><i>*It takes a minimum of 3 clicks. Here's one path: Harry Potter &#8594; United Kingdom &#8594; Basques &#8594; Spanish Inquisition</i></p>
+  </div>
 
   <div class="results">
     <div class="graph"></div>
     <div class="sidebar">
       <div class="summary"></div>
       <div class="details hidden">
-        <div class="help"></div>
+        <div class="help hidden">
+          <p><input class="button" type="submit" value="Go"></p>
+          <p>Find a shortest path between two pages. You can select title suggestions from the drop-down menu or simply enter keywords.</p>
+          <p><input class="button" type="submit" value="Random"></p>
+          <p>Populates the page fields with titles randomly selected from non-list pages that have a high number of outgoing links.</p>
+          <p><input class="button" type="submit" value="Reverse"><p>
+          <p>Swaps the two selections.</p>
+          <p><i>Also...</i></p>
+          <p>Double-clicking the large path images will redirect you to that Wikipedia page.</p>
+        </div>
         <div class="page-image"></div>
         <div class="page-title"></div>
         <div class="page-extract"></div>

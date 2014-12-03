@@ -30,7 +30,7 @@ body {
 }
 
 .title {
-    font-family: "Signika", sans-serif;
+    font-family: 'Signika', sans-serif;
     color: #fff;
     font-size: 40px;
     display: inline-block;
@@ -42,7 +42,7 @@ body {
 }
 
 .blurb {
-    font-family: "Nothing You Could Do", sans-serif;
+    font-family: 'Nothing You Could Do', sans-serif;
     font-size: 20px;
     display: inline-block;
     color: #fff;
@@ -81,7 +81,7 @@ input {
     border: solid 1px #999;
     border-radius: 10px;
     position: relative;
-    font-family: "Signika", sans-serif;
+    font-family: 'Signika', sans-serif;
 }
 
 .button:hover {
@@ -101,6 +101,24 @@ input {
     background-color: #FF7436;
     border: none;
     cursor: auto;
+}
+
+.about {
+    width: 50%;
+    margin: auto;
+    text-align: left;
+    padding-top: 40px;
+    line-height: 150%;
+}
+
+/*h3 {
+    text-align: center;
+    font-family: 'Signika';
+}*/
+
+h3 {
+    text-align: center;
+    font-family: 'Nothing You Could Do';
 }
 
 /*TYPEAHEAD STUFF*/
