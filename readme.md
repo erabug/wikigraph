@@ -1,10 +1,10 @@
 wikiGraph
 ===========
-What connects two topics on Wikipedia? For example how many links do you have to click to get from Harry Potter to the Spanish Inquisition?* Combining trivia nerdery with graph theory, wikiGraph allows users to find and explore the paths within Wikipedia.
+What connects two topics on Wikipedia? For example, how many links do you have to click to get from Harry Potter to the Spanish Inquisition?* Combining trivia nerdery with graph theory, wikiGraph allows users to find and explore the paths within Wikipedia.
 
 You can check out the project [here](http://ec2-54-148-235-143.us-west-2.compute.amazonaws.com/).
 
-*It takes a minimum of 3 clicks. Here is one path: Harry Potter -> British literature -> the spread of the printing press -> the Spanish Inquisition
+*It takes a minimum of 3 clicks. Here's one path: Harry Potter -> British literature -> the spread of the printing press -> the Spanish Inquisition
 
 ###Contents
 - [Features](#features)
