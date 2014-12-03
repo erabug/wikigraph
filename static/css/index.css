@@ -111,11 +111,6 @@ input {
     line-height: 150%;
 }
 
-/*h3 {
-    text-align: center;
-    font-family: 'Signika';
-}*/
-
 h3 {
     text-align: center;
     font-family: 'Nothing You Could Do';
@@ -193,7 +188,6 @@ h3 {
 }
 
 .help {
-    /*text-align: left;*/
     font-size: 14px;
     padding: 5px;
 }
