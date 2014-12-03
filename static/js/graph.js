@@ -4,7 +4,7 @@ function drawGraph(json) {
 
     // establish width and height of the svg
     var width = 600,
-        height = pathLength * 110; // set svg height based on path length
+        height = pathLength * 110;
 
     // color established as a scale
     var color = d3.scale.category20();
@@ -18,9 +18,10 @@ function drawGraph(json) {
     var force = d3.layout.force()
         .gravity(0.05)
         .linkDistance(function(d) {
-          if (d.value == 1) { // if in the path
+          if (d.value == 1) {
             return 115;
           } else {
+            // if not in the path, distance is a random number from 70 to 100
             return Math.floor(Math.random() * (100 - 70)) + 70;
         }
         })
@@ -86,9 +87,11 @@ function drawGraph(json) {
 
     var start;
     Object.keys(queryInfo).forEach(function(key) {
-        var img = queryInfo[key]; // identify the start node
+        // identify the start node
+        var img = queryInfo[key];
         if (img.code === 0) start = key;
-        defs.append('clipPath') // define clip paths for each path node
+        // define clip paths for each path node
+        defs.append('clipPath')
             .attr('id', 'img' + key.toString())
           .append('circle')
             .attr('r', 45);
@@ -109,15 +112,19 @@ function drawGraph(json) {
     nonPathNode.append('circle')
         .attr('r', function(d) {
             var size;
-            if (d.degrees > 600) { // upper bound for scaling size on degrees
-                d.radius = 18; // assign radius to node attribute for arrowhead placement
+            // upper bound for scaling size on degrees
+            if (d.degrees > 600) {
+                // assign radius to node attribute for arrowhead placement
+                d.radius = 18;
             } else {
-                d.radius = d.degrees * 0.02 + 7; // scales linear with degrees
+                // scales linear with degrees
+                d.radius = d.degrees * 0.02 + 7;
             }
             return d.radius;
         })
         .style('fill', function(d) {
-            return color(d.degrees); // colors based on degrees
+            // colors based on degrees
+            return color(d.degrees);
         });
 
     // append white circles to path nodes (for the .gifs)
@@ -143,15 +150,18 @@ function drawGraph(json) {
         .attr('width', function(d) { return queryInfo[d.code].width;})
         .attr('clip-path', function(d) {
             var x = 'img' + d.code;
-            return 'url(#' + x + ')'; // unique clip path for this node
+            // unique clip path for this node
+            return 'url(#' + x + ')';
         });
 
-    pathNode.append('circle') // outline for the path nodes
+    // append empty circle to each path node as an outline
+    pathNode.append('circle')
         .attr('r', 45)
         .style('fill', 'none')
         .style('stroke', '#333')
         .style('stroke-width', '2px');
 
+    // fix the x and y coordinates for the start node
     startNode.each(function(d) {
         d.fixed = true;
         d.x = width/pathLength;
@@ -181,7 +191,8 @@ function drawGraph(json) {
             .attr('y1', function(d) { return d.source.y; })
             .attr('x2', function(d) { return d.target.x; })
             .attr('y2', function(d) { return d.target.y; })
-            .attr('d', function(d) { // this places arrowheads based on radius
+            // this places arrowheads based on radius
+            .attr('d', function(d) {
                 // Total difference in x and y from source to target
                 diffX = d.target.x - d.source.x;
                 diffY = d.target.y - d.source.y;
@@ -193,9 +204,6 @@ function drawGraph(json) {
                 return 'M' + d.source.x + ',' + d.source.y + 'L' +
                     (d.target.x - offsetX) + ',' + (d.target.y - offsetY);
         });
-        // node.attr('transform', function(d) {
-        //     return 'translate(' + d.x + ',' + d.y + ')';
-        // });
     });
 
 }
