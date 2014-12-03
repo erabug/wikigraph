@@ -77,7 +77,7 @@ function displaySummary(path) {
             var len = d.title.length;
             if (len > 42) {
                 return -22;
-            } else if (len > 21) {
+            } else if (len > 20) {
                 return -12;
             } else {
                 return -6;
