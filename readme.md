@@ -30,6 +30,9 @@ You can check out the project [here](http://ec2-54-148-235-143.us-west-2.compute
 *Future*
 
 - [ ] Path responses cached (CouchDB)
+- [ ] Snippets of each path node displayed in the mouseover tooltip (Beautiful Soup)
+
+![wikigraph_screenshot](static/images/wikigraph_ss.png)
 
 #### Data cleaning
 I downloaded RDF files (.ttl) for page links and redirects from [DBPedia](http://wiki.dbpedia.org/Downloads2014). Here's what the raw page links file looks like:
