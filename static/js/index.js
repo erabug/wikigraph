@@ -76,6 +76,7 @@ function decodeInput(d, node) {
 // when the 'Go' button is clicked, check for both values, then run query
 $('input#submit-query').click(function() {
     clearPartial();
+    about.addClass('hidden');
     checkFirst = feelingLucky(startField, 'node1');
     checkLast = feelingLucky(endField, 'node2');
     $.when(
@@ -201,9 +202,7 @@ function addQueryInfo(data) {
 // matching page object's code number
 function getPathCode(title) {
     for (var i = 0; i < response.path.length; i++) {
-        // console.log(title, response.path[i].title);
         if (response.path[i].title == title) {
-            // console.log(response.path[i].code);
             return response.path[i].code;
         }
     }
@@ -287,8 +286,14 @@ function query() {
             '/query',
             CODES,
             function(data) {
+                console.log(data);
                 response = JSON.parse(data);
-                console.log('RETURNED PATH:', response.path);
+                // console.log('RETURNED PATH:', response.path);
+                // try {
+                //     response = JSON.parse(data);
+                // } catch(err) {
+                //     console.log('BOOP');
+                // }
             })
     ).then(function(data) {
         return getInnerImages();
@@ -475,9 +480,9 @@ wtf.mouseout(function() {
 
 // toggles display for the query-form when the title is clicked
 $('.title').click(function() {
-    clearPartial();
+    clearAll();
     queryForm.removeClass('hidden');
-    about.addClass('hidden');
+    // about.addClass('hidden');
 });
 
 // toggles display for the information page when the 'About' button is clicked
