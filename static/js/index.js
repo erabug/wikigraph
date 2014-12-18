@@ -190,7 +190,7 @@ function addQueryInfo(data) {
         item = createThumbnailObject(pageObject[pageKey]);
         if (item.title == CODES.node1.title) code = 0; else code = 1;
         htmlSnippets[code] = makeHTMLSnippet(code, item.thumbnail);
-        addImage(item, CODES['node'+(code+1)].code);
+        addImage(item, CODES['node' + (code + 1)].code);
         imageURLs[code] = {'title': item.title,
                            'thumbnail': item.thumbnail};
     });
@@ -201,7 +201,9 @@ function addQueryInfo(data) {
 // matching page object's code number
 function getPathCode(title) {
     for (var i = 0; i < response.path.length; i++) {
+        // console.log(title, response.path[i].title);
         if (response.path[i].title == title) {
+            // console.log(response.path[i].code);
             return response.path[i].code;
         }
     }
@@ -220,6 +222,13 @@ function addPathImages(data) {
 // updates queryInfo with index numbers for ordering purposes
 function updateIndexCodes() {
     response.path.forEach(function(node) {
+        if (!(queryInfo[node.code])) {
+            queryInfo[node.code] = queryInfo['undefined'];
+            delete queryInfo['undefined'];
+            var old_index = response.path.indexOf(node);
+            response.path[old_index] = {'code': node.code,
+                                        'title': queryInfo[node.code].title};
+        }
         queryInfo[node.code].code = response.path.indexOf(node);
     });
 }
