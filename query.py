@@ -15,7 +15,10 @@ def find_shortest_path(node1, node2):
         """MATCH (m:Page {node:{n1}}), (n:Page {node:{n2}}), 
         p = shortestPath((m)-[*..10]->(n)) RETURN p"""
     )
-    path = query.execute_one(n1=node1, n2=node2)
+    try:
+        path = query.execute_one(n1=node1, n2=node2)
+    except:
+        path = None
 
     t1 = time.time()
 
@@ -169,7 +172,6 @@ def create_lists(node1, node2):
 
         response = """{ "path": %s, "results": { "directed": true, "nodes": %s, 
         "links": %s, "multigraph": false }}""" % (json.dumps(path_names), json.dumps(nodes_list), json.dumps(rels_list))
-
 
     else:
         response = '{ "path": None, "results": None }'
