@@ -104,10 +104,10 @@ input {
 }
 
 .about {
-    width: 50%;
+    width: 60%;
     margin: auto;
     text-align: left;
-    padding-top: 40px;
+    padding-top: 20px;
     line-height: 150%;
 }
 
