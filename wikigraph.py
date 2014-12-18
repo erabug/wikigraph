@@ -48,7 +48,7 @@ def get_page_names():
     response = jsonify(**{ 'results': results })
 
     t1 = time.time()
-    print "DB responded with %d results in %0.2f seconds" % (len(results), t1- t0)
+    print "DB responded with %d results in %0.2f seconds" % (len(results), t1 - t0)
 
     return response
 
@@ -66,7 +66,8 @@ def get_random_names():
                AND NOT title BETWEEN '0' and '9}'
                ORDER BY RANDOM()
                LIMIT 2'''
-    rows = cursor.execute(query).fetchall()
+
+    rows = cursor.execute(query)
     results = [{ 'title': row[1].replace('_', ' '), 'code': row[0] } for row in rows]
     response = jsonify(**{ 'results': results })
 
@@ -76,5 +77,5 @@ def get_random_names():
     return response
 
 if __name__ == '__main__':
-    # app.run(debug=True)
-    app.run(host="54", debug=True)
+    app.run(debug=True)
+    # app.run(host="54")
