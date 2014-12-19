@@ -299,8 +299,8 @@ function query() {
             drawGraph(response.results);
             sideBar();
         } else {
-            path.html('<p>Sorry, we couldn\'t find a path!</p>');
-            path.append('<img id="sadpanda" src="../static/images/sadpanda.jpg">');
+            path.html('<img id="sadpanda" src="../static/images/sadpanda.jpg">');
+            path.append('<p>I couldn\'t find a path between those pages! So sad.</p>');
         }
     });
 }
@@ -482,7 +482,7 @@ wtf.mouseout(function() {
 $('.title').click(function() {
     clearAll();
     queryForm.removeClass('hidden');
-    // about.addClass('hidden');
+    about.addClass('hidden');
 });
 
 // toggles display for the information page when the 'About' button is clicked
