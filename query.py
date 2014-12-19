@@ -174,7 +174,7 @@ def create_lists(node1, node2):
         "links": %s, "multigraph": false }}""" % (json.dumps(path_names), json.dumps(nodes_list), json.dumps(rels_list))
 
     else:
-        response = '{ "path": None, "results": None }'
+        response = '{ "path": "None", "results": "None" }'
 
     return response
 
