@@ -265,7 +265,7 @@ function getInnerImages() {
     }
 }
 
-// assemble and request query for start/end images from Wikiepedia and append
+// assemble and request query for start/end images from Wikipedia and append
 // those to the path div, then request a shortest path from the graph database,
 // then get images for the resulting path, update the index codes, draw the
 // grah, and set up event handlers for the sidebar
@@ -292,15 +292,15 @@ function query() {
         try {
             return getInnerImages();
         } catch(err) {}
-    }).done(function(data, err) {
+    }).done(function() {
+        path.empty();
         if (response.path != 'None') {
             updateIndexCodes();
             path.empty();
             drawGraph(response.results);
             sideBar();
         } else {
-            path.html('<img id="sadpanda" src="../static/images/sadpanda.jpg">');
-            path.append('<p>I couldn\'t find a path between those pages! So sad.</p>');
+            $('.path-not-found').removeClass('hidden');
         }
     });
 }
@@ -457,6 +457,7 @@ function clearPartial() {
     path.empty();
     queryInfo = {};
     imageURLs = [];
+    $('.path-not-found').addClass('hidden');
 }
 
 // full clear of all global variables and input fields
