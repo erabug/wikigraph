@@ -286,22 +286,22 @@ function query() {
             '/query',
             CODES,
             function(data) {
-                console.log(data);
                 response = JSON.parse(data);
-                // console.log('RETURNED PATH:', response.path);
-                // try {
-                //     response = JSON.parse(data);
-                // } catch(err) {
-                //     console.log('BOOP');
-                // }
             })
-    ).then(function(data) {
-        return getInnerImages();
-    }).done(function() {
-        updateIndexCodes();
-        path.empty();
-        drawGraph(response.results);
-        sideBar();
+    ).then(function() {
+        try {
+            return getInnerImages();
+        } catch(err) {}
+    }).done(function(data, err) {
+        if (response.path != 'None') {
+            updateIndexCodes();
+            path.empty();
+            drawGraph(response.results);
+            sideBar();
+        } else {
+            path.html('<p>Sorry, we couldn\'t find a path!</p>');
+            path.append('<img id="sadpanda" src="../static/images/sadpanda.jpg">');
+        }
     });
 }
 
@@ -321,7 +321,7 @@ function makeExtractURL(numPages, pageParams) {
     var extractURL = 'http://en.wikipedia.org/w/api.php' +
                      '?action=query&prop=extracts&format=json&' +
                      'exsentences=3&explaintext=&' +
-                     'exintro=&exlimit='+ numPages + '&titles=' +
+                     'exintro=&exlimit=' + numPages + '&titles=' +
                      pageParams + '&callback=?';
     return extractURL;
 }
