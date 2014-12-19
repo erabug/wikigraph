@@ -118,7 +118,8 @@ h3 {
 
 #sadpanda {
     border: solid 1px #666;
-    border-radius: 10px
+    border-radius: 10px;
+    height: 150px;
 }
 
 /*TYPEAHEAD STUFF*/
