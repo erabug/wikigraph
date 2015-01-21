@@ -3,8 +3,8 @@ function drawGraph(json) {
     var pathLength = Object.keys(queryInfo).length;
 
     // establish width and height of the svg
-    var width = 600,
-        height = pathLength * 110;
+    var width = 600;
+    var height = pathLength * 110;
 
     // color established as a scale
     var color = d3.scale.category20();
@@ -89,7 +89,9 @@ function drawGraph(json) {
     Object.keys(queryInfo).forEach(function(key) {
         // identify the start node
         var img = queryInfo[key];
-        if (img.code === 0) start = key;
+        if (img.code === 0) {
+            start = key;
+        }
         // define clip paths for each path node
         defs.append('clipPath')
             .attr('id', 'img' + key.toString())
@@ -117,13 +119,11 @@ function drawGraph(json) {
                 // assign radius to node attribute for arrowhead placement
                 d.radius = 18;
             } else {
-                // scales linear with degrees
-                d.radius = d.degrees * 0.02 + 7;
+                d.radius = d.degrees * 0.02 + 7; // scales linearly with degrees
             }
             return d.radius;
         })
         .style('fill', function(d) {
-            // colors based on degrees
             return color(d.degrees);
         });
 
@@ -141,17 +141,20 @@ function drawGraph(json) {
         .attr('x', function(d) { return -queryInfo[d.code].width / 2;})
         // this seems to help for portraits, where height > width
         .attr('y', function(d) {
-            var h = queryInfo[d.code].height;
-            var x;
-            if (h > queryInfo[d.code].width) x = 12; else x = 0;
-            return -(h / 2) + x;
+            var imgHeight = queryInfo[d.code].height;
+            var offset;
+            if (h > queryInfo[d.code].width) {
+                offset = 12;
+            } else {
+                offset = 0;
+            }
+            return -(imgHeight / 2) + offset;
         })
         .attr('height', function(d) { return queryInfo[d.code].height;})
         .attr('width', function(d) { return queryInfo[d.code].width;})
         .attr('clip-path', function(d) {
-            var x = 'img' + d.code;
-            // unique clip path for this node
-            return 'url(#' + x + ')';
+            var clipPathID = 'img' + d.code;
+            return 'url(#' + clipPathID + ')'; // unique clip path for this node
         });
 
     // append empty circle to each path node as an outline
@@ -174,7 +177,7 @@ function drawGraph(json) {
         .links(json.links)
         .start();
 
-    // this occurs each time 'tick' is called by d3
+    // this block occurs each time 'tick' is called by d3
     force.on('tick', function() {
         node.attr('cx', function(d) {
                 d.x = Math.max(15, Math.min(width - 15, d.x));

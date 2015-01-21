@@ -1,5 +1,5 @@
 function getSummaryImages(numPages, pageParams) {
-    queryURL = makeQueryURL(size=60, numPages, pageParams);
+    queryURL = makeQueryURL(60, numPages, pageParams);
     $.getJSON(
         queryURL,
         function(data) {
@@ -52,16 +52,20 @@ function displaySummary(path) {
         })
         .attr("x", function(d) { return -queryInfo[d.code].tinyWidth / 2;})
         .attr("y", function(d) {
-            var h = queryInfo[d.code].tinyHeight;
-            var x;
-            if (h > queryInfo[d.code].tinyWidth) x = 6; else x = 0;
-            return -(h / 2) + x;
+            var imgHeight = queryInfo[d.code].tinyHeight;
+            var offset;
+            if (h > queryInfo[d.code].tinyWidth) {
+                offset = 6;
+            } else {
+                offset = 0;
+            }
+            return -(imgHeight / 2) + offset;
         })
         .attr("height", function(d) { return queryInfo[d.code].tinyHeight;})
         .attr("width", function(d) { return queryInfo[d.code].tinyWidth;})
         .attr("clip-path", function(d) {
-            var x = 'timg' + d.code;
-            return "url(#" + x + ")"; // unique clip path for this node
+            var clipPathID = 'timg' + d.code;
+            return "url(#" + clipPathID + ")"; // unique clip path for this node
         });
 
     // append empty circle to nodes as an outline
@@ -71,7 +75,7 @@ function displaySummary(path) {
         .style("stroke-width", "2px")
         .style("fill", "none");
 
-    tinyNode.append("foreignObject") // this is necessary to have wrapped titles
+    tinyNode.append("foreignObject") // necessary for wrapped title strings
         .attr({width: 145, height: 45})
         .attr({x: 30, y: function(d) {
             var len = d.title.length;
