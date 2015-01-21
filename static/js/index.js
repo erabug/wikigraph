@@ -1,10 +1,17 @@
+ 
+// Global variables
+var CODES; // this object will be populated once the user inputs two pages
+var response; // global variable for the graph db response
+var queryInfo; // an object to organize and pass information to the graph
+var imageURLs; // an array for the start and end node images (to retain order)
+
  /**
  * INPUT-RELATED
  */
 
- // define the start and end input fields
-var startField = $('#start-node'),
-    endField = $('#end-node');
+var startField = $('#start-node');
+var endField = $('#end-node');
+var aboutDiv = $('.about');
 
 // sets up the request parameters for Typeahead
 var pageNames = new Bloodhound({
@@ -34,7 +41,7 @@ function feelingLucky(inputField, node) {
             '/page-names',
             'query=' + inputField.val(),
             function(data) {
-                result = data.results[0]; // uses the first result
+                var result = data.results[0]; // uses the first result
                 inputField.val(result.title);
                 CODES[node] = {'title': result.title,
                                'code': result.code.toString()};
@@ -46,14 +53,14 @@ function feelingLucky(inputField, node) {
 function getRandomPages() {
     $.get('/random-query',
         function(data) {
-            var n1 = data.results[0],
-                n2 = data.results[1];
-            CODES.node1 = {'title': n1.title,
-                           'code': n1.code.toString()};
-            CODES.node2 = {'title': n2.title,
-                           'code': n2.code.toString()};
-            startField.val(n1.title); // fill in the search fields
-            endField.val(n2.title);
+            var node1 = data.results[0];
+            var node2 = data.results[1];
+            CODES.node1 = {'title': node1.title,
+                           'code': node1.code.toString()};
+            CODES.node2 = {'title': node2.title,
+                           'code': node2.code.toString()};
+            startField.val(node1.title); // fill in the search fields
+            endField.val(node2.title);
         });
 }
 
@@ -76,9 +83,9 @@ function decodeInput(d, node) {
 // when the 'Go' button is clicked, check for both values, then run query
 $('input#submit-query').click(function() {
     clearPartial();
-    about.addClass('hidden');
-    checkFirst = feelingLucky(startField, 'node1');
-    checkLast = feelingLucky(endField, 'node2');
+    aboutDiv.addClass('hidden');
+    var checkFirst = feelingLucky(startField, 'node1');
+    var checkLast = feelingLucky(endField, 'node2');
     $.when(
         checkFirst,
         checkLast
@@ -134,16 +141,14 @@ pageNames.initialize();
  * QUERY-RELATED
  */
 
-// define the path DOM element
-var path = $('.loading-images');
+var pathDiv = $('.loading-images');
 
 // create and return a query URL for images, based on desired size, number of 
 // pages, and the page titles
 function makeQueryURL(size, numPages, pagesParams) {
-    var queryURL = 'http://en.wikipedia.org/w/api.php' +
-                   '?action=query&format=json&redirects&prop=pageimages&' +
-                   'pithumbsize='+ size +'px&pilimit=' + numPages + '&titles=' +
-                   pagesParams + '&callback=?';
+    var queryURL = 'http://en.wikipedia.org/w/api.php?action=query&' +
+        'format=json&redirects&prop=pageimages&pithumbsize='+ size +
+        'px&pilimit=' + numPages + '&titles=' + pagesParams + '&callback=?';
     return queryURL;
 }
 
@@ -169,8 +174,8 @@ function createThumbnailObject(page) {
 
 // create and return an HTML snippet using the page's code and image url
 function makeHTMLSnippet(code, thumbnail) {
-    html = '<div class="page" id="page' + code.toString() + '">' +
-           '<div class="squareimg"><img src=' + thumbnail + '></div>';
+    var html = '<div class="page" id="page' + code.toString() + '">' +
+        '<div class="squareimg"><img src=' + thumbnail + '></div>';
     return html;
 }
 
@@ -189,7 +194,11 @@ function addQueryInfo(data) {
     var htmlSnippets = {};
     Object.keys(pageObject).forEach(function(pageKey) {
         item = createThumbnailObject(pageObject[pageKey]);
-        if (item.title == CODES.node1.title) code = 0; else code = 1;
+        if (item.title == CODES.node1.title) {
+            code = 0;
+        } else {
+            code = 1;
+        }
         htmlSnippets[code] = makeHTMLSnippet(code, item.thumbnail);
         addImage(item, CODES['node' + (code + 1)].code);
         imageURLs[code] = {'title': item.title,
@@ -221,7 +230,7 @@ function addPathImages(data) {
 // updates queryInfo with index numbers for ordering purposes
 function updateIndexCodes() {
     response.path.forEach(function(node) {
-        if (!(queryInfo[node.code])) {
+        if (!(node.code in queryInfo)) {
             queryInfo[node.code] = queryInfo['undefined'];
             delete queryInfo['undefined'];
             var old_index = response.path.indexOf(node);
@@ -260,7 +269,7 @@ function getInnerImages() {
     if (inner.length === 0) {
         return false;
     } else {
-        var queryURL = makeQueryURL(size=150, numPages, pagesParams);
+        var queryURL = makeQueryURL(150, numPages, pagesParams);
         return getPathImages(queryURL);
     }
 }
@@ -271,14 +280,14 @@ function getInnerImages() {
 // grah, and set up event handlers for the sidebar
 function query() {
     var pagesParams = CODES.node1.title + '|' + CODES.node2.title;
-    var queryURL = makeQueryURL(size=150, numPages=2, pagesParams);
+    var queryURL = makeQueryURL(150, 2, pagesParams);
     $.when(
         $.getJSON(
             queryURL,
             function(data) {
                 var htmlSnippets = addQueryInfo(data);
                 Object.keys(htmlSnippets).forEach(function(node) {
-                    path.append(htmlSnippets[node]);
+                    pathDiv.append(htmlSnippets[node]);
                 });
                 $('#page0').after('<div class="page loading"></div>');
             }),
@@ -293,12 +302,12 @@ function query() {
             return getInnerImages();
         } catch(err) {}
     }).done(function() {
-        path.empty();
+        pathDiv.empty();
         if (response.path != 'None') {
             updateIndexCodes();
-            path.empty();
+            pathDiv.empty();
             drawGraph(response.results);
-            sideBar();
+            buildSidebar();
         } else {
             $('.path-not-found').removeClass('hidden');
         }
@@ -309,20 +318,17 @@ function query() {
  * PATH-RELATED
  */
 
-// define the DOM elements for the sidebar
-var details = $('.details'),
-    pageImage = $('.page-image'),
-    pageTitle = $('.page-title'),
-    pageExtract = $('.page-extract');
+var detailsDiv = $('.details');
+var pageImage = $('.page-image');
+var pageTitle = $('.page-title');
+var pageExtract = $('.page-extract');
 
 // create and return the query URL for extracts from Wikipedia's API, based on
 // number of pages and their titles
 function makeExtractURL(numPages, pageParams) {
-    var extractURL = 'http://en.wikipedia.org/w/api.php' +
-                     '?action=query&prop=extracts&format=json&' +
-                     'exsentences=3&explaintext=&' +
-                     'exintro=&exlimit=' + numPages + '&titles=' +
-                     pageParams + '&callback=?';
+    var extractURL = 'http://en.wikipedia.org/w/api.php?action=query&' +
+        'prop=extracts&format=json&exsentences=3&explaintext=&exintro=&' +
+        'exlimit=' + numPages + '&titles=' + pageParams + '&callback=?';
     return extractURL;
 }
 
@@ -338,7 +344,7 @@ function getImageAndExtract(title, code, that) {
         function(data) {
             var pageObject = data.query.pages;
             Object.keys(pageObject).forEach(function(pageKey) {
-                item = createThumbnailObject(pageObject[pageKey]);
+                var item = createThumbnailObject(pageObject[pageKey]);
                 addImage(item, code);
             });
         })
@@ -363,7 +369,7 @@ function getImageAndExtract(title, code, that) {
 
 // toggles whether the sidebar is displayed
 function toggleSidebar() {
-    details.toggleClass('hidden');
+    detailsDiv.toggleClass('hidden');
 }
 
 // clears all divs in the sidebar
@@ -403,8 +409,8 @@ function mouseoverHandler() {
     $('.node').mouseover(function(e) { // mouseover event handler
         toggleSidebar();
         var info = this.id.split('|');
-        var title = info[0],
-            code = info[1];
+        var title = info[0];
+        var code = info[1];
         pageTitle.html(title);
         if (code in queryInfo) {
             pageImage.html('<img src=' + queryInfo[code].url +
@@ -422,7 +428,7 @@ function mouseoverHandler() {
 
 // takes the result of a query and requests images and extracts from Wikipedia,
 // then sets up the node mouseover handler
-function sideBar() {
+function buildSidebar() {
     var pathNodes = [];
     response.path.forEach(function(node) {
         pathNodes.push(node.title);
@@ -438,23 +444,15 @@ function sideBar() {
  * PAGE-RELATED
  */
 
-// define the global variables
-var CODES, // this object will be populated once the user inputs two pages
-    response, // global variable for the graph db response
-    queryInfo, // an object to pass information to the graph
-    imageURLs; // an array so it will retain order
-
-// define the DOM elements for the help, about, and form divs
-var wtf = $('.wtf'),
-    help = $('.help'),
-    about = $('.about'),
-    queryForm = $('.query-form');
+var wtfDiv = $('.wtf');
+var helpDiv = $('.help');
+var queryForm = $('.query-form');
 
 // clears the information for a new query, retains information about previous
 // searches
 function clearPartial() {
     $('svg').remove();
-    path.empty();
+    pathDiv.empty();
     queryInfo = {};
     imageURLs = [];
     $('.path-not-found').addClass('hidden');
@@ -463,34 +461,35 @@ function clearPartial() {
 // full clear of all global variables and input fields
 function clearAll() {
     CODES = {};
+    response = '';
     startField.val('');
     endField.val('');
     clearPartial();
 }
 
 // toggles diplay for the help button upon mouseover and mouseout
-wtf.mouseover(function() {
+wtfDiv.mouseover(function() {
     clearSidebar();
-    help.toggleClass('hidden');
+    helpDiv.toggleClass('hidden');
 });
 
-wtf.mouseout(function() {
+wtfDiv.mouseout(function() {
     clearSidebar();
-    help.toggleClass('hidden');
+    helpDiv.toggleClass('hidden');
 });
 
 // toggles display for the query-form when the title is clicked
 $('.title').click(function() {
     clearAll();
     queryForm.removeClass('hidden');
-    about.addClass('hidden');
+    aboutDiv.addClass('hidden');
 });
 
 // toggles display for the information page when the 'About' button is clicked
 $('.info').click(function() {
     clearPartial();
     queryForm.addClass('hidden');
-    about.removeClass('hidden');
+    aboutDiv.removeClass('hidden');
 });
 
 // clears everything upon page load
